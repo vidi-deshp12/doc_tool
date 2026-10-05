@@ -58,3 +58,4 @@ Append-only log of decisions, bugs, and open questions. **Update after every tas
 | Oct 4 | Bob installed; target cloned; spike built and fixed (B-001..B-005); v1 scope, framework decision, and these context files written | Phase 0 tasks 0.1-0.5, then 1.1 |
 | Oct 4 | Clarified relationship to OpenAPI (D-012); fixed circular route test (D-013); added task 2a.8b | Same |
 | Oct 4 (late) | Fixed task numbering, tightened rules.md, re-planned calendar from Oct 5, added BOB_LOG.md skeleton | Tasks 0.1-0.5 |
+| Oct 5 | Task 0.1: `.gitignore`, `pyproject.toml`, `docgen.toml`, `README.md`, full `src/docgen/` skeleton (all sub-packages), `viewer/`, `eval/`, `generated/`, `tests/`; committed and pushed to https://github.com/vidi-deshp12/doc_tool | Task 0.2 |

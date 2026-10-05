@@ -36,6 +36,14 @@ Evidence that IBM Bob was a core part of the workflow (judging: tool usage and d
 
 <!-- Add new entries below this line -->
 
+### 2026-10-05 | Task 0.1 | Agent (Code)
+- **Goal:** Create the GitHub repo skeleton — `.gitignore`, `pyproject.toml`, `docgen.toml`, all `src/docgen/` sub-packages, `viewer/`, `eval/`, `generated/`, `tests/`, `README.md`, `BOB_LOG.md` root stub.
+- **Prompt (short):** "yes" — approval to implement the plan that Bob laid out in Plan mode.
+- **What Bob produced:** 53 files committed in one shot: `.gitignore` (excludes `target/`, `.venv/`, `__pycache__/`), `pyproject.toml` (stdlib + pytest only), `docgen.toml` (config skeleton from `architecture.md` §4), full `src/docgen/` tree with module-level docstrings, `viewer/app.py`, `eval/`, `generated/`, `tests/` placeholders. Pushed to `https://github.com/vidi-deshp12/doc_tool` as the initial commit.
+- **What I verified or changed:** Confirmed `target/` does not appear in staged files (`git status --short`). Push succeeded (branch `master` created on origin).
+- **Outcome:** Done. No tests for this task (tests introduced in 0.2). `docs/tasks.md` task 0.1 ticked.
+- **Screenshot:** *(add Bobalytics or repo screenshot if available)*
+
 ---
 
 ## Bobalytics snapshots

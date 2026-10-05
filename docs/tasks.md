@@ -11,7 +11,7 @@ Status legend: `[ ]` todo, `[x]` done, `[~]` in progress. Dates are the plan fro
 ---
 
 ## Phase 0: Foundations (Oct 5)
-- [ ] **0.1 Project repo.** Create the GitHub repo, `.gitignore` (include `target/`, `.venv/`, `__pycache__/`), commit skeleton folders from `architecture.md` §3. *Done when:* repo pushed; folder skeleton present.
+- [x] **0.1 Project repo.** Create the GitHub repo, `.gitignore` (include `target/`, `.venv/`, `__pycache__/`), commit skeleton folders from `architecture.md` §3. *Done when:* repo pushed; folder skeleton present.
 - [ ] **0.2 Environment.** `pyproject.toml`, venv, pytest runs an empty test. *Done when:* `pytest` passes on a trivial test.
 - [ ] **0.3 Bob rules.** Run Bob's `/init`, then add `.bob/rules/rules.md` from this pack. *Done when:* a Bob chat shows it follows a rule (e.g. asks which task).
 - [ ] **0.4 Bob Shell scripted-mode check.** Read bob.ibm.com/docs/shell; test whether a prompt can be run non-interactively and its output captured. Record in `memory.md` as decision D-0xx. *Done when:* decision written: Bob Shell backend yes/no.
