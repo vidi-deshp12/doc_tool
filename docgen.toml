@@ -1,0 +1,11 @@
+[repo]
+root = "target"
+source_root = "target"
+exclude = [".git", ".venv", "venv", "node_modules", "__pycache__", "tests", "migrations"]
+
+[adapter]
+name = "fastapi"
+app = "app.main:app"
+
+[output]
+dir = "generated"
