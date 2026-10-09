@@ -128,7 +128,7 @@ Anything repo-specific lives here, never in code.
 
 **Two hashes per node:**
 - `hash_struct`: structural fields only (signature, decorators incl. route args, bases, fields, imports, depends). **Excludes line numbers and comments.** Change here → dependent doc pages are stale.
-- `hash_source`: source text from first decorator to end of body. Change here → that node's own summary is stale.
+- `hash_source`: token hash of source text given to summarizer (decorators included, blank lines and formatting ignored, comments kept). Change here → that node's own summary is stale.
 
 ## 6. Key technical choices
 

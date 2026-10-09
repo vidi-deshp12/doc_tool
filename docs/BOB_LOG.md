@@ -44,6 +44,22 @@ Evidence that IBM Bob was a core part of the workflow (judging: tool usage and d
 - **Outcome:** Done. No tests for this task (tests introduced in 0.2). `docs/tasks.md` task 0.1 ticked.
 - **Screenshot:** *(add Bobalytics or repo screenshot if available)*
 
+### 2026-10-05 | Task 1.2 | Plan + Agent (Code)
+- **Goal:** Build `eval/ground_truth.json` — the independent answer key for the `ast`-only route extractor.
+- **Prompt (short):** "okay lets start working on task 1.2" → plan approved → "ok".
+- **What Bob produced:** `eval/dump_ground_truth.py` (subprocess helper that imports `app.main.app`, calls `app.openapi()`, writes JSON to a given output path); `eval/build_ground_truth.py` (orchestrator that sets dummy env vars, runs the helper in a subprocess with a 30 s timeout, prints a cross-check table); `target/.venv` (Python 3.11, pydantic 1.10.21, aiosql 6.2); `eval/ground_truth.json` (19 routes, 25 schemas, full `/api/…` paths); `tests/test_ground_truth.py` (16 tests).
+- **What I verified or changed:** Approved the plan. Confirmed target needed Python 3.11 (pydantic v1 incompatible with 3.14). Confirmed aiosql must be pinned to 6.2 (breaking change in 7.x). Hand-count of `@router.<method>` decorators = 19; matches `app.openapi()` count.
+- **Outcome:** Done. 16/16 tests pass. `docs/tasks.md` task 1.2 ticked.
+- **Screenshot:** *(add if available)*
+
+### 2026-10-05 | Task 1.4 | Agent (Code)
+- **Goal:** Seed a realistic bug in `target/` that a test can catch, proves `hash_struct` drift detection, and leaves the app importable.
+- **Prompt (short):** "seed the bug as a wrong status code on the create article endpoint (201 → 200 in the decorator)."
+- **What Bob produced:** Changed `status_code=status.HTTP_201_CREATED` to `status_code=status.HTTP_200_OK` in `create_new_article` decorator (`target/app/api/routes/articles/articles_resource.py`); wrote `tests/test_seeded_bug.py` (asserts status code is 201) and subprocess helper `tests/_check_create_article_status.py`; confirmed test fails with bug and passes after revert; ran full suite (17/17).
+- **What I verified or changed:** Confirmed the bug choice — decorator arg change exercises `hash_struct` (structural) drift, not just `hash_source` (body text). Reverted bug after confirming test behavior. Ground truth (19 routes, 25 schemas) unchanged.
+- **Outcome:** Done. Test fails with bug (200 ≠ 201), passes without. 17/17 total tests pass with reverted code. `docs/tasks.md` task 1.4 ticked.
+- **Screenshot:** *(add if available)*
+
 ---
 
 ## Bobalytics snapshots

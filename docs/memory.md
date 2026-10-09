@@ -20,6 +20,16 @@ Append-only log of decisions, bugs, and open questions. **Update after every tas
 | D-012 | Oct 4 | The endpoint map is an enrichment, not a headline feature. OpenAPI documents the outside of an API; docgen documents the inside (handler, dependency chain, behavior, all non-endpoint code) | FastAPI already produces OpenAPI; most of the codebase has no endpoints |
 | D-013 | Oct 4 | `app.openapi()` grades the `ast`-only route extractor, not the introspection adapter | Both read the same running app, so grading one against the other is circular |
 | D-014 | Oct 4 | Task IDs use the phase label (`2a.3`, `2b.1`, `3e.2`); `rules.md` now requires approval before implementing; calendar shifted to start Oct 5; broad exploration (1.1) reduced to logging the existing trace | Old numbering made `3.x` ambiguous; Oct 4 ended with setup still open |
+| D-018 | Oct 6 | Bob Shell supports non-interactive use via `bob run --format json`; BobShellSummarizer is the real backend | Confirmed: `bob run` works, costs ~0.009 Bobcoins per call, 50-coin budget is sufficient |
+| D-019 | Oct 6 | DB approach: Table definitions are in target/app/db/migrations/versions/fdf8821871d7_main_tables.py (single migration file, 7 tables). ERD is fully feasible from this file alone — no SQL parsing needed, just read the SQLAlchemy create_table calls.
+| D-020 | Oct 5 | 19 route decorators hand-counted in `target/app/api/routes/` by grepping `@router.(get\|post\|put\|delete\|patch)`; `app.openapi()` also returns 19 routes — counts match | Cross-check required by task 1.2 to ensure the answer key itself is not trusted blindly |
+| D-021 | Oct 5 | `target/.venv` uses Python 3.11 (not 3.14); pydantic v1 is incompatible with Python 3.14 (`unable to infer type` error on un-annotated fields in FastAPI 0.79's `openapi/models.py`) | Target requires pydantic 1.x; must pin Python ≤ 3.12 for target venv |
+| D-022 | Oct 5 | `aiosql` must be pinned to `==6.2` in the target venv; `aiosql>=7` changed the SQL name-comment parser to require mandatory parameter lists, breaking `.sql` files that use the old `!` suffix | Target was built against aiosql 6.2 (`poetry.lock`) |
+| D-023 | Oct 5 | Seeded bug: `HTTP_201_CREATED` → `HTTP_200_OK` in `create_new_article` decorator (`target/app/api/routes/articles/articles_resource.py`). Bug currently **reverted** (code is correct). Re-apply for Phase 4 demo. | Exercises `hash_struct` drift (decorator arg change), not merely a body/comment change |
+| D-024 | Oct 6 | Task 2a.1 complete: `facts/schema.py` (Node, Edge, Unresolved, FactGraph dataclasses with all types from architecture.md §5) and `facts/store.py` (stable JSON with sorted keys, indent=2, UTF-8, no timestamps, no absolute paths). Round-trip test passes; byte-identical output on repeat writes. | Foundation for deterministic fact graph; enables all downstream phases. |
+| D-025 | Oct 9 | hash_source uses Python tokenizer (tokenize module), not raw text or ast.dump(). Keeps comments (summarizer sees source_text with comments), strips blank lines/whitespace/CRLF. hash_struct unchanged (ast.dump() based, ignores comments). Record Python version in manifest to warn on tokenizer mismatch. | Blank lines and reformatting don't trigger regeneration; useful comment edits do since summarizer sees raw source_text. |
+| D-026 | Oct 9 | Walker uses substring matching on absolute paths for excludes (e.g., "tests", "migrations" matches any path containing those strings). Config loaded via stdlib tomllib; exclude defaults to empty tuple. | Simple, no regex needed; matches docgen.toml exclude list directly. |
+| D-027 | Oct 9 | Walker yields root-relative POSIX paths (forward slashes) using PurePath.as_posix() on all platforms. Path IDs in facts.json use the same POSIX scheme. | Stable across OS; Windows paths converted to POSIX for determinism (D-004). |
 
 ## 2. Bugs found and fixed
 
@@ -30,6 +40,7 @@ Append-only log of decisions, bugs, and open questions. **Update after every tas
 | B-003 | Oct 4 | PowerShell `>` wrote JSON as UTF-16; file looked blank | Script writes UTF-8 itself via an output argument. Rule: never redirect JSON with `>` on Windows |
 | B-004 | Oct 4 | Duplicate route data (`routes` field repeated `decorators[].route`) | Removed `routes` |
 | B-005 | Oct 4 | Spike IDs started with `target/` depending on run location | Added `--root`; IDs relative to root, POSIX slashes |
+| B-006 | Oct 5 | Seeded bug (task 1.4): `status_code=status.HTTP_200_OK` in `create_new_article` decorator instead of `HTTP_201_CREATED` | Fix: revert to `HTTP_201_CREATED`. Test: `tests/test_seeded_bug.py::test_create_article_returns_201` fails with bug, passes without |
 
 ## 3. Open questions
 - Q-1: Can Bob Shell run non-interactively with output captured? (task 0.4)
@@ -59,3 +70,8 @@ Append-only log of decisions, bugs, and open questions. **Update after every tas
 | Oct 4 | Clarified relationship to OpenAPI (D-012); fixed circular route test (D-013); added task 2a.8b | Same |
 | Oct 4 (late) | Fixed task numbering, tightened rules.md, re-planned calendar from Oct 5, added BOB_LOG.md skeleton | Tasks 0.1-0.5 |
 | Oct 5 | Task 0.1: `.gitignore`, `pyproject.toml`, `docgen.toml`, `README.md`, full `src/docgen/` skeleton (all sub-packages), `viewer/`, `eval/`, `generated/`, `tests/`; committed and pushed to https://github.com/vidi-deshp12/doc_tool | Task 0.2 |
+| Oct 5 | Task 1.2: `eval/dump_ground_truth.py` + `eval/build_ground_truth.py`; `target/.venv` (Python 3.11, pydantic 1.10.21, aiosql 6.2); `eval/ground_truth.json` (19 routes, 25 schemas); `tests/test_ground_truth.py` (16 tests, all pass). Hand-count confirms 19 decorators = 19 routes. | Task 1.3 |
+| Oct 5 | Task 1.4: Seeded bug (`HTTP_200_OK` instead of `HTTP_201_CREATED` on `create_new_article`); `tests/test_seeded_bug.py` + `tests/_check_create_article_status.py`; bug reverted; 17/17 tests pass. | Task 2a.1 |
+| Oct 6 | Task 2a.1: Implemented `src/docgen/facts/schema.py` (Node, Edge, Unresolved, FactGraph dataclasses with all types from architecture.md §5) and `src/docgen/facts/store.py` (write_facts/read_facts with stable JSON: sorted keys, indent=2, UTF-8, no timestamps, no absolute paths). Created `tests/test_schema.py` with round-trip and byte-identical repeat tests — all 6 pass. | Task 2a.2 |
+| Oct 9 | Task 2a.2: Implemented `src/docgen/config.py` (loads docgen.toml via tomllib, validates adapter name, returns Config dataclass) and `src/docgen/walker.py` (walks repo, applies exclude substring matching, yields root-relative POSIX paths via PurePath.as_posix()). Created `tests/test_walker.py` with 9 tests covering basic walk, excludes, Windows paths, empty repo, and toml convenience function — all pass. | Task 2a.3 |
+

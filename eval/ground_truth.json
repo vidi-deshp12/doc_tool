@@ -1,0 +1,689 @@
+{
+  "openapi_version": "3.0.2",
+  "route_count": 19,
+  "routes": [
+    {
+      "method": "GET",
+      "operation_id": "articles_list_articles_api_articles_get",
+      "path": "/api/articles",
+      "summary": "Articles:List-Articles",
+      "tags": [
+        "articles"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "articles_create_article_api_articles_post",
+      "path": "/api/articles",
+      "summary": "Articles:Create-Article",
+      "tags": [
+        "articles"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "articles_get_user_feed_articles_api_articles_feed_get",
+      "path": "/api/articles/feed",
+      "summary": "Articles:Get-User-Feed-Articles",
+      "tags": [
+        "articles"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "articles_delete_article_api_articles__slug__delete",
+      "path": "/api/articles/{slug}",
+      "summary": "Articles:Delete-Article",
+      "tags": [
+        "articles"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "articles_get_article_api_articles__slug__get",
+      "path": "/api/articles/{slug}",
+      "summary": "Articles:Get-Article",
+      "tags": [
+        "articles"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "articles_update_article_api_articles__slug__put",
+      "path": "/api/articles/{slug}",
+      "summary": "Articles:Update-Article",
+      "tags": [
+        "articles"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "comments_get_comments_for_article_api_articles__slug__comments_get",
+      "path": "/api/articles/{slug}/comments",
+      "summary": "Comments:Get-Comments-For-Article",
+      "tags": [
+        "comments"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "comments_create_comment_for_article_api_articles__slug__comments_post",
+      "path": "/api/articles/{slug}/comments",
+      "summary": "Comments:Create-Comment-For-Article",
+      "tags": [
+        "comments"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "comments_delete_comment_from_article_api_articles__slug__comments__comment_id__delete",
+      "path": "/api/articles/{slug}/comments/{comment_id}",
+      "summary": "Comments:Delete-Comment-From-Article",
+      "tags": [
+        "comments"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "articles_unmark_article_favorite_api_articles__slug__favorite_delete",
+      "path": "/api/articles/{slug}/favorite",
+      "summary": "Articles:Unmark-Article-Favorite",
+      "tags": [
+        "articles"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "articles_mark_article_favorite_api_articles__slug__favorite_post",
+      "path": "/api/articles/{slug}/favorite",
+      "summary": "Articles:Mark-Article-Favorite",
+      "tags": [
+        "articles"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "profiles_get_profile_api_profiles__username__get",
+      "path": "/api/profiles/{username}",
+      "summary": "Profiles:Get-Profile",
+      "tags": [
+        "profiles"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "profiles_unsubscribe_from_user_api_profiles__username__follow_delete",
+      "path": "/api/profiles/{username}/follow",
+      "summary": "Profiles:Unsubscribe-From-User",
+      "tags": [
+        "profiles"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "profiles_follow_user_api_profiles__username__follow_post",
+      "path": "/api/profiles/{username}/follow",
+      "summary": "Profiles:Follow-User",
+      "tags": [
+        "profiles"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "tags_get_all_api_tags_get",
+      "path": "/api/tags",
+      "summary": "Tags:Get-All",
+      "tags": [
+        "tags"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "users_get_current_user_api_user_get",
+      "path": "/api/user",
+      "summary": "Users:Get-Current-User",
+      "tags": [
+        "users"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "users_update_current_user_api_user_put",
+      "path": "/api/user",
+      "summary": "Users:Update-Current-User",
+      "tags": [
+        "users"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "auth_register_api_users_post",
+      "path": "/api/users",
+      "summary": "Auth:Register",
+      "tags": [
+        "authentication"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "auth_login_api_users_login_post",
+      "path": "/api/users/login",
+      "summary": "Auth:Login",
+      "tags": [
+        "authentication"
+      ]
+    }
+  ],
+  "schemas": {
+    "ArticleForResponse": {
+      "properties": {
+        "author": {
+          "$ref": "#/components/schemas/Profile"
+        },
+        "body": {
+          "title": "Body",
+          "type": "string"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "title": "Createdat",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "favorited": {
+          "title": "Favorited",
+          "type": "boolean"
+        },
+        "favoritesCount": {
+          "title": "Favoritescount",
+          "type": "integer"
+        },
+        "id": {
+          "default": 0,
+          "title": "Id",
+          "type": "integer"
+        },
+        "slug": {
+          "title": "Slug",
+          "type": "string"
+        },
+        "tagList": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Taglist",
+          "type": "array"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "title": "Updatedat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "slug",
+        "title",
+        "description",
+        "body",
+        "tagList",
+        "author",
+        "favorited",
+        "favoritesCount"
+      ],
+      "title": "ArticleForResponse",
+      "type": "object"
+    },
+    "ArticleInCreate": {
+      "properties": {
+        "body": {
+          "title": "Body",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "tagList": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Taglist",
+          "type": "array"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "body"
+      ],
+      "title": "ArticleInCreate",
+      "type": "object"
+    },
+    "ArticleInResponse": {
+      "properties": {
+        "article": {
+          "$ref": "#/components/schemas/ArticleForResponse"
+        }
+      },
+      "required": [
+        "article"
+      ],
+      "title": "ArticleInResponse",
+      "type": "object"
+    },
+    "ArticleInUpdate": {
+      "properties": {
+        "body": {
+          "title": "Body",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "title": "ArticleInUpdate",
+      "type": "object"
+    },
+    "Body_articles_create_article_api_articles_post": {
+      "properties": {
+        "article": {
+          "$ref": "#/components/schemas/ArticleInCreate"
+        }
+      },
+      "required": [
+        "article"
+      ],
+      "title": "Body_articles_create_article_api_articles_post",
+      "type": "object"
+    },
+    "Body_articles_update_article_api_articles__slug__put": {
+      "properties": {
+        "article": {
+          "$ref": "#/components/schemas/ArticleInUpdate"
+        }
+      },
+      "required": [
+        "article"
+      ],
+      "title": "Body_articles_update_article_api_articles__slug__put",
+      "type": "object"
+    },
+    "Body_auth_login_api_users_login_post": {
+      "properties": {
+        "user": {
+          "$ref": "#/components/schemas/UserInLogin"
+        }
+      },
+      "required": [
+        "user"
+      ],
+      "title": "Body_auth_login_api_users_login_post",
+      "type": "object"
+    },
+    "Body_auth_register_api_users_post": {
+      "properties": {
+        "user": {
+          "$ref": "#/components/schemas/UserInCreate"
+        }
+      },
+      "required": [
+        "user"
+      ],
+      "title": "Body_auth_register_api_users_post",
+      "type": "object"
+    },
+    "Body_comments_create_comment_for_article_api_articles__slug__comments_post": {
+      "properties": {
+        "comment": {
+          "$ref": "#/components/schemas/CommentInCreate"
+        }
+      },
+      "required": [
+        "comment"
+      ],
+      "title": "Body_comments_create_comment_for_article_api_articles__slug__comments_post",
+      "type": "object"
+    },
+    "Body_users_update_current_user_api_user_put": {
+      "properties": {
+        "user": {
+          "$ref": "#/components/schemas/UserInUpdate"
+        }
+      },
+      "required": [
+        "user"
+      ],
+      "title": "Body_users_update_current_user_api_user_put",
+      "type": "object"
+    },
+    "Comment": {
+      "properties": {
+        "author": {
+          "$ref": "#/components/schemas/Profile"
+        },
+        "body": {
+          "title": "Body",
+          "type": "string"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "title": "Createdat",
+          "type": "string"
+        },
+        "id": {
+          "default": 0,
+          "title": "Id",
+          "type": "integer"
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "title": "Updatedat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "body",
+        "author"
+      ],
+      "title": "Comment",
+      "type": "object"
+    },
+    "CommentInCreate": {
+      "properties": {
+        "body": {
+          "title": "Body",
+          "type": "string"
+        }
+      },
+      "required": [
+        "body"
+      ],
+      "title": "CommentInCreate",
+      "type": "object"
+    },
+    "CommentInResponse": {
+      "properties": {
+        "comment": {
+          "$ref": "#/components/schemas/Comment"
+        }
+      },
+      "required": [
+        "comment"
+      ],
+      "title": "CommentInResponse",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "errors": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "title": "Errors",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "ListOfArticlesInResponse": {
+      "properties": {
+        "articles": {
+          "items": {
+            "$ref": "#/components/schemas/ArticleForResponse"
+          },
+          "title": "Articles",
+          "type": "array"
+        },
+        "articlesCount": {
+          "title": "Articlescount",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "articles",
+        "articlesCount"
+      ],
+      "title": "ListOfArticlesInResponse",
+      "type": "object"
+    },
+    "ListOfCommentsInResponse": {
+      "properties": {
+        "comments": {
+          "items": {
+            "$ref": "#/components/schemas/Comment"
+          },
+          "title": "Comments",
+          "type": "array"
+        }
+      },
+      "required": [
+        "comments"
+      ],
+      "title": "ListOfCommentsInResponse",
+      "type": "object"
+    },
+    "Profile": {
+      "properties": {
+        "bio": {
+          "default": "",
+          "title": "Bio",
+          "type": "string"
+        },
+        "following": {
+          "default": false,
+          "title": "Following",
+          "type": "boolean"
+        },
+        "image": {
+          "title": "Image",
+          "type": "string"
+        },
+        "username": {
+          "title": "Username",
+          "type": "string"
+        }
+      },
+      "required": [
+        "username"
+      ],
+      "title": "Profile",
+      "type": "object"
+    },
+    "ProfileInResponse": {
+      "properties": {
+        "profile": {
+          "$ref": "#/components/schemas/Profile"
+        }
+      },
+      "required": [
+        "profile"
+      ],
+      "title": "ProfileInResponse",
+      "type": "object"
+    },
+    "TagsInList": {
+      "properties": {
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "tags"
+      ],
+      "title": "TagsInList",
+      "type": "object"
+    },
+    "UserInCreate": {
+      "properties": {
+        "email": {
+          "format": "email",
+          "title": "Email",
+          "type": "string"
+        },
+        "password": {
+          "title": "Password",
+          "type": "string"
+        },
+        "username": {
+          "title": "Username",
+          "type": "string"
+        }
+      },
+      "required": [
+        "email",
+        "password",
+        "username"
+      ],
+      "title": "UserInCreate",
+      "type": "object"
+    },
+    "UserInLogin": {
+      "properties": {
+        "email": {
+          "format": "email",
+          "title": "Email",
+          "type": "string"
+        },
+        "password": {
+          "title": "Password",
+          "type": "string"
+        }
+      },
+      "required": [
+        "email",
+        "password"
+      ],
+      "title": "UserInLogin",
+      "type": "object"
+    },
+    "UserInResponse": {
+      "properties": {
+        "user": {
+          "$ref": "#/components/schemas/UserWithToken"
+        }
+      },
+      "required": [
+        "user"
+      ],
+      "title": "UserInResponse",
+      "type": "object"
+    },
+    "UserInUpdate": {
+      "properties": {
+        "bio": {
+          "title": "Bio",
+          "type": "string"
+        },
+        "email": {
+          "format": "email",
+          "title": "Email",
+          "type": "string"
+        },
+        "image": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Image",
+          "type": "string"
+        },
+        "password": {
+          "title": "Password",
+          "type": "string"
+        },
+        "username": {
+          "title": "Username",
+          "type": "string"
+        }
+      },
+      "title": "UserInUpdate",
+      "type": "object"
+    },
+    "UserWithToken": {
+      "properties": {
+        "bio": {
+          "default": "",
+          "title": "Bio",
+          "type": "string"
+        },
+        "email": {
+          "title": "Email",
+          "type": "string"
+        },
+        "image": {
+          "title": "Image",
+          "type": "string"
+        },
+        "token": {
+          "title": "Token",
+          "type": "string"
+        },
+        "username": {
+          "title": "Username",
+          "type": "string"
+        }
+      },
+      "required": [
+        "username",
+        "email",
+        "token"
+      ],
+      "title": "UserWithToken",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    }
+  }
+}
