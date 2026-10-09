@@ -26,7 +26,7 @@ Status legend: `[ ]` todo, `[x]` done, `[~]` in progress. Dates are the plan fro
 ## Phase 2a: Fact extractor (Oct 7-9)
 - [x] **2a.1 Schema + store.** `facts/schema.py` dataclasses (Node, Edge, Unresolved, FactGraph); `facts/store.py` stable JSON. *Done when:* round-trip test; output byte-identical on repeat.
 - [x] **2a.2 Config + walker.** `config.py` loads `docgen.toml`; `walker.py` yields root-relative POSIX paths, honoring excludes. *Done when:* test on a fixture repo lists expected files only; works with Windows paths.
-- [ ] **2a.3 Core per-file extraction.** Port `spike.py` into `extract/core.py`: modules, classes (fields, bases), functions, decorators, docstrings, imports. Decorator-inclusive spans; both hashes (`architecture.md` §5). Per-file `SyntaxError` handling. *Done when:* tests on fixtures incl. multi-line decorators; and all rows in this table pass:
+- [x] **2a.3 Core per-file extraction.** Port `spike.py` into `extract/core.py`: modules, classes (fields, bases), functions, decorators, docstrings, imports. Decorator-inclusive spans; both hashes (`architecture.md` §5). Per-file `SyntaxError` handling. *Done when:* tests on fixtures incl. multi-line decorators; and all rows in this table pass:
 
   | Edit | hash_struct changes? | hash_source changes? |
   |---|---|---|
