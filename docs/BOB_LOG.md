@@ -89,3 +89,11 @@ Evidence that IBM Bob was a core part of the workflow (judging: tool usage and d
 - **What I verified or changed:** All 74 tests passed first run. No bugs.
 - **Outcome:** Done. 74/74 tests pass.
 - **Screenshot:** _(none this session)_
+
+### 2026-10-09 | Task 2a.7 | Plan + Agent
+- **Goal:** Unresolved report — detect star_import, dynamic_import, getattr_dynamic; implement real `docgen extract` CLI pipeline; write facts.json; print linter-style summary.
+- **Prompt (short):** "Plan task 2a.7 for unresolved report." Two design questions confirmed: (1) full pipeline in CLI (not read-only), (2) linter-style one-line-per-entry sorted by `where` with count line.
+- **What Bob produced:** `src/docgen/extract/unresolved.py` (detection pass); `src/docgen/cli.py` (full extract pipeline + summary printer); `tests/test_unresolved.py` (7 tests); `tests/test_cli_extract.py` (5 tests).
+- **What I verified or changed:** All 86 tests passed first run. No bugs.
+- **Outcome:** Done. 86/86 tests pass. `docgen extract` now runs end-to-end and writes facts.json.
+- **Screenshot:** _(none this session)_
