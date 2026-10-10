@@ -35,7 +35,7 @@ Status legend: `[ ]` todo, `[x]` done, `[~]` in progress. Dates are the plan fro
   | Decorator changed | yes | yes |
   | Condition changed | no | yes |
   | Argument re-wrapped | no | no |
-- [ ] **2a.4 Module index + import resolution.** `extract/modules.py`: dotted name ↔ path, resolve absolute/relative imports, aliases, `__init__` re-exports; mark library imports `external`; flag star imports. *Done when:* every in-repo import in `target/app` resolves or appears in `unresolved`.
+- [x] **2a.4 Module index + import resolution.** `extract/modules.py`: dotted name ↔ path, resolve absolute/relative imports, aliases, `__init__` re-exports; mark library imports `external`; flag star imports. *Done when:* every in-repo import in `target/app` resolves or appears in `unresolved`.
 - [ ] **2a.5 Class resolution.** `extract/classes.py`: resolve bases across files, flatten inherited fields (in-repo bases only), tag Pydantic models. *Done when:* `ListOfArticlesInResponse` shows its fields via resolved class.
 - [ ] **2a.6 Body facts.** `extract/bodies.py`: `raises` (type + args), raw `calls` text, per function. *Done when:* tests on fixtures; `HTTPException(status_code=...)` captured.
 - [ ] **2a.7 Unresolved report.** Collect dynamic-import, `getattr`, star import, unparsed-file, unresolved-name entries with reason + location. *Done when:* report is a section in `facts.json` and a readable summary prints from the CLI.
