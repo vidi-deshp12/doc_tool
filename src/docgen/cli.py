@@ -116,7 +116,20 @@ def _run_extract(args: argparse.Namespace) -> None:
     scan_unresolved = scan_for_unresolved(module_paths, path_to_info, repo_root)
     all_unresolved.extend(scan_unresolved)
 
-    # Step 7: Deduplicate nodes by id (external nodes may be emitted by multiple passes)
+    # Step 7: Framework adapter (FastAPI introspection)
+    if config.adapter_name == "fastapi":
+        from docgen.extract.adapters.fastapi import extract as fastapi_extract
+        adapter_result = fastapi_extract(all_nodes, all_edges, config, repo_root)
+        all_nodes.extend(adapter_result.nodes)
+        all_edges.extend(adapter_result.edges)
+        all_unresolved.extend(adapter_result.unresolved)
+        print(
+            f"  adapter: {len(adapter_result.nodes)} route nodes, "
+            f"{len(adapter_result.edges)} route edges",
+            file=sys.stderr,
+        )
+
+    # Step 8: Deduplicate nodes by id (external nodes may be emitted by multiple passes)
     seen_node_ids: set[str] = set()
     deduped_nodes: list = []
     for n in all_nodes:

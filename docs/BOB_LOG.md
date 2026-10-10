@@ -97,3 +97,11 @@ Evidence that IBM Bob was a core part of the workflow (judging: tool usage and d
 - **What I verified or changed:** All 86 tests passed first run. No bugs.
 - **Outcome:** Done. 86/86 tests pass. `docgen extract` now runs end-to-end and writes facts.json.
 - **Screenshot:** _(none this session)_
+
+### 2026-10-09 | Task 2a.8a | Plan + Agent
+- **Goal:** FastAPI adapter via subprocess introspection — ROUTE nodes, HANDLES/REQUEST_MODEL/RESPONSE_MODEL edges, fallback on failure.
+- **Prompt (short):** "Plan task 2a.8a." Design decisions: use `app.openapi()` for richness; enrich subprocess script to output `endpoint.__name__` per route (exact match, no operationId heuristics); dummy env vars hardcoded.
+- **What Bob produced:** `adapters/base.py` (AdapterResult); `adapters/fastapi.py` (full implementation); cli.py Step 7 (adapter wiring); `tests/test_fastapi_adapter.py` (6 tests incl. 19-route consistency check).
+- **What I verified or changed:** 1 failure: pydantic v1 PostgresDsn requires `userinfo` in DATABASE_URL. Bob fixed dummy URL to `postgresql://docgen:docgen@localhost/dummy`. All 92 tests then passed.
+- **Outcome:** Done. 92/92 tests pass. Consistency check: all 19 ground-truth routes extracted.
+- **Screenshot:** _(none this session)_
