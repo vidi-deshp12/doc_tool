@@ -436,15 +436,6 @@ def extract_file(path: Path, root: Path) -> tuple[list[Node], list[Edge], list[U
                 )
             )
 
-            # Edges: class inherits bases
-            for base in cls_node.bases:
-                edges.append(
-                    Edge(
-                        type=EdgeType.INHERITS,
-                        from_id=cls_node.id,
-                        to_id=f"external:{base}",
-                        meta=(),
-                    )
-                )
+            # INHERITS edges are produced by extract/classes.py after name resolution.
 
     return nodes, edges, unresolved

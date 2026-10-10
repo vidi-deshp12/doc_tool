@@ -73,3 +73,11 @@ Evidence that IBM Bob was a core part of the workflow (judging: tool usage and d
 - Tasks where Bob did most of the work:
 - Bugs Bob caught in review mode:
 - Things Bob got wrong and how we caught them:
+
+### 2026-10-09 | Task 2a.5 | Plan + Agent
+- **Goal:** Implement `extract/classes.py` — resolve class bases across files, flatten inherited fields (in-repo only), tag Pydantic models.
+- **Prompt (short):** "Plan task 2a.5 — how will we do that?" followed by design decision (Option B: bases stay as raw source text, INHERITS edges carry the resolved topology).
+- **What Bob produced:** Plan written to `docs/plan-2a5-class-resolution.md`; `src/docgen/extract/classes.py` (full implementation: `resolve_classes`, `resolve_all_classes`, field flattening, `is_pydantic_model` propagation); removed 10-line stub INHERITS loop from `src/docgen/extract/core.py`; `tests/test_classes.py` (8 tests).
+- **What I verified or changed:** Ran full suite — 2 tests failed (single-letter class names like `A` were filtered by a too-broad generic-param guard `len==1 and isupper()`). Bob diagnosed the bug from trace output and fixed it in one diff. All 64 tests then passed.
+- **Outcome:** Done. 64/64 tests pass.
+- **Screenshot:** _(none this session)_

@@ -24,19 +24,11 @@ Status legend: `[ ]` todo, `[x]` done, `[~]` in progress. Dates are the plan fro
 - [x] **1.4 Seed a bug.** One realistic bug in `target/` plus a failing test that catches it. *Done when:* test fails with bug, passes when reverted. Log in `memory.md`.
 
 ## Phase 2a: Fact extractor (Oct 7-9)
-- [x] **2a.1 Schema + store.** `facts/schema.py` dataclasses (Node, Edge, Unresolved, FactGraph); `facts/store.py` stable JSON. *Done when:* round-trip test; output byte-identical on repeat.
-- [x] **2a.2 Config + walker.** `config.py` loads `docgen.toml`; `walker.py` yields root-relative POSIX paths, honoring excludes. *Done when:* test on a fixture repo lists expected files only; works with Windows paths.
-- [x] **2a.3 Core per-file extraction.** Port `spike.py` into `extract/core.py`: modules, classes (fields, bases), functions, decorators, docstrings, imports. Decorator-inclusive spans; both hashes (`architecture.md` §5). Per-file `SyntaxError` handling. *Done when:* tests on fixtures incl. multi-line decorators; and all rows in this table pass:
-
-  | Edit | hash_struct changes? | hash_source changes? |
-  |---|---|---|
-  | Blank line added | no | no |
-  | Comment edited | no | yes |
-  | Decorator changed | yes | yes |
-  | Condition changed | no | yes |
-  | Argument re-wrapped | no | no |
-- [x] **2a.4 Module index + import resolution.** `extract/modules.py`: dotted name ↔ path, resolve absolute/relative imports, aliases, `__init__` re-exports; mark library imports `external`; flag star imports. *Done when:* every in-repo import in `target/app` resolves or appears in `unresolved`.
-- [ ] **2a.5 Class resolution.** `extract/classes.py`: resolve bases across files, flatten inherited fields (in-repo bases only), tag Pydantic models. *Done when:* `ListOfArticlesInResponse` shows its fields via resolved class.
+- [ ] **2a.1 Schema + store.** `facts/schema.py` dataclasses (Node, Edge, Unresolved, FactGraph); `facts/store.py` stable JSON. *Done when:* round-trip test; output byte-identical on repeat.
+- [ ] **2a.2 Config + walker.** `config.py` loads `docgen.toml`; `walker.py` yields root-relative POSIX paths, honoring excludes. *Done when:* test on a fixture repo lists expected files only; works with Windows paths.
+- [ ] **2a.3 Core per-file extraction.** Port `spike.py` into `extract/core.py`: modules, classes (fields, bases), functions, decorators, docstrings, imports. Decorator-inclusive spans; both hashes (`architecture.md` §5). Per-file `SyntaxError` handling. *Done when:* tests on fixtures incl. multi-line decorators; editing a decorator changes `hash_struct`; editing a comment does not.
+- [ ] **2a.4 Module index + import resolution.** `extract/modules.py`: dotted name ↔ path, resolve absolute/relative imports, aliases, `__init__` re-exports; mark library imports `external`; flag star imports. *Done when:* every in-repo import in `target/app` resolves or appears in `unresolved`.
+- [x] **2a.5 Class resolution.** `extract/classes.py`: resolve bases across files, flatten inherited fields (in-repo bases only), tag Pydantic models. *Done when:* `ListOfArticlesInResponse` shows its fields via resolved class.
 - [ ] **2a.6 Body facts.** `extract/bodies.py`: `raises` (type + args), raw `calls` text, per function. *Done when:* tests on fixtures; `HTTPException(status_code=...)` captured.
 - [ ] **2a.7 Unresolved report.** Collect dynamic-import, `getattr`, star import, unparsed-file, unresolved-name entries with reason + location. *Done when:* report is a section in `facts.json` and a readable summary prints from the CLI.
 - [ ] **2a.8a FastAPI adapter: routes via introspection.** `adapters/fastapi.py`: import app in subprocess (timeout, dummy env), read routes (method, full path, handler, status, models), link `route -handles-> function`. If import fails, fall back to 2a.8b output and add a notice. *Done when:* runs on the dev repo and its route set is consistent with `eval/ground_truth.json` (this is a consistency check, **not** an accuracy measure, since both read the same source).
