@@ -81,3 +81,11 @@ Evidence that IBM Bob was a core part of the workflow (judging: tool usage and d
 - **What I verified or changed:** Ran full suite — 2 tests failed (single-letter class names like `A` were filtered by a too-broad generic-param guard `len==1 and isupper()`). Bob diagnosed the bug from trace output and fixed it in one diff. All 64 tests then passed.
 - **Outcome:** Done. 64/64 tests pass.
 - **Screenshot:** _(none this session)_
+
+### 2026-10-09 | Task 2a.6 | Plan + Agent
+- **Goal:** Implement `extract/bodies.py` — RAISES edges (exception type + args) and CALLS edges (callable name + full call text) for all module-level functions.
+- **Prompt (short):** "Plan task 2a.6 for body facts." User then refined the CALLS design: `to_id = ast.unparse(call.func)` (callable name only), `meta = (("call_text", full_call),)` — confirmed before implementation.
+- **What Bob produced:** `src/docgen/extract/bodies.py` (full implementation: `_resolve_exception_type`, `_extract_raises`, `_extract_calls`, `extract_body_facts`); `tests/test_bodies.py` (10 tests covering all branches + real-repo smoke test).
+- **What I verified or changed:** All 74 tests passed first run. No bugs.
+- **Outcome:** Done. 74/74 tests pass.
+- **Screenshot:** _(none this session)_
