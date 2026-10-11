@@ -196,6 +196,108 @@ def _run_extract(args: argparse.Namespace) -> None:
     _print_unresolved_summary(list(graph.unresolved))
 
 
+def _node_level(node) -> str:
+    """Map a fact-graph node to a summarization level.
+
+    Only FUNCTION, CLASS, and MODULE nodes are summarized in 2b.1; a FUNCTION with
+    a parent class is reported as a "method".
+    """
+    from docgen.facts.schema import NodeType
+
+    if node.type == NodeType.FUNCTION:
+        return "method" if node.parent_class else "function"
+    if node.type == NodeType.CLASS:
+        return "class"
+    return "module"
+
+
+def _read_source_text(repo_root: Path, node) -> str:
+    """Read a node's source text from its file and line span.
+
+    `node.file` is repo-root-relative POSIX; `node.lines` is a 1-indexed inclusive
+    (start, end). Returns "" when the file is absent or the span is unusable -- the
+    summarizer must never do I/O, so failures degrade to empty text here.
+    """
+    if not node.file:
+        return ""
+    start, end = node.lines
+    if start <= 0 or end < start:
+        return ""
+
+    path = repo_root / node.file
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeDecodeError):
+        return ""
+
+    return "\n".join(lines[start - 1:end])
+
+
+def _run_summarize(args: argparse.Namespace) -> None:
+    """Run the flat summarization pass and write summaries.json.
+
+    Pipeline:
+        load_config → read facts.json → for each FUNCTION/CLASS/MODULE node:
+        read source_text → Summarizer.summarize → write summaries.json
+
+    This is deliberately flat: one call per node, no child summaries (the bottom-up
+    hierarchy is task 2b.3).
+    """
+    from docgen.config import load_config
+    from docgen.facts.schema import NodeType
+    from docgen.facts.store import _node_to_dict, read_facts
+    from docgen.summarize.base import StubSummarizer, SummaryRequest
+    from docgen.summarize.manual import ManualSummarizer
+    from docgen.summarize.store import write_summaries
+
+    config_path = Path(args.config)
+    config = load_config(config_path)
+    repo_root = config_path.parent.resolve()
+    output_dir = repo_root / config.output_dir
+
+    facts_path = output_dir / "facts.json"
+    if not facts_path.exists():
+        raise SystemExit(
+            f"facts.json not found at {facts_path}; run `docgen extract` first."
+        )
+    graph = read_facts(facts_path)
+
+    backend = getattr(args, "backend", "stub")
+    if backend == "stub":
+        summarizer = StubSummarizer()
+    elif backend == "manual":
+        summarizer = ManualSummarizer(output_dir / "manual_summaries")
+    else:
+        raise SystemExit(
+            f"Unknown backend: {backend!r} (expected 'stub' or 'manual')."
+        )
+
+    print(
+        f"docgen summarize: {len(graph.nodes)} nodes from {facts_path} (backend={backend}) …",
+        file=sys.stderr,
+    )
+
+    summarizable = {NodeType.FUNCTION, NodeType.CLASS, NodeType.MODULE}
+    results = []
+    for node in graph.nodes:
+        if node.type not in summarizable:
+            continue
+        req = SummaryRequest(
+            node_id=node.id,
+            level=_node_level(node),
+            facts=_node_to_dict(node),
+            source_text=_read_source_text(repo_root, node),
+            child_summaries=[],
+        )
+        results.append(summarizer.summarize(req))
+
+    summaries_path = output_dir / "summaries.json"
+    write_summaries(results, summaries_path)
+
+    print(f"  summaries.json written: {len(results)} summaries", file=sys.stderr)
+    print(f"{len(results)} summaries written")
+
+
 def main() -> None:
     """Parse arguments and dispatch to the appropriate sub-command."""
     parser = argparse.ArgumentParser(
@@ -211,7 +313,19 @@ def main() -> None:
         help="Path to docgen.toml (default: docgen.toml in cwd).",
     )
 
-    subparsers.add_parser("summarize", help="Generate cited summaries from facts.")
+    summarize_parser = subparsers.add_parser(
+        "summarize", help="Generate cited summaries from facts."
+    )
+    summarize_parser.add_argument(
+        "--config",
+        default="docgen.toml",
+        help="Path to docgen.toml (default: docgen.toml in cwd).",
+    )
+    summarize_parser.add_argument(
+        "--backend",
+        default="stub",
+        help="Summarizer backend: 'stub' or 'manual' (default: stub).",
+    )
     subparsers.add_parser("render", help="Render documentation pages.")
     subparsers.add_parser("check", help="Check for doc drift (exit 1 if stale).")
     subparsers.add_parser("update", help="Regenerate stale pages.")
@@ -221,6 +335,8 @@ def main() -> None:
 
     if args.command == "extract":
         _run_extract(args)
+    elif args.command == "summarize":
+        _run_summarize(args)
     else:
         raise NotImplementedError(f"Command '{args.command}' not yet implemented.")
 

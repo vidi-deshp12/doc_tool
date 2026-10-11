@@ -129,3 +129,19 @@ Evidence that IBM Bob was a core part of the workflow (judging: tool usage and d
 - **What I verified or changed:** All 15 tests passed first run. CLI run: `DEP edges: 66/66 resolved`, 0 unresolved dep edges, no cycles. Matches plan acceptance criterion.
 - **Outcome:** Done. 130/130 tests pass.
 - **Screenshot:** _(none this session)_
+
+### 2026-10-09 | Task 2a.10 | Agent (eval)
+- **Goal:** Run the extractor gate: compare AST route extractor + full pipeline against ground truth; review unresolved list; pass/fail decision for Phase 2b.
+- **Prompt (short):** "Work on task 2a.10. Run the eval check, confirm the 3 unresolved entries are legitimate. Record results in memory.md."
+- **What Bob produced:** Ran `eval_2a10.py` script against `generated/facts.json` and `eval/ground_truth.json`. No code changes — pure evaluation.
+- **What I verified:** Route recall 19/19 (100%). Method accuracy 19/19. Handler accuracy 19/19. DEP edges 66/66 resolved. 3 unresolved entries: (1) `CommonParameter` = aliased import from pypika — extractor correctly can't see through aliases; (2) `Exception` = Python built-in, not imported; (3) `logging.Handler` = attribute access on stdlib module. All three are expected limitations, not bugs. GATE PASSED.
+- **Outcome:** Done. Phase 2b cleared to begin. 130/130 tests pass (unchanged).
+- **Screenshot:** _(none this session)_
+
+### 2026-10-11 | Task 2b.1 | Plan + Agent
+- **Goal:** Build the Summarizer interface and wire a flat `docgen summarize` pipeline that runs end to end with a deterministic stub (no LLM).
+- **Prompt (short):** "Read docs/plan-2b1-summarizer-interface.md and implement task 2b.1 exactly as described." Followed the plan's six sub-tasks in order.
+- **What Bob produced:** `summarize/base.py` (`SummaryRequest`, `SummaryResult`, `Summarizer` protocol, `StubSummarizer`, `MissingSummaryError`, `NodeLevel`, shared `hash_input()`), `summarize/manual.py` (`ManualSummarizer` reading `<folder>/<safe_name>.md`), `summarize/store.py` (`write_summaries`/`read_summaries`, stable JSON), `cli.py` (`_run_summarize`, `_node_level`, `_read_source_text`, `summarize` subparser with `--config`/`--backend`), and `tests/test_summarize.py` (8 tests).
+- **What I verified or changed:** The summarizers perform no I/O — the CLI reads `source_text` from `node.file` + `node.lines` before constructing each request. Only FUNCTION/CLASS/MODULE nodes are summarized; the pass is flat (`child_summaries=[]`). Unknown `--backend` raises `SystemExit`. New tests: `8 passed in 0.27s`.
+- **Outcome:** Done. `facts.json` → `summaries.json` works end to end with the stub backend.
+- **Screenshot:** _(none this session)_
