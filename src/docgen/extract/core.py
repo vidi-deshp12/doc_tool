@@ -56,7 +56,9 @@ def _make_synthetic_ast_for_hash(node: ast.AST) -> ast.AST:
         return new_node
 
     elif isinstance(node, ast.ClassDef):
-        # Create a class with same bases, decorators, but only field annotations
+        # Create a class with same bases, decorators, but only field annotations.
+        # method_hash_structs are injected as Constant nodes so a method signature
+        # change propagates into the class hash_struct.
         new_bases = node.bases
         new_decorators = node.decorator_list
         new_body = []
@@ -113,6 +115,24 @@ def _hash_struct_node(node: ast.AST) -> str:
     return _sha256(dumped)
 
 
+def _hash_struct_class(class_node: ast.ClassDef, method_hash_structs: list[str]) -> str:
+    """Compute hash_struct for a class, including method signature hashes.
+
+    The synthetic class body contains:
+    - Annotated field assignments (name + annotation, no default)
+    - Each method's hash_struct as a Constant string node
+
+    This means: editing a method signature changes the class hash_struct.
+    Editing only a method body comment does not.
+    """
+    synthetic = _make_synthetic_ast_for_hash(class_node)
+    # Append method hash_structs as Constant nodes after field annotations
+    for mhs in method_hash_structs:
+        synthetic.body.append(ast.Expr(value=ast.Constant(value=mhs)))  # type: ignore[attr-defined]
+    dumped = ast.dump(synthetic, annotate_fields=True, include_attributes=False)
+    return _sha256(dumped)
+
+
 def _hash_source_span(source: str, start_line: int, end_line: int) -> str:
     """Compute hash_source using Python tokenize module.
 
@@ -158,6 +178,25 @@ def _extract_decorator_texts(node: ast.AST) -> tuple[str, ...]:
         ast.unparse(d) if isinstance(d, ast.expr) else str(d)
         for d in node.decorator_list
     )
+
+
+def _class_header_end_line(class_node: ast.ClassDef) -> int:
+    """Return the last line of the class header (decorators + class def + docstring).
+
+    The header ends at:
+    - The last line of the docstring, if the first body statement is a string Expr.
+    - Otherwise the class def line itself (node.lineno).
+
+    This determines how far hash_source covers for the class node — method bodies
+    are excluded so they don't trigger class-level re-summarisation.
+    """
+    if class_node.body:
+        first = class_node.body[0]
+        if isinstance(first, ast.Expr) and isinstance(first.value, ast.Constant):
+            # Docstring present — header ends at its last line
+            return first.end_lineno  # type: ignore[attr-defined]
+    # No docstring: header is just the class def line
+    return class_node.lineno
 
 
 def _make_function_node(
@@ -208,18 +247,87 @@ def _make_function_node(
     )
 
 
-def _make_class_node(
-    node: ast.ClassDef,
+def _make_method_node(
+    node: ast.FunctionDef | ast.AsyncFunctionDef,
     source: str,
     mid: str,
-    hash_source: str,
+    class_id: str,
+    class_name: str,
+    is_async: bool,
 ) -> Node:
-    """Create a Node from a class AST node with decorator-inclusive span."""
+    """Create a FUNCTION Node for a class method.
+
+    Args:
+        node: The method's AST node.
+        source: Full source text of the file.
+        mid: Root-relative POSIX file path (module ID).
+        class_id: The class node's id (e.g. "app/models.py::MyClass").
+        class_name: The class name (e.g. "MyClass").
+        is_async: Whether the method is async.
+    """
     start = _get_decorator_start_line(node)
     end = node.end_lineno
     lines = (start, end)
 
     hash_struct = _hash_struct_node(node)
+    hash_source = _hash_source_span(source, start, end)
+    decorators = _extract_decorator_texts(node)
+
+    return Node(
+        id=f"{mid}::{class_name}::{node.name}",
+        type=NodeType.FUNCTION,
+        file=mid,
+        lines=lines,
+        hash_struct=hash_struct,
+        hash_source=hash_source,
+        dotted_name="",
+        docstring=ast.get_docstring(node) or "",
+        bases=(),
+        fields=(),
+        is_pydantic_model=False,
+        decorators=decorators,
+        signature=ast.unparse(node.args) if node.args else "",
+        returns=ast.unparse(node.returns) if node.returns else "",
+        async_flag=is_async,
+        parent_class=class_id,
+        library_name="",
+        what="",
+        why="",
+        where="",
+        method="",
+        full_path="",
+        name=node.name,
+        status_code=0,
+        variable="",
+        prefix="",
+        sql_name="",
+        sql_file="",
+    )
+
+
+def _make_class_node(
+    node: ast.ClassDef,
+    source: str,
+    mid: str,
+    method_hash_structs: list[str],
+) -> Node:
+    """Create a Node from a class AST node.
+
+    hash_struct includes field annotations AND each method's hash_struct (so a
+    method signature change marks the class stale).
+    hash_source covers only the class header: decorators + class def + docstring.
+    Method bodies are excluded from hash_source; they belong to method nodes.
+    """
+    decorator_start = _get_decorator_start_line(node)
+    end = node.end_lineno
+    lines = (decorator_start, end)
+
+    # hash_struct: fields + injected method hashes
+    hash_struct = _hash_struct_class(node, method_hash_structs)
+
+    # hash_source: header span only (decorators → end of docstring or class def line)
+    header_end = _class_header_end_line(node)
+    hash_source = _hash_source_span(source, decorator_start, header_end)
 
     fields: list[tuple[str, str, str]] = []
     for item in node.body:
@@ -423,7 +531,16 @@ def extract_file(path: Path, root: Path) -> tuple[list[Node], list[Edge], list[U
                 )
 
         elif isinstance(item, ast.ClassDef):
-            cls_node = _make_class_node(item, source, mid, hash_source)
+            # Collect method AST nodes (direct children only; no nested classes)
+            method_asts = [
+                m for m in item.body
+                if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef))
+            ]
+
+            # Pre-compute each method's hash_struct for injection into class hash_struct
+            method_hash_structs = [_hash_struct_node(m) for m in method_asts]
+
+            cls_node = _make_class_node(item, source, mid, method_hash_structs)
             nodes.append(cls_node)
 
             # Edge: module contains class
@@ -437,5 +554,46 @@ def extract_file(path: Path, root: Path) -> tuple[list[Node], list[Edge], list[U
             )
 
             # INHERITS edges are produced by extract/classes.py after name resolution.
+
+            # Extract method nodes and edges
+            for method_ast in method_asts:
+                is_async = isinstance(method_ast, ast.AsyncFunctionDef)
+                method_node = _make_method_node(
+                    method_ast, source, mid,
+                    class_id=cls_node.id,
+                    class_name=item.name,
+                    is_async=is_async,
+                )
+                nodes.append(method_node)
+
+                # Edge: class contains method
+                edges.append(
+                    Edge(
+                        type=EdgeType.CONTAINS,
+                        from_id=cls_node.id,
+                        to_id=method_node.id,
+                        meta=(),
+                    )
+                )
+
+                # Depends edges from method parameters and decorators
+                for dep_name in _collect_depends_from_params(method_ast):
+                    edges.append(
+                        Edge(
+                            type=EdgeType.DEPENDS_ON,
+                            from_id=method_node.id,
+                            to_id=f"external:{dep_name}",
+                            meta=(("via", "parameter"),),
+                        )
+                    )
+                for dep_name in _collect_decorator_depends(method_ast):
+                    edges.append(
+                        Edge(
+                            type=EdgeType.DEPENDS_ON,
+                            from_id=method_node.id,
+                            to_id=f"external:{dep_name}",
+                            meta=(("via", "decorator"),),
+                        )
+                    )
 
     return nodes, edges, unresolved

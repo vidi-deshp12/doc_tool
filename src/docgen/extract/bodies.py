@@ -1,13 +1,15 @@
 """Extract body facts: raises (type + args) and raw calls per function.
 
-For each module-level function node this module emits:
+Processes all FUNCTION nodes — both module-level functions and class methods.
+Class methods are identified by a non-empty parent_class field on the Node.
+
+For each function/method node this module emits:
 - RAISES edges: function → resolved exception type (external: or in-repo node ID),
   meta=(("args", "<unparsed constructor args>"),).
 - CALLS edges: function → callable name (ast.unparse of call.func),
   meta=(("call_text", "<full unparsed call>"),). One edge per unique callee per function.
 
 core.py does not emit RAISES or CALLS edges; this module owns all of them.
-Only module-level functions are processed (class methods are not yet extracted by core.py).
 """
 
 from __future__ import annotations
@@ -219,8 +221,22 @@ def _extract_calls(
 
 
 # ---------------------------------------------------------------------------
-# Sub-task D — Public entry point
+# Public entry point
 # ---------------------------------------------------------------------------
+
+# Per-file AST cache type:
+#   file_path → (
+#       top_level: {func_name: ast_node},
+#       methods:   {class_name: {method_name: ast_node}}
+#   )
+_FileAstCache = dict[
+    str,
+    tuple[
+        dict[str, "ast.FunctionDef | ast.AsyncFunctionDef"],
+        dict[str, dict[str, "ast.FunctionDef | ast.AsyncFunctionDef"]],
+    ],
+]
+
 
 def extract_body_facts(
     nodes: list[Node],
@@ -229,7 +245,7 @@ def extract_body_facts(
     dotted_to_path: dict[str, str],
     repo_root: str | None = None,
 ) -> tuple[list[Edge], list[Edge], list[Node], list[Unresolved]]:
-    """Extract RAISES and CALLS edges for all module-level function nodes.
+    """Extract RAISES and CALLS edges for all function nodes (module-level and methods).
 
     Call this after extract_file() has been called on all files and after
     build_module_index() has produced path_to_info and dotted_to_path.
@@ -241,7 +257,7 @@ def extract_body_facts(
         dotted_to_path: From modules.build_module_index().
         repo_root: Absolute path to the repository root. Required to re-parse
                    source files for AST walking. If None, files are looked up
-                   via path_to_info's own source reading.
+                   relative to cwd.
 
     Returns:
         (raises_edges, calls_edges, new_external_nodes, unresolved)
@@ -256,40 +272,51 @@ def extract_body_facts(
     all_calls: list[Edge] = []
     all_externals: list[Node] = []
 
-    # Build per-file AST cache: file_path → {func_name → ast.FunctionDef}
-    # We re-parse each file once, lazily.
-    ast_cache: dict[str, dict[str, ast.FunctionDef | ast.AsyncFunctionDef]] = {}
+    # Two-level AST cache: top-level funcs + class methods, re-parsed once per file.
+    ast_cache: _FileAstCache = {}
 
-    def _get_func_ast(
-        file_path: str,
-    ) -> dict[str, ast.FunctionDef | ast.AsyncFunctionDef]:
+    def _populate_cache(file_path: str) -> None:
         if file_path in ast_cache:
-            return ast_cache[file_path]
-
-        func_map: dict[str, ast.FunctionDef | ast.AsyncFunctionDef] = {}
+            return
+        top: dict[str, ast.FunctionDef | ast.AsyncFunctionDef] = {}
+        methods: dict[str, dict[str, ast.FunctionDef | ast.AsyncFunctionDef]] = {}
         try:
             if repo_root:
                 src_path = Path(repo_root) / file_path
             else:
-                # Fall back: try relative to cwd
                 src_path = Path(file_path)
             source = src_path.read_text(encoding="utf-8")
             tree = ast.parse(source, filename=str(src_path))
             for item in tree.body:
                 if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    func_map[item.name] = item
+                    top[item.name] = item
+                elif isinstance(item, ast.ClassDef):
+                    cls_methods: dict[str, ast.FunctionDef | ast.AsyncFunctionDef] = {}
+                    for member in item.body:
+                        if isinstance(member, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            cls_methods[member.name] = member
+                    methods[item.name] = cls_methods
         except (OSError, SyntaxError):
             pass
+        ast_cache[file_path] = (top, methods)
 
-        ast_cache[file_path] = func_map
-        return func_map
+    def _get_ast_node(
+        file_path: str, func_name: str, parent_class_id: str
+    ) -> "ast.FunctionDef | ast.AsyncFunctionDef | None":
+        _populate_cache(file_path)
+        top, methods = ast_cache[file_path]
+        if not parent_class_id:
+            # Module-level function
+            return top.get(func_name)
+        # Method: extract class name from parent_class_id (last :: component)
+        class_name = parent_class_id.rsplit("::", 1)[-1]
+        return methods.get(class_name, {}).get(func_name)
 
     for node in nodes:
         if node.type != NodeType.FUNCTION:
             continue
 
-        func_map = _get_func_ast(node.file)
-        func_ast = func_map.get(node.name)
+        func_ast = _get_ast_node(node.file, node.name, node.parent_class)
         if func_ast is None:
             continue
 

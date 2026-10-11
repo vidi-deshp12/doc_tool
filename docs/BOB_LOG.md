@@ -105,3 +105,11 @@ Evidence that IBM Bob was a core part of the workflow (judging: tool usage and d
 - **What I verified or changed:** 1 failure: pydantic v1 PostgresDsn requires `userinfo` in DATABASE_URL. Bob fixed dummy URL to `postgresql://docgen:docgen@localhost/dummy`. All 92 tests then passed.
 - **Outcome:** Done. 92/92 tests pass. Consistency check: all 19 ground-truth routes extracted.
 - **Screenshot:** _(none this session)_
+
+### 2026-10-09 | Tasks 2a.3b + 2a.6b | Agent
+- **Goal:** Extract class methods as FUNCTION nodes; extend bodies.py to process method body facts.
+- **Prompt (short):** "Plan tasks 2a.3b and 2a.6b together." User clarified: header span includes docstring; execute immediately after plan approval.
+- **What Bob produced:** `core.py` — `_hash_struct_class`, `_class_header_end_line`, `_make_method_node`, method loop in `extract_file`; `bodies.py` — two-level AST cache, removed module-level restriction; `tests/test_core_methods.py` (9 tests); `tests/test_bodies_methods.py` (4 tests).
+- **What I verified or changed:** 1 test failure: test 6 checked `hash_source` for field changes but fields affect `hash_struct`. Bob corrected the test and added a separate docstring-changes-hash_source test. All 105 tests then passed.
+- **Outcome:** Done. 105/105 tests pass.
+- **Screenshot:** _(none this session)_
