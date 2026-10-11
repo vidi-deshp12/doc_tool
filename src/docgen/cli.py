@@ -47,7 +47,7 @@ def _run_extract(args: argparse.Namespace) -> None:
     from docgen.extract.core import extract_file
     from docgen.extract.modules import build_module_index, resolve_imports
     from docgen.extract.unresolved import scan_for_unresolved
-    from docgen.facts.schema import FactGraph, NodeType
+    from docgen.facts.schema import FactGraph, Unresolved
     from docgen.facts.store import write_facts
     from docgen.walker import walk_repo
 
@@ -128,6 +128,43 @@ def _run_extract(args: argparse.Namespace) -> None:
             f"{len(adapter_result.edges)} route edges",
             file=sys.stderr,
         )
+
+    # Step 7b: AST-only route extraction (Tier A — method + relative path + handler)
+    # Runs unconditionally for any fastapi adapter; results printed to stdout as a
+    # graded recall line.  Full-path resolution (Tier B) is deferred to v0.2.
+    if config.adapter_name == "fastapi":
+        from docgen.extract.adapters.fastapi_ast import extract_ast_routes, grade_ast_routes
+        ast_routes, ast_unresolved = extract_ast_routes(module_paths, repo_root)
+        all_unresolved.extend(ast_unresolved)
+        print(
+            f"AST routes: {len(ast_routes)} route decorators found "
+            f"(method + relative path + handler; full paths deferred to v0.2)"
+        )
+
+    # Step 7c: Resolve DEPENDS_ON edges from external: to real in-repo node IDs.
+    # Runs after core extraction and import resolution so all FUNCTION nodes exist.
+    # Cycle detection emits Unresolved entries but does not abort the run.
+    from docgen.extract.adapters.resolve_deps import detect_dep_cycles, resolve_dep_edges
+    all_edges, dep_unresolved = resolve_dep_edges(
+        all_nodes, all_edges, path_to_info, dotted_to_path
+    )
+    all_unresolved.extend(dep_unresolved)
+    dep_cycles = detect_dep_cycles(all_nodes, all_edges)
+    for cycle in dep_cycles:
+        all_unresolved.append(Unresolved(
+            what="dep_cycle",
+            why=f"Dependency cycle detected: {cycle}",
+            where="dep_graph",
+        ))
+    resolved_count = sum(
+        1 for e in all_edges
+        if e.type.value == "depends_on" and not e.to_id.startswith("external:")
+    )
+    total_dep = sum(1 for e in all_edges if e.type.value == "depends_on")
+    print(
+        f"DEP edges: {resolved_count}/{total_dep} resolved"
+        + (f", {len(dep_cycles)} cycle(s)" if dep_cycles else "")
+    )
 
     # Step 8: Deduplicate nodes by id (external nodes may be emitted by multiple passes)
     seen_node_ids: set[str] = set()

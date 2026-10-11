@@ -113,3 +113,19 @@ Evidence that IBM Bob was a core part of the workflow (judging: tool usage and d
 - **What I verified or changed:** 1 test failure: test 6 checked `hash_source` for field changes but fields affect `hash_struct`. Bob corrected the test and added a separate docstring-changes-hash_source test. All 105 tests then passed.
 - **Outcome:** Done. 105/105 tests pass.
 - **Screenshot:** _(none this session)_
+
+### 2026-10-09 | Task 2a.8b | Plan + Agent
+- **Goal:** FastAPI route extractor via AST only (Tier A: method + relative path + handler name). 100% recall without subprocess or import.
+- **Prompt (short):** "Plan task 2a.8b, clearly separating Tier A (relative paths) vs Tier B (full path resolution). Show complexity difference before deciding." Decision: build Tier A only; record Tier B as D-030 known gap for v0.2; grade 2a.10 on method + handler.
+- **What Bob produced:** `adapters/fastapi_ast.py` — `scan_router_defs` (APIRouter() detection + @router.<method> collector), `extract_ast_routes` (multi-file, SyntaxError-safe), `grade_ast_routes`; `cli.py` Step 7b (prints AST route count); `tests/test_fastapi_ast.py` (10 tests: 5 unit, 2 fixture, 2 grading, 1 integration).
+- **What I verified or changed:** All 10 tests passed first run. Integration test: 19/19 routes, 100% recall. Grading design confirmed: operation_ids don't embed handler names directly (e.g. `create_new_article` → `create_article` in operation_id), so grade on (method, handler_name) pairs not operation_id substrings.
+- **Outcome:** Done. 115/115 tests pass.
+- **Screenshot:** _(none this session)_
+
+### 2026-10-09 | Task 2a.9 | Plan + Agent
+- **Goal:** Resolve DEPENDS_ON edges from `external:` placeholders to real in-repo FUNCTION node IDs; cycle guard.
+- **Prompt (short):** "Plan task 2a.9." Inspected actual `facts.json` before planning — discovered three dep_name shapes including module-qualified names (`authentication.get_current_user_authorizer()`). Chose conservative Option B (never guess) before implementing.
+- **What Bob produced:** `adapters/resolve_deps.py` — regex parser for dep_name strings, name index, alias/plain resolution via import records, `resolve_dep_edges`, `detect_dep_cycles`; `cli.py` Step 7c; `tests/test_resolve_deps.py` (15 tests).
+- **What I verified or changed:** All 15 tests passed first run. CLI run: `DEP edges: 66/66 resolved`, 0 unresolved dep edges, no cycles. Matches plan acceptance criterion.
+- **Outcome:** Done. 130/130 tests pass.
+- **Screenshot:** _(none this session)_

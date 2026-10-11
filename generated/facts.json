@@ -97,6 +97,30 @@
       "type": "calls"
     },
     {
+      "from": "target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__",
+      "meta": {
+        "call_text": "HTTPException(status_code=original_auth_exc.status_code, detail=strings.AUTHENTICATION_REQUIRED)"
+      },
+      "to": "HTTPException",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__",
+      "meta": {
+        "call_text": "super()"
+      },
+      "to": "super",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__",
+      "meta": {
+        "call_text": "super().__call__(request)"
+      },
+      "to": "super().__call__",
+      "type": "calls"
+    },
+    {
       "from": "target/app/api/dependencies/authentication.py::_get_authorization_header",
       "meta": {
         "call_text": "Depends(get_app_settings)"
@@ -1713,6 +1737,86 @@
       "type": "calls"
     },
     {
+      "from": "target/app/core/logging.py::InterceptHandler::emit",
+      "meta": {
+        "call_text": "cast(FrameType, frame.f_back)"
+      },
+      "to": "cast",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/core/logging.py::InterceptHandler::emit",
+      "meta": {
+        "call_text": "logger.level(record.levelname)"
+      },
+      "to": "logger.level",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/core/logging.py::InterceptHandler::emit",
+      "meta": {
+        "call_text": "logger.opt(depth=depth, exception=record.exc_info)"
+      },
+      "to": "logger.opt",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/core/logging.py::InterceptHandler::emit",
+      "meta": {
+        "call_text": "logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())"
+      },
+      "to": "logger.opt(depth=depth, exception=record.exc_info).log",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/core/logging.py::InterceptHandler::emit",
+      "meta": {
+        "call_text": "logging.currentframe()"
+      },
+      "to": "logging.currentframe",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/core/logging.py::InterceptHandler::emit",
+      "meta": {
+        "call_text": "record.getMessage()"
+      },
+      "to": "record.getMessage",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/core/logging.py::InterceptHandler::emit",
+      "meta": {
+        "call_text": "str(record.levelno)"
+      },
+      "to": "str",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/core/settings/app.py::AppSettings::configure_logging",
+      "meta": {
+        "call_text": "InterceptHandler(level=self.logging_level)"
+      },
+      "to": "InterceptHandler",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/core/settings/app.py::AppSettings::configure_logging",
+      "meta": {
+        "call_text": "logger.configure(handlers=[{'sink': sys.stderr, 'level': self.logging_level}])"
+      },
+      "to": "logger.configure",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/core/settings/app.py::AppSettings::configure_logging",
+      "meta": {
+        "call_text": "logging.getLogger(logger_name)"
+      },
+      "to": "logging.getLogger",
+      "type": "calls"
+    },
+    {
       "from": "target/app/db/events.py::close_db_connection",
       "meta": {
         "call_text": "app.state.pool.close()"
@@ -1750,6 +1854,814 @@
         "call_text": "str(settings.database_url)"
       },
       "to": "str",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/queries/tables.py::Parameter::__init__",
+      "meta": {
+        "call_text": "'${0}'.format(count)"
+      },
+      "to": "'${0}'.format",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/queries/tables.py::Parameter::__init__",
+      "meta": {
+        "call_text": "super()"
+      },
+      "to": "super",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/queries/tables.py::Parameter::__init__",
+      "meta": {
+        "call_text": "super().__init__('${0}'.format(count))"
+      },
+      "to": "super().__init__",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/queries/tables.py::TypedTable::__init__",
+      "meta": {
+        "call_text": "super()"
+      },
+      "to": "super",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/queries/tables.py::TypedTable::__init__",
+      "meta": {
+        "call_text": "super().__init__(name, schema, alias, query_cls)"
+      },
+      "to": "super().__init__",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::__init__",
+      "meta": {
+        "call_text": "ProfilesRepository(conn)"
+      },
+      "to": "ProfilesRepository",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::__init__",
+      "meta": {
+        "call_text": "TagsRepository(conn)"
+      },
+      "to": "TagsRepository",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::__init__",
+      "meta": {
+        "call_text": "super()"
+      },
+      "to": "super",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::__init__",
+      "meta": {
+        "call_text": "super().__init__(conn)"
+      },
+      "to": "super().__init__",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::_get_article_from_db_record",
+      "meta": {
+        "call_text": "Article(id_=article_row['id'], slug=slug, title=article_row['title'], description=article_row['description'], body=article_row['body'], author=await self._profiles_repo.get_profile_by_username(username=author_username, requested_user=requested_user), tags=await self.get_tags_for_article_by_slug(slug=slug), favorites_count=await self.get_favorites_count_for_article_by_slug(slug=slug), favorited=await self.is_article_favorited_by_user(slug=slug, user=requested_user) if requested_user else False, created_at=article_row['created_at'], updated_at=article_row['updated_at'])"
+      },
+      "to": "Article",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::_get_article_from_db_record",
+      "meta": {
+        "call_text": "self._profiles_repo.get_profile_by_username(username=author_username, requested_user=requested_user)"
+      },
+      "to": "self._profiles_repo.get_profile_by_username",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::_get_article_from_db_record",
+      "meta": {
+        "call_text": "self.get_favorites_count_for_article_by_slug(slug=slug)"
+      },
+      "to": "self.get_favorites_count_for_article_by_slug",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::_get_article_from_db_record",
+      "meta": {
+        "call_text": "self.get_tags_for_article_by_slug(slug=slug)"
+      },
+      "to": "self.get_tags_for_article_by_slug",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::_get_article_from_db_record",
+      "meta": {
+        "call_text": "self.is_article_favorited_by_user(slug=slug, user=requested_user)"
+      },
+      "to": "self.is_article_favorited_by_user",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::_link_article_with_tags",
+      "meta": {
+        "call_text": "queries.add_tags_to_article(self.connection, [{SLUG_ALIAS: slug, 'tag': tag} for tag in tags])"
+      },
+      "to": "queries.add_tags_to_article",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::add_article_into_favorites",
+      "meta": {
+        "call_text": "queries.add_article_to_favorites(self.connection, username=user.username, slug=article.slug)"
+      },
+      "to": "queries.add_article_to_favorites",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::create_article",
+      "meta": {
+        "call_text": "queries.create_new_article(self.connection, slug=slug, title=title, description=description, body=body, author_username=author.username)"
+      },
+      "to": "queries.create_new_article",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::create_article",
+      "meta": {
+        "call_text": "self._get_article_from_db_record(article_row=article_row, slug=slug, author_username=article_row[AUTHOR_USERNAME_ALIAS], requested_user=author)"
+      },
+      "to": "self._get_article_from_db_record",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::create_article",
+      "meta": {
+        "call_text": "self._link_article_with_tags(slug=slug, tags=tags)"
+      },
+      "to": "self._link_article_with_tags",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::create_article",
+      "meta": {
+        "call_text": "self._tags_repo.create_tags_that_dont_exist(tags=tags)"
+      },
+      "to": "self._tags_repo.create_tags_that_dont_exist",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::create_article",
+      "meta": {
+        "call_text": "self.connection.transaction()"
+      },
+      "to": "self.connection.transaction",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::delete_article",
+      "meta": {
+        "call_text": "queries.delete_article(self.connection, slug=article.slug, author_username=article.author.username)"
+      },
+      "to": "queries.delete_article",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::delete_article",
+      "meta": {
+        "call_text": "self.connection.transaction()"
+      },
+      "to": "self.connection.transaction",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "Parameter(query_params_count)"
+      },
+      "to": "Parameter",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "Query.from_(users)"
+      },
+      "to": "Query.from_",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "Query.from_(articles).select(articles.id, articles.slug, articles.title, articles.description, articles.body, articles.created_at, articles.updated_at, Query.from_(users).where(users.id == articles.author_id).select(users.username).as_(AUTHOR_USERNAME_ALIAS))"
+      },
+      "to": "Query.from_(articles).select",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "Query.from_(tags_table).where(tags_table.tag == Parameter(query_params_count))"
+      },
+      "to": "Query.from_(tags_table).where",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "Query.from_(tags_table).where(tags_table.tag == Parameter(query_params_count)).select(tags_table.tag)"
+      },
+      "to": "Query.from_(tags_table).where(tags_table.tag == Parameter(query_params_count)).select",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "Query.from_(users).where(users.username == Parameter(query_params_count))"
+      },
+      "to": "Query.from_(users).where",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "Query.from_(users).where(users.id == articles.author_id).select(users.username)"
+      },
+      "to": "Query.from_(users).where(users.id == articles.author_id).select",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "Query.from_(users).where(users.id == articles.author_id).select(users.username).as_(AUTHOR_USERNAME_ALIAS)"
+      },
+      "to": "Query.from_(users).where(users.id == articles.author_id).select(users.username).as_",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "Query.from_(users).where(users.username == Parameter(query_params_count)).select(users.id)"
+      },
+      "to": "Query.from_(users).where(users.username == Parameter(query_params_count)).select",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "query.get_sql()"
+      },
+      "to": "query.get_sql",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "query.join(favorites)"
+      },
+      "to": "query.join",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "query.join(articles_to_tags).on((articles.id == articles_to_tags.article_id) & (articles_to_tags.tag == Query.from_(tags_table).where(tags_table.tag == Parameter(query_params_count)).select(tags_table.tag)))"
+      },
+      "to": "query.join(articles_to_tags).on",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "query.join(favorites).on((articles.id == favorites.article_id) & (favorites.user_id == Query.from_(users).where(users.username == Parameter(query_params_count)).select(users.id)))"
+      },
+      "to": "query.join(favorites).on",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "query.join(users).on((articles.author_id == users.id) & (users.id == Query.from_(users).where(users.username == Parameter(query_params_count)).select(users.id)))"
+      },
+      "to": "query.join(users).on",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "query.limit(Parameter(query_params_count + 1))"
+      },
+      "to": "query.limit",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "query.limit(Parameter(query_params_count + 1)).offset(Parameter(query_params_count + 2))"
+      },
+      "to": "query.limit(Parameter(query_params_count + 1)).offset",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "query_params.append(favorited)"
+      },
+      "to": "query_params.append",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "query_params.extend([limit, offset])"
+      },
+      "to": "query_params.extend",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "self._get_article_from_db_record(article_row=article_row, slug=article_row[SLUG_ALIAS], author_username=article_row[AUTHOR_USERNAME_ALIAS], requested_user=requested_user)"
+      },
+      "to": "self._get_article_from_db_record",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "meta": {
+        "call_text": "self.connection.fetch(query.get_sql(), *query_params)"
+      },
+      "to": "self.connection.fetch",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::get_article_by_slug",
+      "meta": {
+        "call_text": "'article with slug {0} does not exist'.format(slug)"
+      },
+      "to": "'article with slug {0} does not exist'.format",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::get_article_by_slug",
+      "meta": {
+        "call_text": "EntityDoesNotExist('article with slug {0} does not exist'.format(slug))"
+      },
+      "to": "EntityDoesNotExist",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::get_article_by_slug",
+      "meta": {
+        "call_text": "queries.get_article_by_slug(self.connection, slug=slug)"
+      },
+      "to": "queries.get_article_by_slug",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::get_article_by_slug",
+      "meta": {
+        "call_text": "self._get_article_from_db_record(article_row=article_row, slug=article_row[SLUG_ALIAS], author_username=article_row[AUTHOR_USERNAME_ALIAS], requested_user=requested_user)"
+      },
+      "to": "self._get_article_from_db_record",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::get_articles_for_user_feed",
+      "meta": {
+        "call_text": "queries.get_articles_for_feed(self.connection, follower_username=user.username, limit=limit, offset=offset)"
+      },
+      "to": "queries.get_articles_for_feed",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::get_articles_for_user_feed",
+      "meta": {
+        "call_text": "self._get_article_from_db_record(article_row=article_row, slug=article_row[SLUG_ALIAS], author_username=article_row[AUTHOR_USERNAME_ALIAS], requested_user=user)"
+      },
+      "to": "self._get_article_from_db_record",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::get_favorites_count_for_article_by_slug",
+      "meta": {
+        "call_text": "queries.get_favorites_count_for_article(self.connection, slug=slug)"
+      },
+      "to": "queries.get_favorites_count_for_article",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::get_tags_for_article_by_slug",
+      "meta": {
+        "call_text": "queries.get_tags_for_article_by_slug(self.connection, slug=slug)"
+      },
+      "to": "queries.get_tags_for_article_by_slug",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::is_article_favorited_by_user",
+      "meta": {
+        "call_text": "queries.is_article_in_favorites(self.connection, username=user.username, slug=slug)"
+      },
+      "to": "queries.is_article_in_favorites",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::remove_article_from_favorites",
+      "meta": {
+        "call_text": "queries.remove_article_from_favorites(self.connection, username=user.username, slug=article.slug)"
+      },
+      "to": "queries.remove_article_from_favorites",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::update_article",
+      "meta": {
+        "call_text": "article.copy(deep=True)"
+      },
+      "to": "article.copy",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::update_article",
+      "meta": {
+        "call_text": "queries.update_article(self.connection, slug=article.slug, author_username=article.author.username, new_slug=updated_article.slug, new_title=updated_article.title, new_body=updated_article.body, new_description=updated_article.description)"
+      },
+      "to": "queries.update_article",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::update_article",
+      "meta": {
+        "call_text": "self.connection.transaction()"
+      },
+      "to": "self.connection.transaction",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::__init__",
+      "meta": {
+        "call_text": "ProfilesRepository(conn)"
+      },
+      "to": "ProfilesRepository",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::__init__",
+      "meta": {
+        "call_text": "super()"
+      },
+      "to": "super",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::__init__",
+      "meta": {
+        "call_text": "super().__init__(conn)"
+      },
+      "to": "super().__init__",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::_get_comment_from_db_record",
+      "meta": {
+        "call_text": "Comment(id_=comment_row['id'], body=comment_row['body'], author=await self._profiles_repo.get_profile_by_username(username=author_username, requested_user=requested_user), created_at=comment_row['created_at'], updated_at=comment_row['updated_at'])"
+      },
+      "to": "Comment",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::_get_comment_from_db_record",
+      "meta": {
+        "call_text": "self._profiles_repo.get_profile_by_username(username=author_username, requested_user=requested_user)"
+      },
+      "to": "self._profiles_repo.get_profile_by_username",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::create_comment_for_article",
+      "meta": {
+        "call_text": "queries.create_new_comment(self.connection, body=body, article_slug=article.slug, author_username=user.username)"
+      },
+      "to": "queries.create_new_comment",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::create_comment_for_article",
+      "meta": {
+        "call_text": "self._get_comment_from_db_record(comment_row=comment_row, author_username=comment_row['author_username'], requested_user=user)"
+      },
+      "to": "self._get_comment_from_db_record",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::delete_comment",
+      "meta": {
+        "call_text": "queries.delete_comment_by_id(self.connection, comment_id=comment.id_, author_username=comment.author.username)"
+      },
+      "to": "queries.delete_comment_by_id",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::get_comment_by_id",
+      "meta": {
+        "call_text": "'comment with id {0} does not exist'.format(comment_id)"
+      },
+      "to": "'comment with id {0} does not exist'.format",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::get_comment_by_id",
+      "meta": {
+        "call_text": "EntityDoesNotExist('comment with id {0} does not exist'.format(comment_id))"
+      },
+      "to": "EntityDoesNotExist",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::get_comment_by_id",
+      "meta": {
+        "call_text": "queries.get_comment_by_id_and_slug(self.connection, comment_id=comment_id, article_slug=article.slug)"
+      },
+      "to": "queries.get_comment_by_id_and_slug",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::get_comment_by_id",
+      "meta": {
+        "call_text": "self._get_comment_from_db_record(comment_row=comment_row, author_username=comment_row['author_username'], requested_user=user)"
+      },
+      "to": "self._get_comment_from_db_record",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::get_comments_for_article",
+      "meta": {
+        "call_text": "queries.get_comments_for_article_by_slug(self.connection, slug=article.slug)"
+      },
+      "to": "queries.get_comments_for_article_by_slug",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::get_comments_for_article",
+      "meta": {
+        "call_text": "self._get_comment_from_db_record(comment_row=comment_row, author_username=comment_row['author_username'], requested_user=user)"
+      },
+      "to": "self._get_comment_from_db_record",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository::__init__",
+      "meta": {
+        "call_text": "UsersRepository(conn)"
+      },
+      "to": "UsersRepository",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository::__init__",
+      "meta": {
+        "call_text": "super()"
+      },
+      "to": "super",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository::__init__",
+      "meta": {
+        "call_text": "super().__init__(conn)"
+      },
+      "to": "super().__init__",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository::add_user_into_followers",
+      "meta": {
+        "call_text": "queries.subscribe_user_to_another(self.connection, follower_username=requested_user.username, following_username=target_user.username)"
+      },
+      "to": "queries.subscribe_user_to_another",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository::add_user_into_followers",
+      "meta": {
+        "call_text": "self.connection.transaction()"
+      },
+      "to": "self.connection.transaction",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository::get_profile_by_username",
+      "meta": {
+        "call_text": "Profile(username=user.username, bio=user.bio, image=user.image)"
+      },
+      "to": "Profile",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository::get_profile_by_username",
+      "meta": {
+        "call_text": "self._users_repo.get_user_by_username(username=username)"
+      },
+      "to": "self._users_repo.get_user_by_username",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository::get_profile_by_username",
+      "meta": {
+        "call_text": "self.is_user_following_for_another_user(target_user=user, requested_user=requested_user)"
+      },
+      "to": "self.is_user_following_for_another_user",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository::is_user_following_for_another_user",
+      "meta": {
+        "call_text": "queries.is_user_following_for_another(self.connection, follower_username=requested_user.username, following_username=target_user.username)"
+      },
+      "to": "queries.is_user_following_for_another",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository::remove_user_from_followers",
+      "meta": {
+        "call_text": "queries.unsubscribe_user_from_another(self.connection, follower_username=requested_user.username, following_username=target_user.username)"
+      },
+      "to": "queries.unsubscribe_user_from_another",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository::remove_user_from_followers",
+      "meta": {
+        "call_text": "self.connection.transaction()"
+      },
+      "to": "self.connection.transaction",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/tags.py::TagsRepository::create_tags_that_dont_exist",
+      "meta": {
+        "call_text": "queries.create_new_tags(self.connection, [{'tag': tag} for tag in tags])"
+      },
+      "to": "queries.create_new_tags",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/tags.py::TagsRepository::get_all_tags",
+      "meta": {
+        "call_text": "queries.get_all_tags(self.connection)"
+      },
+      "to": "queries.get_all_tags",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::create_user",
+      "meta": {
+        "call_text": "UserInDB(username=username, email=email)"
+      },
+      "to": "UserInDB",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::create_user",
+      "meta": {
+        "call_text": "dict(user_row)"
+      },
+      "to": "dict",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::create_user",
+      "meta": {
+        "call_text": "queries.create_new_user(self.connection, username=user.username, email=user.email, salt=user.salt, hashed_password=user.hashed_password)"
+      },
+      "to": "queries.create_new_user",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::create_user",
+      "meta": {
+        "call_text": "self.connection.transaction()"
+      },
+      "to": "self.connection.transaction",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::create_user",
+      "meta": {
+        "call_text": "user.change_password(password)"
+      },
+      "to": "user.change_password",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::create_user",
+      "meta": {
+        "call_text": "user.copy(update=dict(user_row))"
+      },
+      "to": "user.copy",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::get_user_by_email",
+      "meta": {
+        "call_text": "'user with email {0} does not exist'.format(email)"
+      },
+      "to": "'user with email {0} does not exist'.format",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::get_user_by_email",
+      "meta": {
+        "call_text": "EntityDoesNotExist('user with email {0} does not exist'.format(email))"
+      },
+      "to": "EntityDoesNotExist",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::get_user_by_email",
+      "meta": {
+        "call_text": "UserInDB(**user_row)"
+      },
+      "to": "UserInDB",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::get_user_by_email",
+      "meta": {
+        "call_text": "queries.get_user_by_email(self.connection, email=email)"
+      },
+      "to": "queries.get_user_by_email",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::get_user_by_username",
+      "meta": {
+        "call_text": "'user with username {0} does not exist'.format(username)"
+      },
+      "to": "'user with username {0} does not exist'.format",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::get_user_by_username",
+      "meta": {
+        "call_text": "EntityDoesNotExist('user with username {0} does not exist'.format(username))"
+      },
+      "to": "EntityDoesNotExist",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::get_user_by_username",
+      "meta": {
+        "call_text": "UserInDB(**user_row)"
+      },
+      "to": "UserInDB",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::get_user_by_username",
+      "meta": {
+        "call_text": "queries.get_user_by_username(self.connection, username=username)"
+      },
+      "to": "queries.get_user_by_username",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::update_user",
+      "meta": {
+        "call_text": "queries.update_user_by_username(self.connection, username=user.username, new_username=user_in_db.username, new_email=user_in_db.email, new_salt=user_in_db.salt, new_password=user_in_db.hashed_password, new_bio=user_in_db.bio, new_image=user_in_db.image)"
+      },
+      "to": "queries.update_user_by_username",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::update_user",
+      "meta": {
+        "call_text": "self.connection.transaction()"
+      },
+      "to": "self.connection.transaction",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::update_user",
+      "meta": {
+        "call_text": "self.get_user_by_username(username=user.username)"
+      },
+      "to": "self.get_user_by_username",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::update_user",
+      "meta": {
+        "call_text": "user_in_db.change_password(password)"
+      },
+      "to": "user_in_db.change_password",
       "type": "calls"
     },
     {
@@ -1825,6 +2737,22 @@
       "type": "calls"
     },
     {
+      "from": "target/app/models/common.py::DateTimeModelMixin::default_datetime",
+      "meta": {
+        "call_text": "datetime.datetime.now()"
+      },
+      "to": "datetime.datetime.now",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/models/common.py::DateTimeModelMixin::default_datetime",
+      "meta": {
+        "call_text": "validator('created_at', 'updated_at', pre=True)"
+      },
+      "to": "validator",
+      "type": "calls"
+    },
+    {
       "from": "target/app/models/domain/rwmodel.py::convert_datetime_to_realworld",
       "meta": {
         "call_text": "dt.replace(tzinfo=datetime.timezone.utc)"
@@ -1878,6 +2806,30 @@
         "call_text": "word.capitalize()"
       },
       "to": "word.capitalize",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/models/domain/users.py::UserInDB::change_password",
+      "meta": {
+        "call_text": "security.generate_salt()"
+      },
+      "to": "security.generate_salt",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/models/domain/users.py::UserInDB::change_password",
+      "meta": {
+        "call_text": "security.get_password_hash(self.salt + password)"
+      },
+      "to": "security.get_password_hash",
+      "type": "calls"
+    },
+    {
+      "from": "target/app/models/domain/users.py::UserInDB::check_password",
+      "meta": {
+        "call_text": "security.verify_password(self.salt + password, self.hashed_password)"
+      },
+      "to": "security.verify_password",
       "type": "calls"
     },
     {
@@ -2099,6 +3051,11 @@
       "type": "contains"
     },
     {
+      "from": "target/app/api/dependencies/authentication.py::RWAPIKeyHeader",
+      "to": "target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__",
+      "type": "contains"
+    },
+    {
       "from": "target/app/api/dependencies/comments.py",
       "to": "target/app/api/dependencies/comments.py::check_comment_modification_permissions",
       "type": "contains"
@@ -2254,8 +3211,23 @@
       "type": "contains"
     },
     {
+      "from": "target/app/core/logging.py::InterceptHandler",
+      "to": "target/app/core/logging.py::InterceptHandler::emit",
+      "type": "contains"
+    },
+    {
       "from": "target/app/core/settings/app.py",
       "to": "target/app/core/settings/app.py::AppSettings",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/core/settings/app.py::AppSettings",
+      "to": "target/app/core/settings/app.py::AppSettings::configure_logging",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/core/settings/app.py::AppSettings",
+      "to": "target/app/core/settings/app.py::AppSettings::fastapi_kwargs",
       "type": "contains"
     },
     {
@@ -2334,8 +3306,88 @@
       "type": "contains"
     },
     {
+      "from": "target/app/db/queries/tables.py::Parameter",
+      "to": "target/app/db/queries/tables.py::Parameter::__init__",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/queries/tables.py::TypedTable",
+      "to": "target/app/db/queries/tables.py::TypedTable::__init__",
+      "type": "contains"
+    },
+    {
       "from": "target/app/db/repositories/articles.py",
       "to": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::__init__",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::_get_article_from_db_record",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::_link_article_with_tags",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::add_article_into_favorites",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::create_article",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::delete_article",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::get_article_by_slug",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::get_articles_for_user_feed",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::get_favorites_count_for_article_by_slug",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::get_tags_for_article_by_slug",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::is_article_favorited_by_user",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::remove_article_from_favorites",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "to": "target/app/db/repositories/articles.py::ArticlesRepository::update_article",
       "type": "contains"
     },
     {
@@ -2344,8 +3396,48 @@
       "type": "contains"
     },
     {
+      "from": "target/app/db/repositories/base.py::BaseRepository",
+      "to": "target/app/db/repositories/base.py::BaseRepository::__init__",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/base.py::BaseRepository",
+      "to": "target/app/db/repositories/base.py::BaseRepository::connection",
+      "type": "contains"
+    },
+    {
       "from": "target/app/db/repositories/comments.py",
       "to": "target/app/db/repositories/comments.py::CommentsRepository",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository",
+      "to": "target/app/db/repositories/comments.py::CommentsRepository::__init__",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository",
+      "to": "target/app/db/repositories/comments.py::CommentsRepository::_get_comment_from_db_record",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository",
+      "to": "target/app/db/repositories/comments.py::CommentsRepository::create_comment_for_article",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository",
+      "to": "target/app/db/repositories/comments.py::CommentsRepository::delete_comment",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository",
+      "to": "target/app/db/repositories/comments.py::CommentsRepository::get_comment_by_id",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository",
+      "to": "target/app/db/repositories/comments.py::CommentsRepository::get_comments_for_article",
       "type": "contains"
     },
     {
@@ -2354,13 +3446,68 @@
       "type": "contains"
     },
     {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository",
+      "to": "target/app/db/repositories/profiles.py::ProfilesRepository::__init__",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository",
+      "to": "target/app/db/repositories/profiles.py::ProfilesRepository::add_user_into_followers",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository",
+      "to": "target/app/db/repositories/profiles.py::ProfilesRepository::get_profile_by_username",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository",
+      "to": "target/app/db/repositories/profiles.py::ProfilesRepository::is_user_following_for_another_user",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/profiles.py::ProfilesRepository",
+      "to": "target/app/db/repositories/profiles.py::ProfilesRepository::remove_user_from_followers",
+      "type": "contains"
+    },
+    {
       "from": "target/app/db/repositories/tags.py",
       "to": "target/app/db/repositories/tags.py::TagsRepository",
       "type": "contains"
     },
     {
+      "from": "target/app/db/repositories/tags.py::TagsRepository",
+      "to": "target/app/db/repositories/tags.py::TagsRepository::create_tags_that_dont_exist",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/tags.py::TagsRepository",
+      "to": "target/app/db/repositories/tags.py::TagsRepository::get_all_tags",
+      "type": "contains"
+    },
+    {
       "from": "target/app/db/repositories/users.py",
       "to": "target/app/db/repositories/users.py::UsersRepository",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository",
+      "to": "target/app/db/repositories/users.py::UsersRepository::create_user",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository",
+      "to": "target/app/db/repositories/users.py::UsersRepository::get_user_by_email",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository",
+      "to": "target/app/db/repositories/users.py::UsersRepository::get_user_by_username",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository",
+      "to": "target/app/db/repositories/users.py::UsersRepository::update_user",
       "type": "contains"
     },
     {
@@ -2376,6 +3523,11 @@
     {
       "from": "target/app/models/common.py",
       "to": "target/app/models/common.py::IDModelMixin",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/common.py::DateTimeModelMixin",
+      "to": "target/app/models/common.py::DateTimeModelMixin::default_datetime",
       "type": "contains"
     },
     {
@@ -2416,6 +3568,16 @@
     {
       "from": "target/app/models/domain/users.py",
       "to": "target/app/models/domain/users.py::UserInDB",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/domain/users.py::UserInDB",
+      "to": "target/app/models/domain/users.py::UserInDB::change_password",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/domain/users.py::UserInDB",
+      "to": "target/app/models/domain/users.py::UserInDB::check_password",
       "type": "contains"
     },
     {
@@ -2578,7 +3740,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_article_by_slug_from_path",
+      "to": "target/app/api/dependencies/articles.py::get_article_by_slug_from_path",
       "type": "depends_on"
     },
     {
@@ -2586,23 +3748,25 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer()",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/dependencies/articles.py::get_article_by_slug_from_path",
       "meta": {
+        "factory_args": "required=False",
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer(required=False)",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/dependencies/articles.py::get_article_by_slug_from_path",
       "meta": {
+        "factory_args": "ArticlesRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(ArticlesRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2610,7 +3774,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_app_settings",
+      "to": "target/app/core/config.py::get_app_settings",
       "type": "depends_on"
     },
     {
@@ -2618,7 +3782,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_app_settings",
+      "to": "target/app/core/config.py::get_app_settings",
       "type": "depends_on"
     },
     {
@@ -2626,7 +3790,16 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:_get_authorization_header_retriever()",
+      "to": "target/app/api/dependencies/authentication.py::_get_authorization_header_retriever",
+      "type": "depends_on"
+    },
+    {
+      "from": "target/app/api/dependencies/authentication.py::_get_current_user",
+      "meta": {
+        "factory_args": "UsersRepository",
+        "via": "parameter"
+      },
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2634,15 +3807,25 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_app_settings",
+      "to": "target/app/core/config.py::get_app_settings",
       "type": "depends_on"
     },
     {
-      "from": "target/app/api/dependencies/authentication.py::_get_current_user",
+      "from": "target/app/api/dependencies/authentication.py::_get_current_user_optional",
       "meta": {
+        "factory_args": "required=False",
         "via": "parameter"
       },
-      "to": "external:get_repository(UsersRepository)",
+      "to": "target/app/api/dependencies/authentication.py::_get_authorization_header_retriever",
+      "type": "depends_on"
+    },
+    {
+      "from": "target/app/api/dependencies/authentication.py::_get_current_user_optional",
+      "meta": {
+        "factory_args": "UsersRepository",
+        "via": "parameter"
+      },
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2650,23 +3833,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:_get_authorization_header_retriever(required=False)",
-      "type": "depends_on"
-    },
-    {
-      "from": "target/app/api/dependencies/authentication.py::_get_current_user_optional",
-      "meta": {
-        "via": "parameter"
-      },
-      "to": "external:get_app_settings",
-      "type": "depends_on"
-    },
-    {
-      "from": "target/app/api/dependencies/authentication.py::_get_current_user_optional",
-      "meta": {
-        "via": "parameter"
-      },
-      "to": "external:get_repository(UsersRepository)",
+      "to": "target/app/core/config.py::get_app_settings",
       "type": "depends_on"
     },
     {
@@ -2674,7 +3841,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:authentication.get_current_user_authorizer()",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "type": "depends_on"
     },
     {
@@ -2682,7 +3849,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_comment_by_id_from_path",
+      "to": "target/app/api/dependencies/comments.py::get_comment_by_id_from_path",
       "type": "depends_on"
     },
     {
@@ -2690,23 +3857,25 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:articles.get_article_by_slug_from_path",
+      "to": "target/app/api/dependencies/articles.py::get_article_by_slug_from_path",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/dependencies/comments.py::get_comment_by_id_from_path",
       "meta": {
+        "factory_args": "required=False",
         "via": "parameter"
       },
-      "to": "external:authentication.get_current_user_authorizer(required=False)",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/dependencies/comments.py::get_comment_by_id_from_path",
       "meta": {
+        "factory_args": "CommentsRepository",
         "via": "parameter"
       },
-      "to": "external:database.get_repository(CommentsRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2714,23 +3883,25 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:_get_db_pool",
+      "to": "target/app/api/dependencies/database.py::_get_db_pool",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/dependencies/profiles.py::get_profile_by_username_from_path",
       "meta": {
+        "factory_args": "required=False",
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer(required=False)",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/dependencies/profiles.py::get_profile_by_username_from_path",
       "meta": {
+        "factory_args": "ProfilesRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(ProfilesRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2738,15 +3909,16 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer()",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/routes/articles/articles_common.py::get_articles_for_user_feed",
       "meta": {
+        "factory_args": "ArticlesRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(ArticlesRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2754,7 +3926,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_article_by_slug_from_path",
+      "to": "target/app/api/dependencies/articles.py::get_article_by_slug_from_path",
       "type": "depends_on"
     },
     {
@@ -2762,15 +3934,16 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer()",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/routes/articles/articles_common.py::mark_article_as_favorite",
       "meta": {
+        "factory_args": "ArticlesRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(ArticlesRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2778,7 +3951,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_article_by_slug_from_path",
+      "to": "target/app/api/dependencies/articles.py::get_article_by_slug_from_path",
       "type": "depends_on"
     },
     {
@@ -2786,15 +3959,16 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer()",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/routes/articles/articles_common.py::remove_article_from_favorites",
       "meta": {
+        "factory_args": "ArticlesRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(ArticlesRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2802,15 +3976,16 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer()",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/routes/articles/articles_resource.py::create_new_article",
       "meta": {
+        "factory_args": "ArticlesRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(ArticlesRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2818,7 +3993,7 @@
       "meta": {
         "via": "decorator"
       },
-      "to": "external:check_article_modification_permissions",
+      "to": "target/app/api/dependencies/articles.py::check_article_modification_permissions",
       "type": "depends_on"
     },
     {
@@ -2826,15 +4001,16 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_article_by_slug_from_path",
+      "to": "target/app/api/dependencies/articles.py::get_article_by_slug_from_path",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/routes/articles/articles_resource.py::delete_article_by_slug",
       "meta": {
+        "factory_args": "ArticlesRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(ArticlesRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2842,23 +4018,25 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_articles_filters",
+      "to": "target/app/api/dependencies/articles.py::get_articles_filters",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/routes/articles/articles_resource.py::list_articles",
       "meta": {
+        "factory_args": "required=False",
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer(required=False)",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/routes/articles/articles_resource.py::list_articles",
       "meta": {
+        "factory_args": "ArticlesRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(ArticlesRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2866,7 +4044,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_article_by_slug_from_path",
+      "to": "target/app/api/dependencies/articles.py::get_article_by_slug_from_path",
       "type": "depends_on"
     },
     {
@@ -2874,7 +4052,7 @@
       "meta": {
         "via": "decorator"
       },
-      "to": "external:check_article_modification_permissions",
+      "to": "target/app/api/dependencies/articles.py::check_article_modification_permissions",
       "type": "depends_on"
     },
     {
@@ -2882,15 +4060,25 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_article_by_slug_from_path",
+      "to": "target/app/api/dependencies/articles.py::get_article_by_slug_from_path",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/routes/articles/articles_resource.py::update_article_by_slug",
       "meta": {
+        "factory_args": "ArticlesRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(ArticlesRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
+      "type": "depends_on"
+    },
+    {
+      "from": "target/app/api/routes/authentication.py::login",
+      "meta": {
+        "factory_args": "UsersRepository",
+        "via": "parameter"
+      },
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2898,15 +4086,16 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_app_settings",
+      "to": "target/app/core/config.py::get_app_settings",
       "type": "depends_on"
     },
     {
-      "from": "target/app/api/routes/authentication.py::login",
+      "from": "target/app/api/routes/authentication.py::register",
       "meta": {
+        "factory_args": "UsersRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(UsersRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2914,15 +4103,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_app_settings",
-      "type": "depends_on"
-    },
-    {
-      "from": "target/app/api/routes/authentication.py::register",
-      "meta": {
-        "via": "parameter"
-      },
-      "to": "external:get_repository(UsersRepository)",
+      "to": "target/app/core/config.py::get_app_settings",
       "type": "depends_on"
     },
     {
@@ -2930,7 +4111,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_article_by_slug_from_path",
+      "to": "target/app/api/dependencies/articles.py::get_article_by_slug_from_path",
       "type": "depends_on"
     },
     {
@@ -2938,15 +4119,16 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer()",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/routes/comments.py::create_comment_for_article",
       "meta": {
+        "factory_args": "CommentsRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(CommentsRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2954,7 +4136,7 @@
       "meta": {
         "via": "decorator"
       },
-      "to": "external:check_comment_modification_permissions",
+      "to": "target/app/api/dependencies/comments.py::check_comment_modification_permissions",
       "type": "depends_on"
     },
     {
@@ -2962,15 +4144,16 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_comment_by_id_from_path",
+      "to": "target/app/api/dependencies/comments.py::get_comment_by_id_from_path",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/routes/comments.py::delete_comment_from_article",
       "meta": {
+        "factory_args": "CommentsRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(CommentsRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -2978,23 +4161,25 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_article_by_slug_from_path",
+      "to": "target/app/api/dependencies/articles.py::get_article_by_slug_from_path",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/routes/comments.py::list_comments_for_article",
       "meta": {
+        "factory_args": "required=False",
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer(required=False)",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/routes/comments.py::list_comments_for_article",
       "meta": {
+        "factory_args": "CommentsRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(CommentsRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -3002,7 +4187,16 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer()",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
+      "type": "depends_on"
+    },
+    {
+      "from": "target/app/api/routes/profiles.py::follow_for_user",
+      "meta": {
+        "factory_args": "ProfilesRepository",
+        "via": "parameter"
+      },
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -3010,15 +4204,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_profile_by_username_from_path",
-      "type": "depends_on"
-    },
-    {
-      "from": "target/app/api/routes/profiles.py::follow_for_user",
-      "meta": {
-        "via": "parameter"
-      },
-      "to": "external:get_repository(ProfilesRepository)",
+      "to": "target/app/api/dependencies/profiles.py::get_profile_by_username_from_path",
       "type": "depends_on"
     },
     {
@@ -3026,7 +4212,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_profile_by_username_from_path",
+      "to": "target/app/api/dependencies/profiles.py::get_profile_by_username_from_path",
       "type": "depends_on"
     },
     {
@@ -3034,7 +4220,16 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer()",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
+      "type": "depends_on"
+    },
+    {
+      "from": "target/app/api/routes/profiles.py::unsubscribe_from_user",
+      "meta": {
+        "factory_args": "ProfilesRepository",
+        "via": "parameter"
+      },
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -3042,23 +4237,16 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_profile_by_username_from_path",
-      "type": "depends_on"
-    },
-    {
-      "from": "target/app/api/routes/profiles.py::unsubscribe_from_user",
-      "meta": {
-        "via": "parameter"
-      },
-      "to": "external:get_repository(ProfilesRepository)",
+      "to": "target/app/api/dependencies/profiles.py::get_profile_by_username_from_path",
       "type": "depends_on"
     },
     {
       "from": "target/app/api/routes/tags.py::get_all_tags",
       "meta": {
+        "factory_args": "TagsRepository",
         "via": "parameter"
       },
-      "to": "external:get_repository(TagsRepository)",
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -3066,7 +4254,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_app_settings",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "type": "depends_on"
     },
     {
@@ -3074,7 +4262,7 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer()",
+      "to": "target/app/core/config.py::get_app_settings",
       "type": "depends_on"
     },
     {
@@ -3082,7 +4270,16 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_app_settings",
+      "to": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
+      "type": "depends_on"
+    },
+    {
+      "from": "target/app/api/routes/users.py::update_current_user",
+      "meta": {
+        "factory_args": "UsersRepository",
+        "via": "parameter"
+      },
+      "to": "target/app/api/dependencies/database.py::get_repository",
       "type": "depends_on"
     },
     {
@@ -3090,16 +4287,103 @@
       "meta": {
         "via": "parameter"
       },
-      "to": "external:get_current_user_authorizer()",
+      "to": "target/app/core/config.py::get_app_settings",
       "type": "depends_on"
     },
     {
-      "from": "target/app/api/routes/users.py::update_current_user",
-      "meta": {
-        "via": "parameter"
-      },
-      "to": "external:get_repository(UsersRepository)",
-      "type": "depends_on"
+      "from": "route:DELETE /api/articles/{slug}",
+      "to": "target/app/api/routes/articles/articles_resource.py::delete_article_by_slug",
+      "type": "handles"
+    },
+    {
+      "from": "route:DELETE /api/articles/{slug}/comments/{comment_id}",
+      "to": "target/app/api/routes/comments.py::delete_comment_from_article",
+      "type": "handles"
+    },
+    {
+      "from": "route:DELETE /api/articles/{slug}/favorite",
+      "to": "target/app/api/routes/articles/articles_common.py::remove_article_from_favorites",
+      "type": "handles"
+    },
+    {
+      "from": "route:DELETE /api/profiles/{username}/follow",
+      "to": "target/app/api/routes/profiles.py::unsubscribe_from_user",
+      "type": "handles"
+    },
+    {
+      "from": "route:GET /api/articles",
+      "to": "target/app/api/routes/articles/articles_resource.py::list_articles",
+      "type": "handles"
+    },
+    {
+      "from": "route:GET /api/articles/feed",
+      "to": "target/app/api/routes/articles/articles_common.py::get_articles_for_user_feed",
+      "type": "handles"
+    },
+    {
+      "from": "route:GET /api/articles/{slug}",
+      "to": "target/app/api/routes/articles/articles_resource.py::retrieve_article_by_slug",
+      "type": "handles"
+    },
+    {
+      "from": "route:GET /api/articles/{slug}/comments",
+      "to": "target/app/api/routes/comments.py::list_comments_for_article",
+      "type": "handles"
+    },
+    {
+      "from": "route:GET /api/profiles/{username}",
+      "to": "target/app/api/routes/profiles.py::retrieve_profile_by_username",
+      "type": "handles"
+    },
+    {
+      "from": "route:GET /api/tags",
+      "to": "target/app/api/routes/tags.py::get_all_tags",
+      "type": "handles"
+    },
+    {
+      "from": "route:GET /api/user",
+      "to": "target/app/api/routes/users.py::retrieve_current_user",
+      "type": "handles"
+    },
+    {
+      "from": "route:POST /api/articles",
+      "to": "target/app/api/routes/articles/articles_resource.py::create_new_article",
+      "type": "handles"
+    },
+    {
+      "from": "route:POST /api/articles/{slug}/comments",
+      "to": "target/app/api/routes/comments.py::create_comment_for_article",
+      "type": "handles"
+    },
+    {
+      "from": "route:POST /api/articles/{slug}/favorite",
+      "to": "target/app/api/routes/articles/articles_common.py::mark_article_as_favorite",
+      "type": "handles"
+    },
+    {
+      "from": "route:POST /api/profiles/{username}/follow",
+      "to": "target/app/api/routes/profiles.py::follow_for_user",
+      "type": "handles"
+    },
+    {
+      "from": "route:POST /api/users",
+      "to": "target/app/api/routes/authentication.py::register",
+      "type": "handles"
+    },
+    {
+      "from": "route:POST /api/users/login",
+      "to": "target/app/api/routes/authentication.py::login",
+      "type": "handles"
+    },
+    {
+      "from": "route:PUT /api/articles/{slug}",
+      "to": "target/app/api/routes/articles/articles_resource.py::update_article_by_slug",
+      "type": "handles"
+    },
+    {
+      "from": "route:PUT /api/user",
+      "to": "target/app/api/routes/users.py::update_current_user",
+      "type": "handles"
     },
     {
       "from": "target/app/api/dependencies/articles.py",
@@ -6183,6 +7467,14 @@
       "type": "raises"
     },
     {
+      "from": "target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__",
+      "meta": {
+        "args": "status_code=original_auth_exc.status_code, detail=strings.AUTHENTICATION_REQUIRED"
+      },
+      "to": "external:starlette.exceptions.HTTPException",
+      "type": "raises"
+    },
+    {
       "from": "target/app/api/dependencies/authentication.py::_get_authorization_header",
       "meta": {
         "args": "status_code=status.HTTP_403_FORBIDDEN, detail=strings.WRONG_TOKEN_PREFIX"
@@ -6337,6 +7629,38 @@
       "type": "raises"
     },
     {
+      "from": "target/app/db/repositories/articles.py::ArticlesRepository::get_article_by_slug",
+      "meta": {
+        "args": "'article with slug {0} does not exist'.format(slug)"
+      },
+      "to": "target/app/db/errors.py::EntityDoesNotExist",
+      "type": "raises"
+    },
+    {
+      "from": "target/app/db/repositories/comments.py::CommentsRepository::get_comment_by_id",
+      "meta": {
+        "args": "'comment with id {0} does not exist'.format(comment_id)"
+      },
+      "to": "target/app/db/errors.py::EntityDoesNotExist",
+      "type": "raises"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::get_user_by_email",
+      "meta": {
+        "args": "'user with email {0} does not exist'.format(email)"
+      },
+      "to": "target/app/db/errors.py::EntityDoesNotExist",
+      "type": "raises"
+    },
+    {
+      "from": "target/app/db/repositories/users.py::UsersRepository::get_user_by_username",
+      "meta": {
+        "args": "'user with username {0} does not exist'.format(username)"
+      },
+      "to": "target/app/db/errors.py::EntityDoesNotExist",
+      "type": "raises"
+    },
+    {
       "from": "target/app/services/jwt.py::get_username_from_token",
       "meta": {
         "args": "'malformed payload in token'"
@@ -6351,6 +7675,206 @@
       },
       "to": "external:ValueError",
       "type": "raises"
+    },
+    {
+      "from": "route:POST /api/articles",
+      "to": "external:Body_articles_create_article_api_articles_post",
+      "type": "request_model"
+    },
+    {
+      "from": "route:POST /api/articles/{slug}/comments",
+      "to": "external:Body_comments_create_comment_for_article_api_articles__slug__comments_post",
+      "type": "request_model"
+    },
+    {
+      "from": "route:POST /api/users",
+      "to": "external:Body_auth_register_api_users_post",
+      "type": "request_model"
+    },
+    {
+      "from": "route:POST /api/users/login",
+      "to": "external:Body_auth_login_api_users_login_post",
+      "type": "request_model"
+    },
+    {
+      "from": "route:PUT /api/articles/{slug}",
+      "to": "external:Body_articles_update_article_api_articles__slug__put",
+      "type": "request_model"
+    },
+    {
+      "from": "route:PUT /api/user",
+      "to": "external:Body_users_update_current_user_api_user_put",
+      "type": "request_model"
+    },
+    {
+      "from": "route:DELETE /api/articles/{slug}",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:DELETE /api/articles/{slug}/comments/{comment_id}",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:DELETE /api/articles/{slug}/favorite",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:DELETE /api/articles/{slug}/favorite",
+      "to": "target/app/models/schemas/articles.py::ArticleInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:DELETE /api/profiles/{username}/follow",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:DELETE /api/profiles/{username}/follow",
+      "to": "target/app/models/schemas/profiles.py::ProfileInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:GET /api/articles",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:GET /api/articles",
+      "to": "target/app/models/schemas/articles.py::ListOfArticlesInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:GET /api/articles/feed",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:GET /api/articles/feed",
+      "to": "target/app/models/schemas/articles.py::ListOfArticlesInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:GET /api/articles/{slug}",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:GET /api/articles/{slug}",
+      "to": "target/app/models/schemas/articles.py::ArticleInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:GET /api/articles/{slug}/comments",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:GET /api/articles/{slug}/comments",
+      "to": "target/app/models/schemas/comments.py::ListOfCommentsInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:GET /api/profiles/{username}",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:GET /api/profiles/{username}",
+      "to": "target/app/models/schemas/profiles.py::ProfileInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:GET /api/tags",
+      "to": "target/app/models/schemas/tags.py::TagsInList",
+      "type": "response_model"
+    },
+    {
+      "from": "route:GET /api/user",
+      "to": "target/app/models/schemas/users.py::UserInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:POST /api/articles",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:POST /api/articles",
+      "to": "target/app/models/schemas/articles.py::ArticleInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:POST /api/articles/{slug}/comments",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:POST /api/articles/{slug}/comments",
+      "to": "target/app/models/schemas/comments.py::CommentInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:POST /api/articles/{slug}/favorite",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:POST /api/articles/{slug}/favorite",
+      "to": "target/app/models/schemas/articles.py::ArticleInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:POST /api/profiles/{username}/follow",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:POST /api/profiles/{username}/follow",
+      "to": "target/app/models/schemas/profiles.py::ProfileInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:POST /api/users",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:POST /api/users",
+      "to": "target/app/models/schemas/users.py::UserInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:POST /api/users/login",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:POST /api/users/login",
+      "to": "target/app/models/schemas/users.py::UserInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:PUT /api/articles/{slug}",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:PUT /api/articles/{slug}",
+      "to": "target/app/models/schemas/articles.py::ArticleInResponse",
+      "type": "response_model"
+    },
+    {
+      "from": "route:PUT /api/user",
+      "to": "external:HTTPValidationError",
+      "type": "response_model"
+    },
+    {
+      "from": "route:PUT /api/user",
+      "to": "target/app/models/schemas/users.py::UserInResponse",
+      "type": "response_model"
     }
   ],
   "nodes": [
@@ -7171,6 +8695,291 @@
       "type": "external"
     },
     {
+      "file": "target/app/api/routes/articles/articles_resource.py",
+      "full_path": "/api/articles/{slug}",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:DELETE /api/articles/{slug}",
+      "lines": [
+        109,
+        120
+      ],
+      "method": "DELETE",
+      "name": "articles:delete-article",
+      "status_code": 204,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/comments.py",
+      "full_path": "/api/articles/{slug}/comments/{comment_id}",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:DELETE /api/articles/{slug}/comments/{comment_id}",
+      "lines": [
+        60,
+        71
+      ],
+      "method": "DELETE",
+      "name": "comments:delete-comment-from-article",
+      "status_code": 204,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/articles/articles_common.py",
+      "full_path": "/api/articles/{slug}/favorite",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:DELETE /api/articles/{slug}/favorite",
+      "lines": [
+        77,
+        104
+      ],
+      "method": "DELETE",
+      "name": "articles:unmark-article-favorite",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/profiles.py",
+      "full_path": "/api/profiles/{username}/follow",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:DELETE /api/profiles/{username}/follow",
+      "lines": [
+        57,
+        84
+      ],
+      "method": "DELETE",
+      "name": "profiles:unsubscribe-from-user",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/articles/articles_resource.py",
+      "full_path": "/api/articles",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:GET /api/articles",
+      "lines": [
+        30,
+        50
+      ],
+      "method": "GET",
+      "name": "articles:list-articles",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/articles/articles_common.py",
+      "full_path": "/api/articles/feed",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:GET /api/articles/feed",
+      "lines": [
+        22,
+        44
+      ],
+      "method": "GET",
+      "name": "articles:get-user-feed-articles",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/articles/articles_resource.py",
+      "full_path": "/api/articles/{slug}",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:GET /api/articles/{slug}",
+      "lines": [
+        82,
+        86
+      ],
+      "method": "GET",
+      "name": "articles:get-article",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/comments.py",
+      "full_path": "/api/articles/{slug}/comments",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:GET /api/articles/{slug}/comments",
+      "lines": [
+        26,
+        37
+      ],
+      "method": "GET",
+      "name": "comments:get-comments-for-article",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/profiles.py",
+      "full_path": "/api/profiles/{username}",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:GET /api/profiles/{username}",
+      "lines": [
+        16,
+        24
+      ],
+      "method": "GET",
+      "name": "profiles:get-profile",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/tags.py",
+      "full_path": "/api/tags",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:GET /api/tags",
+      "lines": [
+        10,
+        15
+      ],
+      "method": "GET",
+      "name": "tags:get-all",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/users.py",
+      "full_path": "/api/user",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:GET /api/user",
+      "lines": [
+        18,
+        35
+      ],
+      "method": "GET",
+      "name": "users:get-current-user",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/articles/articles_resource.py",
+      "full_path": "/api/articles",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:POST /api/articles",
+      "lines": [
+        53,
+        79
+      ],
+      "method": "POST",
+      "name": "articles:create-article",
+      "status_code": 201,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/comments.py",
+      "full_path": "/api/articles/{slug}/comments",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:POST /api/articles/{slug}/comments",
+      "lines": [
+        40,
+        57
+      ],
+      "method": "POST",
+      "name": "comments:create-comment-for-article",
+      "status_code": 201,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/articles/articles_common.py",
+      "full_path": "/api/articles/{slug}/favorite",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:POST /api/articles/{slug}/favorite",
+      "lines": [
+        47,
+        74
+      ],
+      "method": "POST",
+      "name": "articles:mark-article-favorite",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/profiles.py",
+      "full_path": "/api/profiles/{username}/follow",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:POST /api/profiles/{username}/follow",
+      "lines": [
+        27,
+        54
+      ],
+      "method": "POST",
+      "name": "profiles:follow-user",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/authentication.py",
+      "full_path": "/api/users",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:POST /api/users",
+      "lines": [
+        56,
+        93
+      ],
+      "method": "POST",
+      "name": "auth:register",
+      "status_code": 201,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/authentication.py",
+      "full_path": "/api/users/login",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:POST /api/users/login",
+      "lines": [
+        22,
+        53
+      ],
+      "method": "POST",
+      "name": "auth:login",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/articles/articles_resource.py",
+      "full_path": "/api/articles/{slug}",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:PUT /api/articles/{slug}",
+      "lines": [
+        89,
+        106
+      ],
+      "method": "PUT",
+      "name": "articles:update-article",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
+      "file": "target/app/api/routes/users.py",
+      "full_path": "/api/user",
+      "hash_source": "",
+      "hash_struct": "",
+      "id": "route:PUT /api/user",
+      "lines": [
+        38,
+        73
+      ],
+      "method": "PUT",
+      "name": "users:update-current-user",
+      "status_code": 200,
+      "type": "route"
+    },
+    {
       "file": "target/app/__init__.py",
       "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6",
@@ -7273,8 +9082,8 @@
         "APIKeyHeader"
       ],
       "file": "target/app/api/dependencies/authentication.py",
-      "hash_source": "2334aaac799fe602672a9e13c21871b9ac9ba46405e72a54002bd199e8d04069",
-      "hash_struct": "c4c24f5ca44bf2f265b50f1dbdaad7ea1e0bec858c2a5c158fb420a152417821",
+      "hash_source": "8ac58b752d6d8e20cadff3adb5422c59b256bd397f53f54af475f8b07b3e47a7",
+      "hash_struct": "ef54383e36b096ed1588f039be0dd306ebaca6f9449963a840f1ce59e46bb4c3",
       "id": "target/app/api/dependencies/authentication.py::RWAPIKeyHeader",
       "lines": [
         21,
@@ -7282,6 +9091,22 @@
       ],
       "name": "RWAPIKeyHeader",
       "type": "class"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/api/dependencies/authentication.py",
+      "hash_source": "75f5c1be7cbebb08f54700b0b8abc4d0ce329ebbee84bae567acad6d8bf1bbe5",
+      "hash_struct": "b5216d793eb36f42e784ec35f90e659d8755ba91fc7596321c5de313c74a7756",
+      "id": "target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__",
+      "lines": [
+        22,
+        32
+      ],
+      "name": "__call__",
+      "parent_class": "target/app/api/dependencies/authentication.py::RWAPIKeyHeader",
+      "returns": "Optional[str]",
+      "signature": "self, request: requests.Request",
+      "type": "function"
     },
     {
       "file": "target/app/api/dependencies/authentication.py",
@@ -8108,8 +9933,8 @@
         "logging.Handler"
       ],
       "file": "target/app/core/logging.py",
-      "hash_source": "3051e63f4b3afe9768955fc334fcb19a4fada844ec9111770c6e4a25e34d53bf",
-      "hash_struct": "1f2bf9c9c8ffb9943c793d0dc9afa44975a1184ca304f5e858202699433a6a53",
+      "hash_source": "39948381524bfe2509f15c1fd8b497aae9e70ed2c8cce59396621717bdc3fe35",
+      "hash_struct": "0252d29addd1412e3780fdab25d7e1202f34297e372ab71e5b3ced0e52f9c058",
       "id": "target/app/core/logging.py::InterceptHandler",
       "lines": [
         8,
@@ -8117,6 +9942,21 @@
       ],
       "name": "InterceptHandler",
       "type": "class"
+    },
+    {
+      "file": "target/app/core/logging.py",
+      "hash_source": "52fd85afc403bb0859a56bd7d0eaedc1286fcacae80beaee8904b800df17b1c4",
+      "hash_struct": "b45b86476a0ce1c3795a05173b91aa2bd0008ba6558b8e2f0a1a536fa7475aeb",
+      "id": "target/app/core/logging.py::InterceptHandler::emit",
+      "lines": [
+        9,
+        25
+      ],
+      "name": "emit",
+      "parent_class": "target/app/core/logging.py::InterceptHandler",
+      "returns": "None",
+      "signature": "self, record: logging.LogRecord",
+      "type": "function"
     },
     {
       "file": "target/app/core/settings/__init__.py",
@@ -8232,8 +10072,8 @@
         ]
       ],
       "file": "target/app/core/settings/app.py",
-      "hash_source": "9e6d94f3bf190c7c1157b5bbdbc4c47be0122f66989081a5070ec46da255feeb",
-      "hash_struct": "c47c5852b788ecb9f8fbb58f1fee5783d31d8129fb4bb05aca6ccd401229f271",
+      "hash_source": "f9c25fecad03af004392f4c216a1392c4c4bd1ca20fb0832a55780b76b9a2d6a",
+      "hash_struct": "f5b9934974ed180261dcc719557299e62759f3b537aaf66ac69800f843d869a3",
       "id": "target/app/core/settings/app.py::AppSettings",
       "is_pydantic_model": true,
       "lines": [
@@ -8242,6 +10082,39 @@
       ],
       "name": "AppSettings",
       "type": "class"
+    },
+    {
+      "file": "target/app/core/settings/app.py",
+      "hash_source": "87fafd73e780797e0eaa10320926cc0da8e25546d3635fee3196128af207775c",
+      "hash_struct": "a76da0933b74906f32143fe98a0592714489bfb6d4523317b94fe703fbdb47b3",
+      "id": "target/app/core/settings/app.py::AppSettings::configure_logging",
+      "lines": [
+        51,
+        57
+      ],
+      "name": "configure_logging",
+      "parent_class": "target/app/core/settings/app.py::AppSettings",
+      "returns": "None",
+      "signature": "self",
+      "type": "function"
+    },
+    {
+      "decorators": [
+        "property"
+      ],
+      "file": "target/app/core/settings/app.py",
+      "hash_source": "e865ef6a8e66cc1a336f2d56bce8eecc9ae3745f851d4e7d68d256ff72f9d783",
+      "hash_struct": "3b6e5ccc1a008153467385766c70570e173b6ead621e67ced8112d5fe45342e0",
+      "id": "target/app/core/settings/app.py::AppSettings::fastapi_kwargs",
+      "lines": [
+        39,
+        49
+      ],
+      "name": "fastapi_kwargs",
+      "parent_class": "target/app/core/settings/app.py::AppSettings",
+      "returns": "Dict[str, Any]",
+      "signature": "self",
+      "type": "function"
     },
     {
       "file": "target/app/core/settings/base.py",
@@ -8276,7 +10149,7 @@
         ]
       ],
       "file": "target/app/core/settings/base.py",
-      "hash_source": "f9810912ab05f3b74d4a13dcf066ddbfbde6104a434cec1607c9905669e7771c",
+      "hash_source": "c6141cfde2e240c6e85fc1daa9878acc39b945f4f6eff3f6516d676eee58a17e",
       "hash_struct": "f312a24be7cd5d22b473854a19a2415c41a67b7005924714149608bba24df253",
       "id": "target/app/core/settings/base.py::AppEnvTypes",
       "lines": [
@@ -8298,7 +10171,7 @@
         ]
       ],
       "file": "target/app/core/settings/base.py",
-      "hash_source": "f9810912ab05f3b74d4a13dcf066ddbfbde6104a434cec1607c9905669e7771c",
+      "hash_source": "e675fd09d51263c0eb750cbb752953cef69bd8fa05d9401a55ea1b8bebd6054e",
       "hash_struct": "82747747237f7df5760361efa3269003e4b68654d7745cf98b9f0fa9a9b2d643",
       "id": "target/app/core/settings/base.py::BaseAppSettings",
       "is_pydantic_model": true,
@@ -8412,7 +10285,7 @@
         ]
       ],
       "file": "target/app/core/settings/development.py",
-      "hash_source": "2fc15aa07237daa654697f0fdaa3fa8735e0bc2b59f6290f830ef4a653edf1e3",
+      "hash_source": "a8a6307de19eb5c88d9c111392ae9dc5b5e32d857d404d50f3855c5b4afb4cb7",
       "hash_struct": "a37a2c6e8224c9870b9254f8d71966045571ad37d0aa957d973625917bd7743d",
       "id": "target/app/core/settings/development.py::DevAppSettings",
       "is_pydantic_model": true,
@@ -8526,7 +10399,7 @@
         ]
       ],
       "file": "target/app/core/settings/production.py",
-      "hash_source": "948f12b7df450c4c3c0d0df84d793f438960ad21a5fa50e48d73eb34445f344b",
+      "hash_source": "3411ca2154ecb27d7fbe756652eb66f8cc3e0050e2254383ad74ab0762c59440",
       "hash_struct": "651b7af9bc770dba5a3c0005ad0c6c67b1703c674a6143142833b39a6cdc2db0",
       "id": "target/app/core/settings/production.py::ProdAppSettings",
       "is_pydantic_model": true,
@@ -8640,7 +10513,7 @@
         ]
       ],
       "file": "target/app/core/settings/test.py",
-      "hash_source": "eb5391801429d19d131d793553ac92946273d373739c4c2c632b43485953f9ba",
+      "hash_source": "b104a8ad7a249a3e988f335203bd68136bf89c5862fd66aa83c8106eecd34ee2",
       "hash_struct": "79681448509c545f4a4252a2f6bb27fff3e78727937656b8fd093448bfa6f10a",
       "id": "target/app/core/settings/test.py::TestAppSettings",
       "is_pydantic_model": true,
@@ -8810,7 +10683,7 @@
         ]
       ],
       "file": "target/app/db/queries/tables.py",
-      "hash_source": "25a1f6ec06cfae0c9aa103732f78a937edb527c3224224c5689d27287fb64fbd",
+      "hash_source": "11734acf441fb1f9f70b34535fbdebc9f3254946585fb7f5b1c7f0834c740fbe",
       "hash_struct": "b4750ba0cd4129435ebae3cababcd5d950393437f70dbb39bcb2006d20f5b9cd",
       "id": "target/app/db/queries/tables.py::Articles",
       "lines": [
@@ -8837,7 +10710,7 @@
         ]
       ],
       "file": "target/app/db/queries/tables.py",
-      "hash_source": "25a1f6ec06cfae0c9aa103732f78a937edb527c3224224c5689d27287fb64fbd",
+      "hash_source": "c02d310b188088ed2e29b465376b776cc4e0d7b834fe18807a5299f1f8e1cb8a",
       "hash_struct": "82df7a089164d3a6fa1837cc6b91923c1058aab86c4053bab6e30f514cc709d7",
       "id": "target/app/db/queries/tables.py::ArticlesToTags",
       "lines": [
@@ -8864,7 +10737,7 @@
         ]
       ],
       "file": "target/app/db/queries/tables.py",
-      "hash_source": "25a1f6ec06cfae0c9aa103732f78a937edb527c3224224c5689d27287fb64fbd",
+      "hash_source": "fbbf8577a3c78ea4db176d77b209730d2f471f36efbda4b8d67544e0d40a55d4",
       "hash_struct": "921f70ed16e3898d0a4cbd850e7c9ed4a2782b10f1b0c0dd617b4444a037fee9",
       "id": "target/app/db/queries/tables.py::Favorites",
       "lines": [
@@ -8879,8 +10752,8 @@
         "CommonParameter"
       ],
       "file": "target/app/db/queries/tables.py",
-      "hash_source": "25a1f6ec06cfae0c9aa103732f78a937edb527c3224224c5689d27287fb64fbd",
-      "hash_struct": "379d5d166c8ae30a602663befdff1114dc6769cf093851f793de26d71a2e816a",
+      "hash_source": "fea00b24f770a604623faa34467cbdf4d69754300e30e89163d2b77ee86c7308",
+      "hash_struct": "724dbc8568776c1d2f403521d2ff2576987646c29abc08631d7db00891502fd5",
       "id": "target/app/db/queries/tables.py::Parameter",
       "lines": [
         7,
@@ -8888,6 +10761,21 @@
       ],
       "name": "Parameter",
       "type": "class"
+    },
+    {
+      "file": "target/app/db/queries/tables.py",
+      "hash_source": "1abd873adc04882335fa1962ffbeb807a7dffcd1e860b1cc92d91c277e4b0e35",
+      "hash_struct": "5405e3e5502464a1dffbc12cb461f3fca287f25781d4831e7ff32dd229736c34",
+      "id": "target/app/db/queries/tables.py::Parameter::__init__",
+      "lines": [
+        8,
+        9
+      ],
+      "name": "__init__",
+      "parent_class": "target/app/db/queries/tables.py::Parameter",
+      "returns": "None",
+      "signature": "self, count: int",
+      "type": "function"
     },
     {
       "bases": [
@@ -8901,7 +10789,7 @@
         ]
       ],
       "file": "target/app/db/queries/tables.py",
-      "hash_source": "25a1f6ec06cfae0c9aa103732f78a937edb527c3224224c5689d27287fb64fbd",
+      "hash_source": "05ff04a293bb0d3ef60b4341d71760afb68026e29bbff1916897a09b0ff64514",
       "hash_struct": "00bf9e33178227826bb28e7f738f745115abf3ea36726765a0e49ae40c094590",
       "id": "target/app/db/queries/tables.py::Tags",
       "lines": [
@@ -8916,8 +10804,8 @@
         "Table"
       ],
       "file": "target/app/db/queries/tables.py",
-      "hash_source": "25a1f6ec06cfae0c9aa103732f78a937edb527c3224224c5689d27287fb64fbd",
-      "hash_struct": "670a8696d5ef03482e622ef88cbf33cb8b635bac21093d2245fa3cdf66f81f8c",
+      "hash_source": "12ee72f809ba4c7df09245afde537a5ce016a4941440d90b3194812d44d256fd",
+      "hash_struct": "b367deffae3f93e4f7e254e0832bc8045941e3d983b1cf6337a94d18544c15de",
       "id": "target/app/db/queries/tables.py::TypedTable",
       "lines": [
         12,
@@ -8925,6 +10813,21 @@
       ],
       "name": "TypedTable",
       "type": "class"
+    },
+    {
+      "file": "target/app/db/queries/tables.py",
+      "hash_source": "dce61c194afe90698829093fec7c9b642495539650ebca558730b60385876ea5",
+      "hash_struct": "c7726446727b450f87193f9745eaf68f85548bcb529b0d4e332207794c8dade2",
+      "id": "target/app/db/queries/tables.py::TypedTable::__init__",
+      "lines": [
+        15,
+        28
+      ],
+      "name": "__init__",
+      "parent_class": "target/app/db/queries/tables.py::TypedTable",
+      "returns": "None",
+      "signature": "self, name: Optional[str]=None, schema: Optional[str]=None, alias: Optional[str]=None, query_cls: Optional[Query]=None",
+      "type": "function"
     },
     {
       "bases": [
@@ -8943,7 +10846,7 @@
         ]
       ],
       "file": "target/app/db/queries/tables.py",
-      "hash_source": "25a1f6ec06cfae0c9aa103732f78a937edb527c3224224c5689d27287fb64fbd",
+      "hash_source": "e1c62c8884bb74818f852a02b2c69a52ba88de69e4563db6268085d742950c1f",
       "hash_struct": "d3edd79f45c98db9552dc43ef1e1360ad1fa442b3921a20225bfd9f18e6f30c8",
       "id": "target/app/db/queries/tables.py::Users",
       "lines": [
@@ -8980,8 +10883,8 @@
         "BaseRepository"
       ],
       "file": "target/app/db/repositories/articles.py",
-      "hash_source": "bb6d8c92e2acdcc3e11f9aa6e509e35b3a7cdb0366b58c35c1a2e6b0f9974fab",
-      "hash_struct": "c5bb1493c593c9d07f8159d8b568c37005b67999957c0e50a7852d35d17b408c",
+      "hash_source": "7128468072043c69d324b49994708f70966342ff7b17dbb2252d6dcc5b33b27f",
+      "hash_struct": "35bdc23a593c7bf1584bde5d2909b99320931eb345adafcdd8bcd561925e5ca2",
       "id": "target/app/db/repositories/articles.py::ArticlesRepository",
       "lines": [
         28,
@@ -8989,6 +10892,229 @@
       ],
       "name": "ArticlesRepository",
       "type": "class"
+    },
+    {
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "a7aeaff08a3c634ee8aa07199fce2ed545a06f430d6b1566c96f71eafa4eb8fb",
+      "hash_struct": "00d33ffc539968c0b02f755e2204a4c72a4ecbab9e8f7f3559de004c72f0573b",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::__init__",
+      "lines": [
+        29,
+        32
+      ],
+      "name": "__init__",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "None",
+      "signature": "self, conn: Connection",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "e69e069802828773043421ed9c37e4d4d8d184d21b6c37a34f051d26c93e2c2b",
+      "hash_struct": "2ec6a5e95ff430e01e6d437c752b410d2f5f90e03a11d546e839fff83cebd8e4",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::_get_article_from_db_record",
+      "lines": [
+        294,
+        324
+      ],
+      "name": "_get_article_from_db_record",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "Article",
+      "signature": "self, *, article_row: Record, slug: str, author_username: str, requested_user: Optional[User]",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "9325794dd5f7c50f0fc483d51553e9802ed810fb3c46edbd9adea8d24eb4764b",
+      "hash_struct": "48697bb886076fde8065543227a5a8225cb0a81db900b3f507b5f0351b06ed99",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::_link_article_with_tags",
+      "lines": [
+        326,
+        330
+      ],
+      "name": "_link_article_with_tags",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "None",
+      "signature": "self, *, slug: str, tags: Sequence[str]",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "43426debb371509ce497fb79fbd4d3e46d6761fbae5dd5bf5add71182a2d4431",
+      "hash_struct": "07434f98b5044de26ae1aeaf06b9ba4a40c4b0200b4d28132dc5220d18b46525",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::add_article_into_favorites",
+      "lines": [
+        275,
+        280
+      ],
+      "name": "add_article_into_favorites",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "None",
+      "signature": "self, *, article: Article, user: User",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "ac05f663684b2aefce2f76cf756e10a9d197de45e82468aed9301afece8e28e9",
+      "hash_struct": "982b98eefaddfb6acf8209bc69a73c0620792abc22934e1cd2b4ae39f9760a87",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::create_article",
+      "lines": [
+        34,
+        63
+      ],
+      "name": "create_article",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "Article",
+      "signature": "self, *, slug: str, title: str, description: str, body: str, author: User, tags: Optional[Sequence[str]]=None",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "637a6aecb3ea738c19ee1e3f089fd765d3f24a7409c588dd6120e13e63167e93",
+      "hash_struct": "37d73a7023b048e786be847575bc5aceaa5a52241cca8d7eb6e10d943fdcb4f8",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::delete_article",
+      "lines": [
+        93,
+        99
+      ],
+      "name": "delete_article",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "None",
+      "signature": "self, *, article: Article",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "cd1c02d1dd918bc4eb1c9b107b122a6f912629e3373794892b5f8e401e97097d",
+      "hash_struct": "71b32bf2ea4eca0ccc97074f4dc3d2312d74137f3e0e2aadb674f65176ec101b",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+      "lines": [
+        101,
+        212
+      ],
+      "name": "filter_articles",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "List[Article]",
+      "signature": "self, *, tag: Optional[str]=None, author: Optional[str]=None, favorited: Optional[str]=None, limit: int=20, offset: int=0, requested_user: Optional[User]=None",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "67025065d2b0a8fd12ddf9cbb294a83e8d02b4539f91e5b6fea407640e3c1b41",
+      "hash_struct": "ec2ecd3707ee9502a353d666985453a5cbd43042787afe49f5b40c9b8a4b0674",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::get_article_by_slug",
+      "lines": [
+        237,
+        252
+      ],
+      "name": "get_article_by_slug",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "Article",
+      "signature": "self, *, slug: str, requested_user: Optional[User]=None",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "e3abae5af42eba5388b1fd3facb016504ba565a25f31ce8819cd1a63bb15b9e3",
+      "hash_struct": "39d327e51ae0a3689115dbb94a3c6fbde6922e4fe1902d0070068ebf0c4f53f6",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::get_articles_for_user_feed",
+      "lines": [
+        214,
+        235
+      ],
+      "name": "get_articles_for_user_feed",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "List[Article]",
+      "signature": "self, *, user: User, limit: int=20, offset: int=0",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "73e58d3edb68e96e9e1cd69710cc98fcc69f1557abcaa4900b608385afa4cf89",
+      "hash_struct": "6adf6a98261ed162ea5e642d4e95da44bb6f4bf60da2178d1d04982c37627c56",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::get_favorites_count_for_article_by_slug",
+      "lines": [
+        261,
+        264
+      ],
+      "name": "get_favorites_count_for_article_by_slug",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "int",
+      "signature": "self, *, slug: str",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "1cd6652e77878f48534d848099ea8a8d64633bcda2e4066852b318536dcd2f37",
+      "hash_struct": "0697db62ae594e0a9a02fec43ea5b0940ac1e0a78bfe10f322ec6e222f101c40",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::get_tags_for_article_by_slug",
+      "lines": [
+        254,
+        259
+      ],
+      "name": "get_tags_for_article_by_slug",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "List[str]",
+      "signature": "self, *, slug: str",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "9d450d31d58fbf8595f1b66a58bfd53cd800bab857299085f40d0fb9778a0fdb",
+      "hash_struct": "34b916611b116da13d65c195f0a29aba5101d4a96258e076fed7a02ca01c806f",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::is_article_favorited_by_user",
+      "lines": [
+        266,
+        273
+      ],
+      "name": "is_article_favorited_by_user",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "bool",
+      "signature": "self, *, slug: str, user: User",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "785d2f453bacea0a7f10433b83809d04a1e90f5a63e79f33544e6f751272af06",
+      "hash_struct": "a5afad78a49a556d4f3655dd273fb047e9fcc2a3b0dab6ba7b187454cb448011",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::remove_article_from_favorites",
+      "lines": [
+        282,
+        292
+      ],
+      "name": "remove_article_from_favorites",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "None",
+      "signature": "self, *, article: Article, user: User",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/articles.py",
+      "hash_source": "bc17af55401c61c27ba47406a7db297f403eb2e0ae1f0a7b855c77f556f3fb7c",
+      "hash_struct": "f2e83adbd23aca0f7d731da030d2a2c3a465fdb7abe8aa1f26f1ff15e2ba0cbb",
+      "id": "target/app/db/repositories/articles.py::ArticlesRepository::update_article",
+      "lines": [
+        65,
+        91
+      ],
+      "name": "update_article",
+      "parent_class": "target/app/db/repositories/articles.py::ArticlesRepository",
+      "returns": "Article",
+      "signature": "self, *, article: Article, slug: Optional[str]=None, title: Optional[str]=None, body: Optional[str]=None, description: Optional[str]=None",
+      "type": "function"
     },
     {
       "file": "target/app/db/repositories/base.py",
@@ -9003,8 +11129,8 @@
     },
     {
       "file": "target/app/db/repositories/base.py",
-      "hash_source": "1bde2a49533b1c9982b3b9a163ccf9d7b181189145e70e645a14f92fb7aee643",
-      "hash_struct": "f2b8faa19bdf77d415af62903275ade209243283b778ab9be61051446601fd1b",
+      "hash_source": "0fb06ed394222e01e387e724d9374c8c5d46b68a70db92cef6eda81aa9f3ce22",
+      "hash_struct": "2756a9de10b8b284e8cd6a74c34d1d571310e1871c83197e283faa710d6f2ea6",
       "id": "target/app/db/repositories/base.py::BaseRepository",
       "lines": [
         4,
@@ -9012,6 +11138,39 @@
       ],
       "name": "BaseRepository",
       "type": "class"
+    },
+    {
+      "file": "target/app/db/repositories/base.py",
+      "hash_source": "7532ef7aa90155cbfcd47fd7aa6969d263b781299cc970e5c99fb73544342f5a",
+      "hash_struct": "00d33ffc539968c0b02f755e2204a4c72a4ecbab9e8f7f3559de004c72f0573b",
+      "id": "target/app/db/repositories/base.py::BaseRepository::__init__",
+      "lines": [
+        5,
+        6
+      ],
+      "name": "__init__",
+      "parent_class": "target/app/db/repositories/base.py::BaseRepository",
+      "returns": "None",
+      "signature": "self, conn: Connection",
+      "type": "function"
+    },
+    {
+      "decorators": [
+        "property"
+      ],
+      "file": "target/app/db/repositories/base.py",
+      "hash_source": "ee5b9c95520dde536721752278bd7abc63884e5db9d08549c28eda8d460a337e",
+      "hash_struct": "a15f5becf70606808a5d2afb0544b4407e3543bddde9790af26a4cf3a7af38cf",
+      "id": "target/app/db/repositories/base.py::BaseRepository::connection",
+      "lines": [
+        8,
+        10
+      ],
+      "name": "connection",
+      "parent_class": "target/app/db/repositories/base.py::BaseRepository",
+      "returns": "Connection",
+      "signature": "self",
+      "type": "function"
     },
     {
       "file": "target/app/db/repositories/comments.py",
@@ -9029,8 +11188,8 @@
         "BaseRepository"
       ],
       "file": "target/app/db/repositories/comments.py",
-      "hash_source": "800a81ac299c9038699d6e20fce2e7238f74ae7bb294c987e5874c7caa61303e",
-      "hash_struct": "80faf1a7a7fecd4dff71ea6d4648caa8a81408caa695816b39c23bdcf3a1d276",
+      "hash_source": "e352e42279f7e233516c3bc46f74a60f6792453204eaa5b69f1aa97cc2db4f27",
+      "hash_struct": "2323b2f083af545e4be39c57f08f552d5002c988a1a87659a692362b03e99ddb",
       "id": "target/app/db/repositories/comments.py::CommentsRepository",
       "lines": [
         14,
@@ -9038,6 +11197,101 @@
       ],
       "name": "CommentsRepository",
       "type": "class"
+    },
+    {
+      "file": "target/app/db/repositories/comments.py",
+      "hash_source": "4736d1e7e9038ce623e56b70577bdfcc550d9acd6dcdb0fbb72d267bd3eb45de",
+      "hash_struct": "00d33ffc539968c0b02f755e2204a4c72a4ecbab9e8f7f3559de004c72f0573b",
+      "id": "target/app/db/repositories/comments.py::CommentsRepository::__init__",
+      "lines": [
+        15,
+        17
+      ],
+      "name": "__init__",
+      "parent_class": "target/app/db/repositories/comments.py::CommentsRepository",
+      "returns": "None",
+      "signature": "self, conn: Connection",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/comments.py",
+      "hash_source": "21cda19305d56107a67b01dcdd7ebe6cb01393d4a919dad7d1c514ad3d0dc8bb",
+      "hash_struct": "a0d682bcf742f585c473d571f631fabaac79cd91532171ae4b8a107bdb6241b0",
+      "id": "target/app/db/repositories/comments.py::CommentsRepository::_get_comment_from_db_record",
+      "lines": [
+        87,
+        103
+      ],
+      "name": "_get_comment_from_db_record",
+      "parent_class": "target/app/db/repositories/comments.py::CommentsRepository",
+      "returns": "Comment",
+      "signature": "self, *, comment_row: Record, author_username: str, requested_user: Optional[User]",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/comments.py",
+      "hash_source": "7023563e9ca733d6e0decde56ddd040902fe5925a21421b9f3ca055fb1976deb",
+      "hash_struct": "2aefd40deefb49c226fdbbafad7cfd146b5fc12bef7e3ec17d0bd4a2bf866e1b",
+      "id": "target/app/db/repositories/comments.py::CommentsRepository::create_comment_for_article",
+      "lines": [
+        61,
+        78
+      ],
+      "name": "create_comment_for_article",
+      "parent_class": "target/app/db/repositories/comments.py::CommentsRepository",
+      "returns": "Comment",
+      "signature": "self, *, body: str, article: Article, user: User",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/comments.py",
+      "hash_source": "020c10d0e59d906605462f9600bc2434a978af6e9f4f66e17982279b7a16e941",
+      "hash_struct": "39b04d4113b7c9d467573ab69b8d3e671e042f0a804b7e14ba304b560957bb83",
+      "id": "target/app/db/repositories/comments.py::CommentsRepository::delete_comment",
+      "lines": [
+        80,
+        85
+      ],
+      "name": "delete_comment",
+      "parent_class": "target/app/db/repositories/comments.py::CommentsRepository",
+      "returns": "None",
+      "signature": "self, *, comment: Comment",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/comments.py",
+      "hash_source": "f4dc2d6d419609e4986fd347bce1b69321608e91412b653e84e53ab306295f28",
+      "hash_struct": "f42db00c62f1b77483f5b48e5aa089a81f56ecaeb5e78a6748e5cd1af26a22d7",
+      "id": "target/app/db/repositories/comments.py::CommentsRepository::get_comment_by_id",
+      "lines": [
+        19,
+        40
+      ],
+      "name": "get_comment_by_id",
+      "parent_class": "target/app/db/repositories/comments.py::CommentsRepository",
+      "returns": "Comment",
+      "signature": "self, *, comment_id: int, article: Article, user: Optional[User]=None",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/comments.py",
+      "hash_source": "ca2b223a75741f597300a07299b65b0738cf7de9caf3cec66d362680aa011ca3",
+      "hash_struct": "a7549bd4ce1b0e488796326dc3c1a71f68734054d37d069e47063179e7e8e777",
+      "id": "target/app/db/repositories/comments.py::CommentsRepository::get_comments_for_article",
+      "lines": [
+        42,
+        59
+      ],
+      "name": "get_comments_for_article",
+      "parent_class": "target/app/db/repositories/comments.py::CommentsRepository",
+      "returns": "List[Comment]",
+      "signature": "self, *, article: Article, user: Optional[User]=None",
+      "type": "function"
     },
     {
       "file": "target/app/db/repositories/profiles.py",
@@ -9055,8 +11309,8 @@
         "BaseRepository"
       ],
       "file": "target/app/db/repositories/profiles.py",
-      "hash_source": "227323a95db81aad101363d8b97e44a8e2f02613dc3ef08065186b273d2192cd",
-      "hash_struct": "8b72f3c8fc44a87720db20090ea036518aaa3cd885faeee1e324a0756109ccb1",
+      "hash_source": "888bd78981e75d6f0e1fd515ecd5ac321070a87df85e5e14b24727d1d50ae0d1",
+      "hash_struct": "1bd3288726f926fea08729f0ee058ef503b00f1b9599e2f92c8e3423cf0fe211",
       "id": "target/app/db/repositories/profiles.py::ProfilesRepository",
       "lines": [
         14,
@@ -9064,6 +11318,84 @@
       ],
       "name": "ProfilesRepository",
       "type": "class"
+    },
+    {
+      "file": "target/app/db/repositories/profiles.py",
+      "hash_source": "bdfc7c3a32ecee7d9e3ecb487d10c586ba5b0488fbd26f51c70494668d87fe6c",
+      "hash_struct": "1c2dacf29e0b8beb4ace27e60d7ed986cb61fb9f6dd4873596b715da4aef1c98",
+      "id": "target/app/db/repositories/profiles.py::ProfilesRepository::__init__",
+      "lines": [
+        15,
+        17
+      ],
+      "name": "__init__",
+      "parent_class": "target/app/db/repositories/profiles.py::ProfilesRepository",
+      "signature": "self, conn: Connection",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/profiles.py",
+      "hash_source": "e5bb890a8ec1d19f018d946d92f381005526b9f449b89d4835ee6c74c6429d98",
+      "hash_struct": "716dced557a3547fc7a4bd74074f6183f0e9a37fc8dad1f0054b751f44c0547b",
+      "id": "target/app/db/repositories/profiles.py::ProfilesRepository::add_user_into_followers",
+      "lines": [
+        50,
+        61
+      ],
+      "name": "add_user_into_followers",
+      "parent_class": "target/app/db/repositories/profiles.py::ProfilesRepository",
+      "returns": "None",
+      "signature": "self, *, target_user: UserLike, requested_user: UserLike",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/profiles.py",
+      "hash_source": "02c584cefc4f8a8af6751fd5f31dd6b3adb320b4a6e2f4fcbae1a4db9416c51c",
+      "hash_struct": "ad8edf69833396c02c31ce1ebf0430752354c9063435afc0d2873814b777dba3",
+      "id": "target/app/db/repositories/profiles.py::ProfilesRepository::get_profile_by_username",
+      "lines": [
+        19,
+        34
+      ],
+      "name": "get_profile_by_username",
+      "parent_class": "target/app/db/repositories/profiles.py::ProfilesRepository",
+      "returns": "Profile",
+      "signature": "self, *, username: str, requested_user: Optional[UserLike]",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/profiles.py",
+      "hash_source": "15abfaf58a942db3217cccfb731bd0cc866fbfdd2e6261fcb0581566b39759e3",
+      "hash_struct": "fb5356e749852d8e1ac676690101a662ea06332eab1bfb26674fc1ec060528c1",
+      "id": "target/app/db/repositories/profiles.py::ProfilesRepository::is_user_following_for_another_user",
+      "lines": [
+        36,
+        48
+      ],
+      "name": "is_user_following_for_another_user",
+      "parent_class": "target/app/db/repositories/profiles.py::ProfilesRepository",
+      "returns": "bool",
+      "signature": "self, *, target_user: UserLike, requested_user: UserLike",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/profiles.py",
+      "hash_source": "bd30c790f6ef7e856d955202e49f918e3377927385ba24fee7465ea0da421554",
+      "hash_struct": "ab40e748bcb083a0aab6f2cdadbadd991120b8126b284638c6cdea0e36fede96",
+      "id": "target/app/db/repositories/profiles.py::ProfilesRepository::remove_user_from_followers",
+      "lines": [
+        63,
+        74
+      ],
+      "name": "remove_user_from_followers",
+      "parent_class": "target/app/db/repositories/profiles.py::ProfilesRepository",
+      "returns": "None",
+      "signature": "self, *, target_user: UserLike, requested_user: UserLike",
+      "type": "function"
     },
     {
       "file": "target/app/db/repositories/tags.py",
@@ -9081,8 +11413,8 @@
         "BaseRepository"
       ],
       "file": "target/app/db/repositories/tags.py",
-      "hash_source": "c56388c9dc7f7e03b6d77b39cbe91de26f0cfdaefc69464b9efd85abbcf649d8",
-      "hash_struct": "f5413332cc39d319e876386f80345f383376f5d21027b840d21123f5cbd489a8",
+      "hash_source": "1a947273821fa0de201a342190ba90c56e1da01221d631b0325842d5caaa7edd",
+      "hash_struct": "afd8100e21a69823dd4be7002f95a3c58c84562d0dbd2df8c4d73ffe855c4845",
       "id": "target/app/db/repositories/tags.py::TagsRepository",
       "lines": [
         7,
@@ -9090,6 +11422,38 @@
       ],
       "name": "TagsRepository",
       "type": "class"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/tags.py",
+      "hash_source": "8fa44dbfdaa603dca76ac8ee3bbf9885ae620eccbe03ed8bca209b911a08be6b",
+      "hash_struct": "65f0fd74e0e060b2e16d36beee8dca03bb035a3a65fec228389a16fb062e756f",
+      "id": "target/app/db/repositories/tags.py::TagsRepository::create_tags_that_dont_exist",
+      "lines": [
+        12,
+        13
+      ],
+      "name": "create_tags_that_dont_exist",
+      "parent_class": "target/app/db/repositories/tags.py::TagsRepository",
+      "returns": "None",
+      "signature": "self, *, tags: Sequence[str]",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/tags.py",
+      "hash_source": "715901fc29c8844381bc84525a4d402517651da56562796667f32a9ea91c930b",
+      "hash_struct": "38c113808de567c115f9cff68cc9f9ed91ac283fcc1fa656f981acfdb67c3429",
+      "id": "target/app/db/repositories/tags.py::TagsRepository::get_all_tags",
+      "lines": [
+        8,
+        10
+      ],
+      "name": "get_all_tags",
+      "parent_class": "target/app/db/repositories/tags.py::TagsRepository",
+      "returns": "List[str]",
+      "signature": "self",
+      "type": "function"
     },
     {
       "file": "target/app/db/repositories/users.py",
@@ -9107,8 +11471,8 @@
         "BaseRepository"
       ],
       "file": "target/app/db/repositories/users.py",
-      "hash_source": "dcc803ef99968fefe5c7177250fbadb64e748686a318338cf915a1653777acaf",
-      "hash_struct": "358220e0fd53c655644b7e387606d6590fbcdf9e2ba1fe225af4521eb09bb944",
+      "hash_source": "cf419e80c30b54b4aa5af29fdc0cb9cd20d160804df3afb5563404534653cdd1",
+      "hash_struct": "03991652c3bcb5d7a56ce26753b63946c2fa2754da10fb254091fdbb04447b94",
       "id": "target/app/db/repositories/users.py::UsersRepository",
       "lines": [
         9,
@@ -9116,6 +11480,70 @@
       ],
       "name": "UsersRepository",
       "type": "class"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/users.py",
+      "hash_source": "54cf78174ebe794c21d96c0fe3bec80c3b1705892b36bd29f5b9f74c51f5b239",
+      "hash_struct": "477cdb07ed4c908512f41ff679d8eeba9ac9c8826a0a5ade5eec3010a7cc6354",
+      "id": "target/app/db/repositories/users.py::UsersRepository::create_user",
+      "lines": [
+        29,
+        48
+      ],
+      "name": "create_user",
+      "parent_class": "target/app/db/repositories/users.py::UsersRepository",
+      "returns": "UserInDB",
+      "signature": "self, *, username: str, email: str, password: str",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/users.py",
+      "hash_source": "460abd7885086d8b9b705e93971cf68a897186354cd308f25f7e7936bccc15ae",
+      "hash_struct": "e0468fed08208c56bdf3efec514200371e463e1c1e423f18c22e1a0d3f1f880b",
+      "id": "target/app/db/repositories/users.py::UsersRepository::get_user_by_email",
+      "lines": [
+        10,
+        15
+      ],
+      "name": "get_user_by_email",
+      "parent_class": "target/app/db/repositories/users.py::UsersRepository",
+      "returns": "UserInDB",
+      "signature": "self, *, email: str",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/users.py",
+      "hash_source": "dc363a093fe0126b9b9d136c5bf608328f27391253c9d1e74769f1cb3943e957",
+      "hash_struct": "6123ef45878c7a84d4d4394db15de3f09e15850e5863ff14b79b0413edb74f2e",
+      "id": "target/app/db/repositories/users.py::UsersRepository::get_user_by_username",
+      "lines": [
+        17,
+        27
+      ],
+      "name": "get_user_by_username",
+      "parent_class": "target/app/db/repositories/users.py::UsersRepository",
+      "returns": "UserInDB",
+      "signature": "self, *, username: str",
+      "type": "function"
+    },
+    {
+      "async_flag": true,
+      "file": "target/app/db/repositories/users.py",
+      "hash_source": "785fa4fb1660694e1539fed2ac5449454740a58f149c8540a73141d5b6eef651",
+      "hash_struct": "08299bcace8648cb9571eb583a6c21077c5f3a6a2b4dbfa21cf7a0062b1d33cd",
+      "id": "target/app/db/repositories/users.py::UsersRepository::update_user",
+      "lines": [
+        50,
+        81
+      ],
+      "name": "update_user",
+      "parent_class": "target/app/db/repositories/users.py::UsersRepository",
+      "returns": "UserInDB",
+      "signature": "self, *, user: User, username: Optional[str]=None, email: Optional[str]=None, password: Optional[str]=None, bio: Optional[str]=None, image: Optional[str]=None",
+      "type": "function"
     },
     {
       "file": "target/app/main.py",
@@ -9180,8 +11608,8 @@
         ]
       ],
       "file": "target/app/models/common.py",
-      "hash_source": "1893b8b0b5f075c086494114ccf60be33d16d2f7e55a2f57e99b22d49dbcc49d",
-      "hash_struct": "176683fc28d4191f9d8cf128d918da950eb8eb828395168bbc1a3dd3730646e6",
+      "hash_source": "8c4138c15f1b303548c1d325bc3fb921aacaf81c5ff8106e717a64eff151a752",
+      "hash_struct": "e669e50072089d9b47a14bf94f9d27370b17e619c7f48e8743229f328af8d45d",
       "id": "target/app/models/common.py::DateTimeModelMixin",
       "is_pydantic_model": true,
       "lines": [
@@ -9190,6 +11618,24 @@
       ],
       "name": "DateTimeModelMixin",
       "type": "class"
+    },
+    {
+      "decorators": [
+        "validator('created_at', 'updated_at', pre=True)"
+      ],
+      "file": "target/app/models/common.py",
+      "hash_source": "c65bab1ff4673c84314378c62d8c992127cc36ddcb38b1a434605ae69a8804b2",
+      "hash_struct": "7d6c31dc64238ea3f3feb225a17ad243b9cfb15c3772d6cfcfff2d3194fbe5a5",
+      "id": "target/app/models/common.py::DateTimeModelMixin::default_datetime",
+      "lines": [
+        10,
+        15
+      ],
+      "name": "default_datetime",
+      "parent_class": "target/app/models/common.py::DateTimeModelMixin",
+      "returns": "datetime.datetime",
+      "signature": "cls, value: datetime.datetime",
+      "type": "function"
     },
     {
       "bases": [
@@ -9203,7 +11649,7 @@
         ]
       ],
       "file": "target/app/models/common.py",
-      "hash_source": "1893b8b0b5f075c086494114ccf60be33d16d2f7e55a2f57e99b22d49dbcc49d",
+      "hash_source": "b60332aa234aec9d31c00b49c18c37248a85d33c661c6ee09134c3fe97eda67c",
       "hash_struct": "ece0b03c4cd1d8b4eb9be230e3ffa033002fa0dabe0afbf9c4df8c7340bcd427",
       "id": "target/app/models/common.py::IDModelMixin",
       "is_pydantic_model": true,
@@ -9300,7 +11746,7 @@
         ]
       ],
       "file": "target/app/models/domain/articles.py",
-      "hash_source": "c868e01fa6d4f4352d893b106ad6f13a7cbdf0780bdb3be3525315a216c74589",
+      "hash_source": "8c6062448c24e08a1d75a0488177404de01d0e7e999eb582cdd67be6a09b4e76",
       "hash_struct": "0b03c7b804353e2a3de335635ff5184516af96c02440f772667c79782e5c548b",
       "id": "target/app/models/domain/articles.py::Article",
       "is_pydantic_model": true,
@@ -9356,7 +11802,7 @@
         ]
       ],
       "file": "target/app/models/domain/comments.py",
-      "hash_source": "c81cf6b2e3f0dc15a15c65478057229b0fe5eb5f0a704474c375e825d5f2cf3f",
+      "hash_source": "a6720c9912a64fafe9e55af54e3ab8f2358cb83277bac92ad4d8d81fb48d0636",
       "hash_struct": "6fef1f96c2d467990eaf2bd71db11962366ad09d5673ee197e22c1dd24fe5fba",
       "id": "target/app/models/domain/comments.py::Comment",
       "is_pydantic_model": true,
@@ -9405,7 +11851,7 @@
         ]
       ],
       "file": "target/app/models/domain/profiles.py",
-      "hash_source": "c452b81e01b55fec67ebd836bb4a1715f2461794b2a3a30a0c6f77f897b7a269",
+      "hash_source": "24fdef84de4cd3250fb09f1e619289fe8d0f706286e4d27e30b11ab2d9bc2e44",
       "hash_struct": "a954e8bae6d0b6b7f227efba4508cee1de9ed929dd0680a091a4fa0144236740",
       "id": "target/app/models/domain/profiles.py::Profile",
       "is_pydantic_model": true,
@@ -9432,7 +11878,7 @@
         "BaseModel"
       ],
       "file": "target/app/models/domain/rwmodel.py",
-      "hash_source": "b3c784163f187ce8e36b97c74d9723d81635b56453e4ccf98da0ef5d0b4e6045",
+      "hash_source": "313f6202a6837e76f42ab074dec9e061849d15bb21ee6f86c5933e57abf75818",
       "hash_struct": "b4d78f5d696b9f086ac9923dd6923076d8baa99ad7b1d5edfdcd604c4fd7e185",
       "id": "target/app/models/domain/rwmodel.py::RWModel",
       "is_pydantic_model": true,
@@ -9509,7 +11955,7 @@
         ]
       ],
       "file": "target/app/models/domain/users.py",
-      "hash_source": "2d2969de250f220f341656165a67c2358d29d476d476707c47785400298d92d1",
+      "hash_source": "0a4cb6af3d74fca7a55fe596259e9ffecd1bcd201a50c07bc00181021260d2ce",
       "hash_struct": "06c2830374f75155f3aea40d8afb2e513a6c767bb4787502bf90309417290361",
       "id": "target/app/models/domain/users.py::User",
       "is_pydantic_model": true,
@@ -9574,8 +12020,8 @@
         ]
       ],
       "file": "target/app/models/domain/users.py",
-      "hash_source": "2d2969de250f220f341656165a67c2358d29d476d476707c47785400298d92d1",
-      "hash_struct": "dc3ae548676c293e6ad6c63c9182efd407100d2807636cd331819732e73f1e5b",
+      "hash_source": "4eba39917afb3e9c8ebe420579fdcf5829c95d65686b3be746001df89eb91b23",
+      "hash_struct": "30138030022f8dbb7d3774b32267e4099e819612a822172cce3fa5b04faa5042",
       "id": "target/app/models/domain/users.py::UserInDB",
       "is_pydantic_model": true,
       "lines": [
@@ -9584,6 +12030,36 @@
       ],
       "name": "UserInDB",
       "type": "class"
+    },
+    {
+      "file": "target/app/models/domain/users.py",
+      "hash_source": "32e5d89c1a3d2abb126142752eb346d0a8dae27e33167f8ddde632a80a79c362",
+      "hash_struct": "f1b23ba2eafa8c1257330a52a43ee0869dc55f483519ffcb5487c7f2c30644dd",
+      "id": "target/app/models/domain/users.py::UserInDB::change_password",
+      "lines": [
+        22,
+        24
+      ],
+      "name": "change_password",
+      "parent_class": "target/app/models/domain/users.py::UserInDB",
+      "returns": "None",
+      "signature": "self, password: str",
+      "type": "function"
+    },
+    {
+      "file": "target/app/models/domain/users.py",
+      "hash_source": "a04dbec01822dc906e07e7f6987b9fbe043a3e89eeee5b1f9972fa3bb0bb3719",
+      "hash_struct": "656ab35cac5ae60270adc7b269eb76b33dd5b82ffc43ae284d507a7f2831cbc1",
+      "id": "target/app/models/domain/users.py::UserInDB::check_password",
+      "lines": [
+        19,
+        20
+      ],
+      "name": "check_password",
+      "parent_class": "target/app/models/domain/users.py::UserInDB",
+      "returns": "bool",
+      "signature": "self, password: str",
+      "type": "function"
     },
     {
       "file": "target/app/models/schemas/__init__.py",
@@ -9670,7 +12146,7 @@
         ]
       ],
       "file": "target/app/models/schemas/articles.py",
-      "hash_source": "7348977a78615832911bb5ca15f4a4193b7e52f894b311d691121d75a97a53ec",
+      "hash_source": "bd9402ea0604fae11fdeff5e3b31eb5f2d6eb1aa0de938db1c9288803eea1120",
       "hash_struct": "260451d65fe017c869dbf384e3caeedc577ee7dcdb7949fe56fedc75c8b12ae5",
       "id": "target/app/models/schemas/articles.py::ArticleForResponse",
       "is_pydantic_model": true,
@@ -9708,7 +12184,7 @@
         ]
       ],
       "file": "target/app/models/schemas/articles.py",
-      "hash_source": "7348977a78615832911bb5ca15f4a4193b7e52f894b311d691121d75a97a53ec",
+      "hash_source": "703616f8ef112baed2e63c65c1d9967eaf965b7c748dbbb01c8d654df3cd386f",
       "hash_struct": "dce4c42bf96858d2e3d73f1812349313c61017571683cc1d9ed1451c3804bad2",
       "id": "target/app/models/schemas/articles.py::ArticleInCreate",
       "is_pydantic_model": true,
@@ -9731,7 +12207,7 @@
         ]
       ],
       "file": "target/app/models/schemas/articles.py",
-      "hash_source": "7348977a78615832911bb5ca15f4a4193b7e52f894b311d691121d75a97a53ec",
+      "hash_source": "c7e1a1589bc2d912e5a0bda101093f2c1d522270416d1934fa401a29e8b79281",
       "hash_struct": "b819b3e23fa5bcfc870ab79d217f5807c19ec7020098e8013f465edf8f29faec",
       "id": "target/app/models/schemas/articles.py::ArticleInResponse",
       "is_pydantic_model": true,
@@ -9764,7 +12240,7 @@
         ]
       ],
       "file": "target/app/models/schemas/articles.py",
-      "hash_source": "7348977a78615832911bb5ca15f4a4193b7e52f894b311d691121d75a97a53ec",
+      "hash_source": "a3e7c5b8ba03f0abc3f26e35be3939c6f0e6f3b5a04a8b64d0a3c0eaaff40c4f",
       "hash_struct": "e9f81d5e916ad643de866ad5d77499bb498d767a377ce8755eb507749e5fa128",
       "id": "target/app/models/schemas/articles.py::ArticleInUpdate",
       "is_pydantic_model": true,
@@ -9807,7 +12283,7 @@
         ]
       ],
       "file": "target/app/models/schemas/articles.py",
-      "hash_source": "7348977a78615832911bb5ca15f4a4193b7e52f894b311d691121d75a97a53ec",
+      "hash_source": "4c2b2202f4b6b58a79492ec2186c0f453ab6009f215b23bf92518c75ff1dd552",
       "hash_struct": "37d492df64ad43719ee4e61ee2b2fa57c708e7f033e17e14c258b40b25170169",
       "id": "target/app/models/schemas/articles.py::ArticlesFilters",
       "is_pydantic_model": true,
@@ -9835,7 +12311,7 @@
         ]
       ],
       "file": "target/app/models/schemas/articles.py",
-      "hash_source": "7348977a78615832911bb5ca15f4a4193b7e52f894b311d691121d75a97a53ec",
+      "hash_source": "70c5a842c8797a1bd42a1263e9a5842af6bd80f090de66b9a73d8f472da0fae3",
       "hash_struct": "a8493044bd1039deb18fe1f88127b3d662c76d1367b7d35cdae43053d7a268d5",
       "id": "target/app/models/schemas/articles.py::ListOfArticlesInResponse",
       "is_pydantic_model": true,
@@ -9869,7 +12345,7 @@
         ]
       ],
       "file": "target/app/models/schemas/comments.py",
-      "hash_source": "3ac1b7a60b44c8070fff6c78f6efcc6d8a5847cbb31ee9e370b2b1e2a9b13334",
+      "hash_source": "a9869cc9f6a61cc2dea9411eb5b2a8bbf0f1ef0525523df4932740b49aab28a4",
       "hash_struct": "06dac021bd525cebc51c6117bb782563ae29170d31f81e159fb6edebf778baf8",
       "id": "target/app/models/schemas/comments.py::CommentInCreate",
       "is_pydantic_model": true,
@@ -9892,7 +12368,7 @@
         ]
       ],
       "file": "target/app/models/schemas/comments.py",
-      "hash_source": "3ac1b7a60b44c8070fff6c78f6efcc6d8a5847cbb31ee9e370b2b1e2a9b13334",
+      "hash_source": "c1be75aebde706727b48125ff4b88b3d978936e7510a55c284882f37145e68b1",
       "hash_struct": "25f484f7aecc97b11a834583c11b87c63262f85fc1eadbb101c77a7cab9b71c2",
       "id": "target/app/models/schemas/comments.py::CommentInResponse",
       "is_pydantic_model": true,
@@ -9915,7 +12391,7 @@
         ]
       ],
       "file": "target/app/models/schemas/comments.py",
-      "hash_source": "3ac1b7a60b44c8070fff6c78f6efcc6d8a5847cbb31ee9e370b2b1e2a9b13334",
+      "hash_source": "336751a8e56bdfa348b1e31bb2dfa2d7b535d5b7607311dc43bd3aefbd2a6f61",
       "hash_struct": "1f0b8bee445c55ee4bc24adaedab70383dd5927f5f3214f5af35536df8578651",
       "id": "target/app/models/schemas/comments.py::ListOfCommentsInResponse",
       "is_pydantic_model": true,
@@ -9954,7 +12430,7 @@
         ]
       ],
       "file": "target/app/models/schemas/jwt.py",
-      "hash_source": "a632220dd76e1e98beb8518c92ca535b6e9d6b0f2d3b4cfefd43cc1aed980654",
+      "hash_source": "d57dd8b4b6d4de7bc04f1bc6cfd622d113e086c6648feeac7d05f762668e0d6a",
       "hash_struct": "896ffa74c6b941da44c358f68c44cc6381a56faeed542d3d9fd3dfd054d2d93a",
       "id": "target/app/models/schemas/jwt.py::JWTMeta",
       "is_pydantic_model": true,
@@ -9977,7 +12453,7 @@
         ]
       ],
       "file": "target/app/models/schemas/jwt.py",
-      "hash_source": "a632220dd76e1e98beb8518c92ca535b6e9d6b0f2d3b4cfefd43cc1aed980654",
+      "hash_source": "36e9d5edfd4f2754521cfbee330d696d23ccf5387949a9165cb86fb6b4c5f58a",
       "hash_struct": "b7fb38c57cc51dec673668ae76b2c49bd58f5a86ec7439fcbf12f7bf022045b7",
       "id": "target/app/models/schemas/jwt.py::JWTUser",
       "is_pydantic_model": true,
@@ -10011,7 +12487,7 @@
         ]
       ],
       "file": "target/app/models/schemas/profiles.py",
-      "hash_source": "ab317f6e14904bc880ddca3949fb690bd758d18533a09960175e84dedecd4e91",
+      "hash_source": "6bb3dc80243183e88a4cae3f2d66844b021e6f70475c3a5aaadf94744da7e474",
       "hash_struct": "c9b12561978970a6ec622488dd56b99bb96bed000202a0b6869160a2f02f7e3a",
       "id": "target/app/models/schemas/profiles.py::ProfileInResponse",
       "is_pydantic_model": true,
@@ -10038,7 +12514,7 @@
         "RWModel"
       ],
       "file": "target/app/models/schemas/rwschema.py",
-      "hash_source": "790ec9b6a976de9c95cab59b82089bf9477d4b32fd6c75cdbe6299b725df8307",
+      "hash_source": "c297ee15a377d3cf049a153c13343f1b950777eb9b08f71859af35a7179ad37a",
       "hash_struct": "0ed196c5b58df9860ce75cdc7a93e035795cc8e44d0a092eedb5b49efdd4de36",
       "id": "target/app/models/schemas/rwschema.py::RWSchema",
       "is_pydantic_model": true,
@@ -10072,7 +12548,7 @@
         ]
       ],
       "file": "target/app/models/schemas/tags.py",
-      "hash_source": "e2ae33012d4ec9b0c1d613121b3e6f9724d104cf4e3f13123c7a24a2394d50db",
+      "hash_source": "cf5699409695640a75e48d4f14518aa50650bc78674fc8c74e61509b641dc587",
       "hash_struct": "8f16183ef28ed71b695d774696204b7786d2c9549dfb4204971c4bf8720dca27",
       "id": "target/app/models/schemas/tags.py::TagsInList",
       "is_pydantic_model": true,
@@ -10116,7 +12592,7 @@
         ]
       ],
       "file": "target/app/models/schemas/users.py",
-      "hash_source": "a8c8767811e1840ffd6cb31770e2eb1b83466a23b049147f54ee9d04cffbcc74",
+      "hash_source": "231dc03c0635acb26a7ea3a8c42050f977aa39efb4d833cea49382206b41bc23",
       "hash_struct": "edf68f71608036f5aff8dafd1240c01037d0e4157747639ea999d0bbe57e2237",
       "id": "target/app/models/schemas/users.py::UserInCreate",
       "is_pydantic_model": true,
@@ -10144,7 +12620,7 @@
         ]
       ],
       "file": "target/app/models/schemas/users.py",
-      "hash_source": "a8c8767811e1840ffd6cb31770e2eb1b83466a23b049147f54ee9d04cffbcc74",
+      "hash_source": "970c5df40365ccc530970931f30f07f67f16bb5a954d445a52efe512382dae1d",
       "hash_struct": "f116262b98a478da81ac06f7e5e8a4d9a2903d41e612d389b16afb8509ea24e4",
       "id": "target/app/models/schemas/users.py::UserInLogin",
       "is_pydantic_model": true,
@@ -10167,7 +12643,7 @@
         ]
       ],
       "file": "target/app/models/schemas/users.py",
-      "hash_source": "a8c8767811e1840ffd6cb31770e2eb1b83466a23b049147f54ee9d04cffbcc74",
+      "hash_source": "73712309eec556347a69a7af2d7e0c5001a97f472c891d110f512cc4dde6610f",
       "hash_struct": "502da87b818d73204cc606dfaa3e36f98317ac2d29a42ac68d692e65dfa385eb",
       "id": "target/app/models/schemas/users.py::UserInResponse",
       "is_pydantic_model": true,
@@ -10210,7 +12686,7 @@
         ]
       ],
       "file": "target/app/models/schemas/users.py",
-      "hash_source": "a8c8767811e1840ffd6cb31770e2eb1b83466a23b049147f54ee9d04cffbcc74",
+      "hash_source": "eb3ab4a22fe4db652d7f0d398181515e1732dea813b383e26e2e33fd337bd7f9",
       "hash_struct": "8476a9d5187ebec578384a791eced7e7b5a77678281b7c42850b22dc7cb83201",
       "id": "target/app/models/schemas/users.py::UserInUpdate",
       "is_pydantic_model": true,
@@ -10253,7 +12729,7 @@
         ]
       ],
       "file": "target/app/models/schemas/users.py",
-      "hash_source": "a8c8767811e1840ffd6cb31770e2eb1b83466a23b049147f54ee9d04cffbcc74",
+      "hash_source": "c8ddf7212bbbb74e46cbef3cf14b20fa8553da1b4a361ad3b7a02ae7f249db5e",
       "hash_struct": "185bd708720aae0c19a34f7368661d15ecdcff75513df45d4a94642e7fe91e48",
       "id": "target/app/models/schemas/users.py::UserWithToken",
       "is_pydantic_model": true,
