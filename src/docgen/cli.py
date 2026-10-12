@@ -244,7 +244,7 @@ def _run_summarize(args: argparse.Namespace) -> None:
     hierarchy is task 2b.3).
     """
     from docgen.config import load_config
-    from docgen.facts.schema import NodeType
+    from docgen.facts.schema import EdgeType, NodeType
     from docgen.facts.store import _node_to_dict, read_facts
     from docgen.summarize.base import StubSummarizer, SummaryRequest
     from docgen.summarize.manual import ManualSummarizer
@@ -278,6 +278,28 @@ def _run_summarize(args: argparse.Namespace) -> None:
     )
 
     summarizable = {NodeType.FUNCTION, NodeType.CLASS, NodeType.MODULE}
+    relevant_edge_types = {
+        EdgeType.RAISES,
+        EdgeType.DEPENDS_ON,
+        EdgeType.CALLS,
+        EdgeType.INHERITS,
+    }
+
+    # Index the relational edges a summarizer may cite, keyed by the emitting node.
+    # FactGraph sorts its edges, so each list is deterministic. Non-relational edge
+    # types (contains, imports, handles, …) are intentionally dropped.
+    edges_by_from: dict[str, list] = {}
+    for edge in graph.edges:
+        if edge.type in relevant_edge_types:
+            edges_by_from.setdefault(edge.from_id, []).append(
+                {
+                    "type": edge.type.value,
+                    "from": edge.from_id,
+                    "to": edge.to_id,
+                    "meta": dict(edge.meta),
+                }
+            )
+
     results = []
     for node in graph.nodes:
         if node.type not in summarizable:
@@ -288,6 +310,7 @@ def _run_summarize(args: argparse.Namespace) -> None:
             facts=_node_to_dict(node),
             source_text=_read_source_text(repo_root, node),
             child_summaries=[],
+            edges=edges_by_from.get(node.id, []),
         )
         results.append(summarizer.summarize(req))
 

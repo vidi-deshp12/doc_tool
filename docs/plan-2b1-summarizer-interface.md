@@ -224,3 +224,39 @@ summarizer, write `summaries.json`. For 2b.1 this is flat (no hierarchy).
 | `tests/test_summarize.py` | **New** — 8 tests |
 
 `src/docgen/summarize/hierarchy.py`, `prompts.py`, `citations.py`, `bob_shell.py` — **unchanged** (not in scope for 2b.1).
+
+---
+
+## Addendum (Oct 11): Edge enrichment of `SummaryRequest`
+
+**Why.** 2b.1's `SummaryRequest` carried only the node's own facts, its `source_text`, and
+child summaries. That limits what a summary can *cite*: the model could cite the node
+itself, its module, and its enclosing class, but not the richer relational facts already in
+`facts.json` — `raises` (exceptions thrown), `depends_on` (dependencies / auth / DB
+access), `calls` (what it calls), and `inherits` (base classes). Passing those edges in lets
+2b.2's prompts hand the model real citation targets, so summaries are grounded better.
+
+**Change (3 files).**
+
+1. `src/docgen/summarize/base.py` — add a field to `SummaryRequest`:
+   `edges: list[dict] = field(default_factory=list)`, carrying edge dicts in the same shape
+   as `facts.json` (`{"type", "from", "to", "meta"?}`). Appended after `child_summaries` so
+   positional construction is unaffected and the field is optional.
+
+2. `src/docgen/cli.py` (`_run_summarize`) — before the node loop, index the graph's edges by
+   `from_id`, retaining only `raises`, `depends_on`, `calls`, and `inherits` (`contains`,
+   `imports`, `handles`, `includes`, `request_model`, `response_model`, `runs_query` are
+   excluded). For each node, pass `edges=<edges emitted by this node of the retained types>`.
+   `FactGraph` sorts its edges, so the per-node lists are already deterministic.
+
+3. `tests/test_summarize.py` — the fixture now supports edges; add a test asserting the CLI
+   puts a node's `raises`/`calls` edges into its `SummaryRequest` and excludes non-relational
+   types such as `contains`.
+
+**Not changed / considered.**
+- `hash_input()` still hashes `node_id + hash_struct + hash_source`. Edge changes already
+  surface through those hashes (a new `raise`/call is a body change → new `hash_source`; a
+  new `depends_on` decorator or base class is structural → new `hash_struct`), so edges are
+  not folded into the cache key here. 2b.3 may revisit.
+- `child_summaries` semantics are unchanged: still empty in 2b.1's flat pass.
+- No validator or entailment work — this only widens the inputs a summarizer may see.

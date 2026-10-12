@@ -145,3 +145,11 @@ Evidence that IBM Bob was a core part of the workflow (judging: tool usage and d
 - **What I verified or changed:** The summarizers perform no I/O — the CLI reads `source_text` from `node.file` + `node.lines` before constructing each request. Only FUNCTION/CLASS/MODULE nodes are summarized; the pass is flat (`child_summaries=[]`). Unknown `--backend` raises `SystemExit`. New tests: `8 passed in 0.27s`.
 - **Outcome:** Done. `facts.json` → `summaries.json` works end to end with the stub backend.
 - **Screenshot:** _(none this session)_
+
+### 2026-10-12 | Task 2b.2 | Plan + Agent
+- **Goal:** Implement `summarize/prompts.py`: per-level prompt templates and the `[[fact_id]]` citation format; no LLM calls.
+- **Prompt (short):** "Implement task 2b.2 from docs/plan-2b2-prompts.md exactly as planned." Preceded by a small fix: `cli.py` no longer imports the private `_edge_to_dict` from `facts/store.py`; the edge dict is built inline.
+- **What Bob produced:** `prompts.py` (`PROMPT_VERSION`, `CITATION_RE`, `format_citation`, `extract_citations`, `SYSTEM_PREAMBLE`, `CITATION_RULES`, `OUTPUT_INSTRUCTION`, `LEVEL_INSTRUCTIONS` for the 6 levels, `allowed_fact_ids`, `render_edges`, `build_prompt`) and `tests/test_prompts.py` (9 tests).
+- **What I verified or changed:** Allowed IDs include in-repo `raises`/`depends_on`/`inherits` targets but exclude `external:` and bare `calls` names (verified against `generated/facts.json`: `calls` targets are names like `Depends`/`HTTPException`, not node ids). `build_prompt` is deterministic (sorted facts/ids/children/edges) and omits empty optional sections. Tests: `19 passed` (9 new + 10 existing).
+- **Outcome:** Done. Prompt + citation format ready for the 2b.3 hierarchy driver and the 2b.6 backend.
+- **Screenshot:** _(none this session)_

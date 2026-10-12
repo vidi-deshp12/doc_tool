@@ -139,8 +139,11 @@ def test_write_summaries_stable(tmp_path: Path) -> None:
 # CLI fixture helpers
 # ---------------------------------------------------------------------------
 
-def _make_fixture_repo(tmp_path: Path) -> Path:
-    """Create a minimal repo with a source file, docgen.toml, and facts.json."""
+def _make_fixture_repo(tmp_path: Path, edges: tuple = ()) -> Path:
+    """Create a minimal repo with a source file, docgen.toml, and facts.json.
+
+    `edges` are additional fact-graph edges to include (for the edge-enrichment test).
+    """
     (tmp_path / "mod.py").write_text(
         "def f():\n"
         "    return 1\n"
@@ -185,7 +188,7 @@ def _make_fixture_repo(tmp_path: Path) -> Path:
         hash_source="f-source",
         signature="()",
     )
-    graph = FactGraph(nodes=(module, func), edges=(), unresolved=())
+    graph = FactGraph(nodes=(module, func), edges=edges, unresolved=())
 
     out_dir = tmp_path / "out"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -255,3 +258,68 @@ def test_cli_summarize_source_text_read(
     module_reqs = [r for r in captured if r.node_id == "mod.py"]
     assert len(module_reqs) == 1
     assert "def g" in module_reqs[0].source_text
+
+
+# ---------------------------------------------------------------------------
+# Test 9: the CLI enriches SummaryRequest with the node's relational edges
+# ---------------------------------------------------------------------------
+
+def test_cli_summarize_passes_relevant_edges(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from docgen.facts.schema import Edge, EdgeType
+
+    edges = (
+        Edge(type=EdgeType.RAISES, from_id="mod.py::f", to_id="external:ValueError"),
+        Edge(type=EdgeType.CALLS, from_id="mod.py::f", to_id="external:print"),
+        Edge(type=EdgeType.DEPENDS_ON, from_id="mod.py::f", to_id="external:dep"),
+        Edge(type=EdgeType.INHERITS, from_id="mod.py::f", to_id="external:Base"),
+        # Non-relational edges must NOT be handed to the summarizer.
+        Edge(type=EdgeType.CONTAINS, from_id="mod.py", to_id="mod.py::f"),
+        Edge(type=EdgeType.IMPORTS, from_id="mod.py", to_id="external:os"),
+    )
+    toml_path = _make_fixture_repo(tmp_path, edges=edges)
+
+    import docgen.summarize.base as base
+
+    captured: list[SummaryRequest] = []
+
+    class RecordingSummarizer:
+        def summarize(self, req: SummaryRequest) -> SummaryResult:
+            captured.append(req)
+            return SummaryResult(
+                node_id=req.node_id, text="rec", backend="rec", hash_input="h"
+            )
+
+    monkeypatch.setattr(base, "StubSummarizer", RecordingSummarizer)
+
+    from docgen.cli import _run_summarize
+
+    _run_summarize(argparse.Namespace(config=str(toml_path), backend="stub"))
+
+    func_req = [r for r in captured if r.node_id == "mod.py::f"][0]
+    func_types = {e["type"] for e in func_req.edges}
+    assert func_types == {"raises", "calls", "depends_on", "inherits"}
+    assert all(e["from"] == "mod.py::f" for e in func_req.edges)
+
+    # The module node only emits `contains`/`imports`, so it gets no edges.
+    module_req = [r for r in captured if r.node_id == "mod.py"][0]
+    assert module_req.edges == []
+
+
+# ---------------------------------------------------------------------------
+# Test 10: SummaryRequest.edges defaults to empty and round-trips supplied edges
+# ---------------------------------------------------------------------------
+
+def test_summary_request_edges_field() -> None:
+    bare = SummaryRequest(node_id="x", level="function", facts={}, source_text="")
+    assert bare.edges == []
+
+    with_edges = SummaryRequest(
+        node_id="x",
+        level="function",
+        facts={},
+        source_text="",
+        edges=[{"type": "raises", "from": "x", "to": "external:ValueError"}],
+    )
+    assert with_edges.edges == [{"type": "raises", "from": "x", "to": "external:ValueError"}]

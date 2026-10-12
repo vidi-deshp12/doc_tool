@@ -62,6 +62,10 @@ class SummaryRequest:
             happens inside a summarizer.
         child_summaries: Summaries of already-summarized children. Empty for the
             flat pass in 2b.1; populated by the hierarchy driver in 2b.3.
+        edges: Relational facts emitted by this node, as edge dicts in the same shape
+            as `facts.json` (`{"type", "from", "to", "meta"?}`). The CLI retains the
+            `raises`, `depends_on`, `calls`, and `inherits` edges so a summary can
+            cite them. Empty when the node has no such edges.
     """
 
     node_id: str
@@ -69,6 +73,7 @@ class SummaryRequest:
     facts: dict[str, Any]
     source_text: str
     child_summaries: list[SummaryResult] = field(default_factory=list)
+    edges: list[dict[str, Any]] = field(default_factory=list)
 
 
 def hash_input(req: SummaryRequest) -> str:

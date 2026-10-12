@@ -39,7 +39,7 @@ Status legend: `[ ]` todo, `[x]` done, `[~]` in progress. Dates are the plan fro
 
 ## Phase 2b: Cited summarizer (Oct 10-11)
 - [x] **2b.1 Summarizer interface.** `summarize/base.py` protocol + `StubSummarizer`; `ManualSummarizer` reading files from a folder. *Done when:* pipeline runs end to end with Stub in tests. **Implemented: `SummaryRequest`/`SummaryResult`, `Summarizer` protocol, `StubSummarizer`, `ManualSummarizer`, `summarize/store.py`, and `docgen summarize` CLI (flat pass over FUNCTION/CLASS/MODULE nodes). 8 new tests pass.**
-- [ ] **2b.2 Prompts + citation format.** `prompts.py`: per-level prompts; `[[fact_id]]` citations. 
+- [x] **2b.2 Prompts + citation format.** `prompts.py`: per-level prompts; `[[fact_id]]` citations. **Implemented: `PROMPT_VERSION`, `CITATION_RE`/`format_citation`/`extract_citations`, `LEVEL_INSTRUCTIONS` (6 levels), `allowed_fact_ids`, `render_edges`, `build_prompt`. Allowed IDs include in-repo `raises`/`depends_on`/`inherits` targets; `calls` names are context only. 9 tests pass.**
 - [ ] **2b.3 Hierarchy driver + cache.** Bottom-up function→module→package→system; cache keyed by input hashes. *Done when:* re-run with no changes makes zero summarizer calls (test with call counter).
 - [ ] **2b.4 Citation validator.** IDs exist; each sentence has a citation; report broken ones. 
 - [ ] **2b.5 Entailment spot-check.** Sample N claims, check cited facts support them; produce a sheet for hand-grading.
