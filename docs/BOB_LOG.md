@@ -153,3 +153,27 @@ Evidence that IBM Bob was a core part of the workflow (judging: tool usage and d
 - **What I verified or changed:** Allowed IDs include in-repo `raises`/`depends_on`/`inherits` targets but exclude `external:` and bare `calls` names (verified against `generated/facts.json`: `calls` targets are names like `Depends`/`HTTPException`, not node ids). `build_prompt` is deterministic (sorted facts/ids/children/edges) and omits empty optional sections. Tests: `19 passed` (9 new + 10 existing).
 - **Outcome:** Done. Prompt + citation format ready for the 2b.3 hierarchy driver and the 2b.6 backend.
 - **Screenshot:** _(none this session)_
+
+### 2026-10-12 | Task 2b.3 | Plan + Agent
+- **Goal:** Bottom-up hierarchy driver — children summarized before parents; cache so unchanged nodes are skipped on re-run; synthetic system-level node always produced.
+- **Prompt (short):** "Plan task 2b.3." User confirmed: system node always produced (not deferred), `_read_source_text` moves to hierarchy.py. Implemented immediately after approval.
+- **What Bob produced:** `summarize/hierarchy.py` — `build_contains_index`, `topological_order`, `hash_input_with_children`, `run_hierarchy`, `read_source_text`, `_node_level`, `_build_edges_by_from`, `_node_type_for_id`, `SYSTEM_NODE_ID`; `cli.py` — flat loop replaced by `run_hierarchy` call, existing cache loaded from `summaries.json`; `tests/test_hierarchy.py` (8 tests); `docs/plan-2b3-hierarchy-cache.md`.
+- **What I verified or changed:** Cache key folds in `PROMPT_VERSION` (resolving D-035 flag) and sorted child `hash_input` values — same cache key without changes guarantees zero calls on re-run. `test_run_hierarchy_zero_calls_on_rerun` explicitly asserts 0 calls. System node is last in `summaries.json` with `node_id="system"`. Existing `test_cli_summarize_stub_e2e` updated (now expects 3 summaries including system). All 157 tests pass first run.
+- **Outcome:** Done. `docgen summarize` now runs bottom-up with child summaries populated at every level. Zero re-calls on unchanged cache verified.
+- **Screenshot:** _(none this session)_
+
+### 2026-10-12 | Task 2b.4 | Plan + Agent
+- **Goal:** Citation validator — check that every `[[id]]` exists in `facts.json` and every sentence is cited (with a calls-name exemption).
+- **Prompt (short):** "Plan task 2b.4." User added the calls exemption: sentences mentioning a raw CALLS to_id are exempt from the citation rule (D-008 reasoning). Approved immediately after plan.
+- **What Bob produced:** `summarize/citations.py` — `CitationError` dataclass, `_split_sentences` (with leading-citation merging), `validate_summaries(summaries, known_ids, calls_by_node)`, `format_report`; `cli.py` — `_run_validate` + `validate` subparser (exit 0/1); `tests/test_citations.py` (15 tests); `docs/plan-2b4-citation-validator.md`.
+- **What I verified or changed:** First run: 4 tests failed. Root cause: sentence splitter split `"clause. [[id]] next clause"` at the period, leaving `[[id]]` as the *start* of the next fragment instead of the *end* of the previous one. Fixed by stripping leading `[[...]]` tokens from each fragment and prepending them to the preceding sentence. All 15 tests then passed first run. `docgen validate` exits 0 on clean stub output, exits 1 on uncited sentences.
+- **Outcome:** Done. 172/172 tests pass.
+- **Screenshot:** _(none this session)_
+
+### 2026-10-16 | Task 2b.6 | Plan + Agent
+- **Goal:** Build `BobShellSummarizer` — the real LLM backend using `bob run --format json` non-interactively; add per-node failure handling so one bad summarizer call never kills the whole run.
+- **Prompt (short):** "Plan task 2b.6." Before implementing, verified three things: (1) `echo "say hello" | bob run --format json --max-cost 0.1` returns `{"status":"success","last_message":"..."}` ✓; (2) `shutil.which("bob")` resolves to `bob.CMD` on Windows, subprocess runs it without `shell=True` ✓; (3) user specified: needs_human_review nodes should be written to summaries.json and skipped by the validator.
+- **What Bob produced:** `summarize/bob_shell.py` — `BobShellError`, `_find_bob`, `_call_bob` (NamedTemporaryFile stdin, JSON parse, delete=False for Windows), `BobShellSummarizer` (API key check at init, `_find_bob`, 2-attempt retry with 5s backoff); `hierarchy.py` — `NEEDS_HUMAN_REVIEW_BACKEND` constant, `_call_summarizer` helper wrapping every summarizer call in try/except; `citations.py` — skip loop for `needs_human_review` backend; `cli.py` — `bob_shell` backend + `--max-cost`/`--max-turns` flags; `tests/test_bob_shell.py` (10 tests).
+- **What I verified or changed:** All 10 tests passed first run including retry, missing API key, validator skip, and hierarchy continue-on-failure. Full suite: 182/182 pass. Live `bob run` test confirmed JSON schema before writing code.
+- **Outcome:** Done. `docgen summarize --backend bob_shell` is now the real end-to-end pipeline.
+- **Screenshot:** _(none this session)_

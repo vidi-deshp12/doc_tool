@@ -196,59 +196,25 @@ def _run_extract(args: argparse.Namespace) -> None:
     _print_unresolved_summary(list(graph.unresolved))
 
 
-def _node_level(node) -> str:
-    """Map a fact-graph node to a summarization level.
-
-    Only FUNCTION, CLASS, and MODULE nodes are summarized in 2b.1; a FUNCTION with
-    a parent class is reported as a "method".
-    """
-    from docgen.facts.schema import NodeType
-
-    if node.type == NodeType.FUNCTION:
-        return "method" if node.parent_class else "function"
-    if node.type == NodeType.CLASS:
-        return "class"
-    return "module"
-
-
-def _read_source_text(repo_root: Path, node) -> str:
-    """Read a node's source text from its file and line span.
-
-    `node.file` is repo-root-relative POSIX; `node.lines` is a 1-indexed inclusive
-    (start, end). Returns "" when the file is absent or the span is unusable -- the
-    summarizer must never do I/O, so failures degrade to empty text here.
-    """
-    if not node.file:
-        return ""
-    start, end = node.lines
-    if start <= 0 or end < start:
-        return ""
-
-    path = repo_root / node.file
-    try:
-        lines = path.read_text(encoding="utf-8").splitlines()
-    except (OSError, UnicodeDecodeError):
-        return ""
-
-    return "\n".join(lines[start - 1:end])
-
-
 def _run_summarize(args: argparse.Namespace) -> None:
-    """Run the flat summarization pass and write summaries.json.
+    """Run the bottom-up hierarchy summarization pass and write summaries.json.
 
     Pipeline:
-        load_config → read facts.json → for each FUNCTION/CLASS/MODULE node:
-        read source_text → Summarizer.summarize → write summaries.json
+        load_config → read facts.json → load existing summaries.json (cache) →
+        run_hierarchy (bottom-up, child summaries passed to parents) →
+        write summaries.json
 
-    This is deliberately flat: one call per node, no child summaries (the bottom-up
-    hierarchy is task 2b.3).
+    Re-runs with no fact changes produce zero summarizer calls because the cache
+    keys match.
     """
     from docgen.config import load_config
-    from docgen.facts.schema import EdgeType, NodeType
-    from docgen.facts.store import _node_to_dict, read_facts
-    from docgen.summarize.base import StubSummarizer, SummaryRequest
+    from docgen.facts.store import read_facts
+    from docgen.summarize.base import StubSummarizer
+    from docgen.summarize.bob_shell import BobShellSummarizer
+    from docgen.summarize.hierarchy import run_hierarchy
     from docgen.summarize.manual import ManualSummarizer
-    from docgen.summarize.store import write_summaries
+    from docgen.summarize.prompts import PROMPT_VERSION
+    from docgen.summarize.store import read_summaries, write_summaries
 
     config_path = Path(args.config)
     config = load_config(config_path)
@@ -263,13 +229,18 @@ def _run_summarize(args: argparse.Namespace) -> None:
     graph = read_facts(facts_path)
 
     backend = getattr(args, "backend", "stub")
+    max_cost = float(getattr(args, "max_cost", 2.0))
+    max_turns = int(getattr(args, "max_turns", 10))
+
     if backend == "stub":
         summarizer = StubSummarizer()
     elif backend == "manual":
         summarizer = ManualSummarizer(output_dir / "manual_summaries")
+    elif backend == "bob_shell":
+        summarizer = BobShellSummarizer(max_cost=max_cost, max_turns=max_turns)
     else:
         raise SystemExit(
-            f"Unknown backend: {backend!r} (expected 'stub' or 'manual')."
+            f"Unknown backend: {backend!r} (expected 'stub', 'manual', or 'bob_shell')."
         )
 
     print(
@@ -277,48 +248,82 @@ def _run_summarize(args: argparse.Namespace) -> None:
         file=sys.stderr,
     )
 
-    summarizable = {NodeType.FUNCTION, NodeType.CLASS, NodeType.MODULE}
-    relevant_edge_types = {
-        EdgeType.RAISES,
-        EdgeType.DEPENDS_ON,
-        EdgeType.CALLS,
-        EdgeType.INHERITS,
-    }
-
-    # Index the relational edges a summarizer may cite, keyed by the emitting node.
-    # FactGraph sorts its edges, so each list is deterministic. Non-relational edge
-    # types (contains, imports, handles, …) are intentionally dropped.
-    edges_by_from: dict[str, list] = {}
-    for edge in graph.edges:
-        if edge.type in relevant_edge_types:
-            edges_by_from.setdefault(edge.from_id, []).append(
-                {
-                    "type": edge.type.value,
-                    "from": edge.from_id,
-                    "to": edge.to_id,
-                    "meta": dict(edge.meta),
-                }
-            )
-
-    results = []
-    for node in graph.nodes:
-        if node.type not in summarizable:
-            continue
-        req = SummaryRequest(
-            node_id=node.id,
-            level=_node_level(node),
-            facts=_node_to_dict(node),
-            source_text=_read_source_text(repo_root, node),
-            child_summaries=[],
-            edges=edges_by_from.get(node.id, []),
-        )
-        results.append(summarizer.summarize(req))
-
+    # Load existing summaries as the cache; skip if this is the first run.
     summaries_path = output_dir / "summaries.json"
+    existing_cache: dict = {}
+    if summaries_path.exists():
+        for result in read_summaries(summaries_path):
+            existing_cache[result.node_id] = result
+
+    results = run_hierarchy(
+        graph=graph,
+        summarizer=summarizer,
+        repo_root=repo_root,
+        existing_cache=existing_cache,
+        prompt_version=PROMPT_VERSION,
+    )
+
     write_summaries(results, summaries_path)
 
     print(f"  summaries.json written: {len(results)} summaries", file=sys.stderr)
     print(f"{len(results)} summaries written")
+
+
+def _run_validate(args: argparse.Namespace) -> None:
+    """Validate citations in summaries.json against facts.json.
+
+    Pipeline:
+        load_config → read facts.json (build known_ids + calls_by_node) →
+        read summaries.json → validate_summaries → print report → exit 0/1
+
+    Exit 0 when no errors are found; exit 1 when at least one CitationError is reported.
+    """
+    from docgen.config import load_config
+    from docgen.facts.schema import EdgeType
+    from docgen.facts.store import read_facts
+    from docgen.summarize.citations import format_report, validate_summaries
+    from docgen.summarize.hierarchy import SYSTEM_NODE_ID
+    from docgen.summarize.store import read_summaries
+
+    config_path = Path(args.config)
+    config = load_config(config_path)
+    output_dir = config_path.parent.resolve() / config.output_dir
+
+    facts_path = output_dir / "facts.json"
+    if not facts_path.exists():
+        raise SystemExit(
+            f"facts.json not found at {facts_path}; run `docgen extract` first."
+        )
+    summaries_path = output_dir / "summaries.json"
+    if not summaries_path.exists():
+        raise SystemExit(
+            f"summaries.json not found at {summaries_path}; run `docgen summarize` first."
+        )
+
+    graph = read_facts(facts_path)
+    summaries = read_summaries(summaries_path)
+
+    # Build the set of known node ids. Add the synthetic system node explicitly so a
+    # self-citation [[system]] in the system summary is treated as valid.
+    known_ids: set[str] = {n.id for n in graph.nodes} | {SYSTEM_NODE_ID}
+
+    # Build the calls-by-node index for the coverage exemption.
+    calls_by_node: dict[str, set[str]] = {}
+    for edge in graph.edges:
+        if edge.type is EdgeType.CALLS:
+            calls_by_node.setdefault(edge.from_id, set()).add(edge.to_id)
+
+    print(
+        f"docgen validate: {len(summaries)} summaries, {len(known_ids)} known ids …",
+        file=sys.stderr,
+    )
+
+    errors = validate_summaries(summaries, known_ids, calls_by_node)
+    report = format_report(errors)
+    print(report, end="")
+
+    if errors:
+        raise SystemExit(1)
 
 
 def main() -> None:
@@ -347,8 +352,32 @@ def main() -> None:
     summarize_parser.add_argument(
         "--backend",
         default="stub",
-        help="Summarizer backend: 'stub' or 'manual' (default: stub).",
+        help="Summarizer backend: 'stub', 'manual', or 'bob_shell' (default: stub).",
     )
+    summarize_parser.add_argument(
+        "--max-cost",
+        type=float,
+        default=2.0,
+        dest="max_cost",
+        help="Maximum Bobcoins per bob_shell call (default: 2.0).",
+    )
+    summarize_parser.add_argument(
+        "--max-turns",
+        type=int,
+        default=10,
+        dest="max_turns",
+        help="Maximum conversation turns per bob_shell call (default: 10).",
+    )
+
+    validate_parser = subparsers.add_parser(
+        "validate", help="Validate citations in summaries.json (exit 1 if broken)."
+    )
+    validate_parser.add_argument(
+        "--config",
+        default="docgen.toml",
+        help="Path to docgen.toml (default: docgen.toml in cwd).",
+    )
+
     subparsers.add_parser("render", help="Render documentation pages.")
     subparsers.add_parser("check", help="Check for doc drift (exit 1 if stale).")
     subparsers.add_parser("update", help="Regenerate stale pages.")
@@ -360,6 +389,8 @@ def main() -> None:
         _run_extract(args)
     elif args.command == "summarize":
         _run_summarize(args)
+    elif args.command == "validate":
+        _run_validate(args)
     else:
         raise NotImplementedError(f"Command '{args.command}' not yet implemented.")
 

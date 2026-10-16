@@ -213,10 +213,11 @@ def test_cli_summarize_stub_e2e(tmp_path: Path) -> None:
     assert summaries_path.exists(), "summaries.json was not created"
 
     data = json.loads(summaries_path.read_text(encoding="utf-8"))
-    assert len(data["summaries"]) == 2
+    # The hierarchy driver always appends a synthetic "system" node, so there are 3 summaries.
+    assert len(data["summaries"]) == 3
 
     node_ids = {s["node_id"] for s in data["summaries"]}
-    assert node_ids == {"mod.py", "mod.py::f"}
+    assert node_ids == {"mod.py", "mod.py::f", "system"}
     for entry in data["summaries"]:
         assert entry["node_id"] in entry["text"]
 

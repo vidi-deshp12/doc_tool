@@ -240,7 +240,7 @@ Update `docs/tasks.md`, `docs/memory.md`, `BOB_LOG.md` (repo convention).
 ## Open questions
 
 - **`calls` are not citeable.** Call targets are unresolved raw names (D-008), so a summary can
-  *mention* a call but must cite a real node id (usually its own). Resolving calls is Tier 2
+  *mention* a call but must cite a real node id (usually its own). Resolving calls is Tier 2(decision D-035 in memory.md)
   (2a.11), out of scope. Confirm this is acceptable, or the model will occasionally want to cite
   a call that is not a fact ID.
 - **Prompt-version invalidation** (D-E) needs a 2b.3 cache-key decision.

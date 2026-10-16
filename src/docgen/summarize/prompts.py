@@ -23,7 +23,7 @@ from .base import NodeLevel, SummaryRequest
 # Bump when the wording of the prompt changes. The cache key in base.hash_input()
 # does not include this yet (see plan-2b2-prompts.md, decision D-E); 2b.3 should
 # fold it in so a prompt edit invalidates cached summaries.
-PROMPT_VERSION = "2b2.1"
+PROMPT_VERSION = "2b4.1"
 
 # The one true citation matcher, reused by the prompt tests and (in 2b.4) the validator.
 CITATION_RE = re.compile(r"\[\[([^\[\]]+)\]\]")
@@ -36,17 +36,22 @@ SYSTEM_PREAMBLE = (
 )
 
 CITATION_RULES = (
-    "- Every sentence must end with at least one citation in the form [[<fact_id>]].\n"
+    "- Place all citations for a sentence immediately before the closing punctuation mark "
+    "(., !, or ?), not after it.\n"
+    "  Format: \"prose text [[id1]] [[id2]].\" — citations grouped before the period.\n"
+    "  Example: \"This function raises HTTPException when the slug already exists "
+    "[[external:fastapi.HTTPException]].\"\n"
+    "  Example (multiple): \"It validates the token and fetches the user "
+    "[[pkg/auth.py::verify_token]] [[pkg/auth.py::get_user]].\"\n"
     "- Cite ONLY IDs from the \"Allowed fact IDs\" list below. Never invent an ID.\n"
     "- Do not restate anything you cannot ground in the inputs.\n"
-    "- When several facts support one sentence, include several citations, e.g. [[id-a]] [[id-b]].\n"
     "- A name shown only under \"Relational facts\" (for example a bare call name) is context, "
     "not a citable ID, unless it also appears in \"Allowed fact IDs\"."
 )
 
 OUTPUT_INSTRUCTION = (
     "Write markdown prose: no headings, no bullet lists, no code fences. "
-    "Every sentence carries at least one [[id]] citation."
+    "Every sentence carries at least one [[id]] citation placed before its closing punctuation."
 )
 
 _GROUNDING_RULE = (
