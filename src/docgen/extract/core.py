@@ -204,14 +204,19 @@ def _make_function_node(
     source: str,
     mid: str,
     is_async: bool,
-    hash_source: str,
 ) -> Node:
-    """Create a Node from a function AST node with decorator-inclusive span."""
+    """Create a Node from a function AST node with decorator-inclusive span.
+
+    hash_source is computed from the function's own span (first decorator line
+    to end of body) — same as _make_method_node. This ensures editing one
+    module-level function does not mark its siblings stale.
+    """
     start = _get_decorator_start_line(node)
     end = node.end_lineno
     lines = (start, end)
 
     hash_struct = _hash_struct_node(node)
+    hash_source = _hash_source_span(source, start, end)
 
     decorators = _extract_decorator_texts(node)
 
@@ -495,7 +500,7 @@ def extract_file(path: Path, root: Path) -> tuple[list[Node], list[Edge], list[U
     for item in tree.body:
         if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
             is_async = isinstance(item, ast.AsyncFunctionDef)
-            fn_node = _make_function_node(item, source, mid, is_async, hash_source)
+            fn_node = _make_function_node(item, source, mid, is_async)
             nodes.append(fn_node)
 
             # Edge: module contains function

@@ -10,6 +10,8 @@ empty AdapterResult with one Unresolved entry describing the failure.
 
 from __future__ import annotations
 
+import ast
+import hashlib
 import json
 import os
 import platform
@@ -230,17 +232,150 @@ def _find_class_node(class_name: str, all_nodes: list[Node]) -> Node | None:
     return None
 
 
+# ---------------------------------------------------------------------------
+# Sub-task C2 — Request model extraction from handler AST (E5)
+# ---------------------------------------------------------------------------
+
+# Parameter names that are never request bodies regardless of their annotation.
+_NON_BODY_PARAM_NAMES: frozenset[str] = frozenset(
+    {"self", "cls", "request", "response", "db", "background_tasks", "current_user"}
+)
+
+# FastAPI dependency/query default call names — parameters with these defaults are
+# not request bodies even if their annotation is a Pydantic model.
+_NON_BODY_DEFAULT_CALLS: frozenset[str] = frozenset(
+    {"Depends", "Query", "Path", "Header", "Cookie", "Form", "File", "Security"}
+)
+
+
+def _is_body_default(default_node: ast.expr | None) -> bool | None:
+    """Return True if the default is Body(...), False if it is a known non-body
+    call (Depends/Query/Path/…), None if no default (let annotation decide)."""
+    if default_node is None:
+        return None  # no default — check annotation
+    if isinstance(default_node, ast.Call):
+        func_name = ""
+        if isinstance(default_node.func, ast.Name):
+            func_name = default_node.func.id
+        elif isinstance(default_node.func, ast.Attribute):
+            func_name = default_node.func.attr
+        if func_name == "Body":
+            return True
+        if func_name in _NON_BODY_DEFAULT_CALLS:
+            return False
+    return None  # unknown default — let annotation decide
+
+
+def _resolve_annotation_to_class_id(
+    annotation: ast.expr | None,
+    file_path: str,
+    all_nodes: list[Node],
+) -> str | None:
+    """Resolve a parameter annotation to a CLASS node id if it is an in-repo
+    Pydantic model.  Returns None if the annotation cannot be resolved or is not
+    a Pydantic model.
+    """
+    if annotation is None:
+        return None
+    try:
+        name = ast.unparse(annotation)
+    except Exception:
+        return None
+    # Only handle simple names (no subscripts like list[Item])
+    if "[" in name or "." in name:
+        return None
+    # Look for a CLASS node with this name
+    for node in all_nodes:
+        if node.type is NodeType.CLASS and node.name == name and node.is_pydantic_model:
+            return node.id
+    return None
+
+
+def _extract_request_models_from_handler(
+    func_node: Node,
+    repo_root: Path,
+    all_nodes: list[Node],
+) -> list[str]:
+    """Return a list of resolved class node IDs for request-body parameters in
+    the handler function.
+
+    Detects two patterns:
+    - Explicit: ``item: ItemModel = Body(...)``
+    - Implicit: ``item: ItemModel`` with no default, when ItemModel is an
+      in-repo Pydantic model and the parameter name is not in _NON_BODY_PARAM_NAMES.
+
+    Returns an empty list when nothing is found (caller falls back to OpenAPI).
+    """
+    try:
+        src_path = repo_root / func_node.file
+        source = src_path.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=str(src_path))
+    except (OSError, SyntaxError):
+        return []
+
+    # Find the function AST node by name (top-level only; methods handled by parent_class)
+    func_ast: ast.FunctionDef | ast.AsyncFunctionDef | None = None
+    for item in ast.walk(tree):
+        if (
+            isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and item.name == func_node.name
+        ):
+            func_ast = item
+            break
+    if func_ast is None:
+        return []
+
+    body_model_ids: list[str] = []
+    args = func_ast.args
+    # Pair each arg with its default (defaults are right-aligned in CPython AST)
+    n_args = len(args.args)
+    n_defaults = len(args.defaults)
+    defaults: list[ast.expr | None] = [None] * (n_args - n_defaults) + list(args.defaults)
+
+    for arg, default in zip(args.args, defaults):
+        param_name = arg.arg
+        if param_name in _NON_BODY_PARAM_NAMES:
+            continue
+
+        body_flag = _is_body_default(default)
+        if body_flag is False:
+            # Explicitly a Depends/Query/etc — skip
+            continue
+
+        # body_flag is True (explicit Body) or None (no default / unknown default)
+        class_id = _resolve_annotation_to_class_id(arg.annotation, func_node.file, all_nodes)
+        if class_id:
+            body_model_ids.append(class_id)
+
+    return body_model_ids
+
+
+def _sha256(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
 def _openapi_to_facts(
     openapi_dict: dict[str, Any],
     handler_map: dict[str, dict[str, str]],
     all_nodes: list[Node],
+    repo_root: Path,
 ) -> tuple[list[Node], list[Edge], list[Unresolved]]:
     """Convert an OpenAPI dict + handler map into ROUTE nodes and edges.
+
+    Order of operations per route (plan §sub-task 2):
+      1. Look up handler function node.
+      2. Resolve REQUEST_MODEL via handler AST (E5); fall back to OpenAPI names,
+         filtering out auto-generated Body_... wrappers.
+      3. Resolve RESPONSE_MODEL from OpenAPI (unchanged).
+      4. Compute hash_struct / hash_source from fully-resolved data (E4).
+      5. Construct the ROUTE Node.
+      6. Emit HANDLES, REQUEST_MODEL, RESPONSE_MODEL edges.
 
     Args:
         openapi_dict: The full OpenAPI spec from app.openapi().
         handler_map: {"METHOD path": {"handler": func_name, "name": route_name}}
         all_nodes: All currently extracted nodes (for handler/model matching).
+        repo_root: Absolute path to the project root (for AST re-parsing).
 
     Returns:
         (route_nodes, edges, unresolved)
@@ -268,19 +403,67 @@ def _openapi_to_facts(
             responses = operation.get("responses", {})
             status_code = _extract_status_code(responses)
 
-            # Locate handler's file and line range from FUNCTION nodes
+            # Step 1: locate handler function node
             func_node = _find_function_node(func_name, all_nodes) if func_name else None
             handler_file = func_node.file if func_node else ""
             handler_lines = func_node.lines if func_node else (0, 0)
 
-            # Build ROUTE node
+            # Step 2: REQUEST_MODEL — AST-derived first (E5), fall back to OpenAPI
+            req_model_ids: list[str] = []
+            if func_node:
+                req_model_ids = _extract_request_models_from_handler(
+                    func_node, repo_root, all_nodes
+                )
+            if not req_model_ids:
+                # Fall back: OpenAPI-derived name, but skip Body_... auto-generated names
+                request_body = operation.get("requestBody", {})
+                if request_body:
+                    req_schema_name = _extract_body_schema_name(request_body)
+                    if req_schema_name and not req_schema_name.startswith("Body_"):
+                        cls_node = _find_class_node(req_schema_name, all_nodes)
+                        to_id = cls_node.id if cls_node else f"external:{req_schema_name}"
+                        req_model_ids = [to_id]
+
+            # Step 3: RESPONSE_MODEL — from OpenAPI (unchanged)
+            resp_model_ids: list[str] = []
+            for _status_key, response in responses.items():
+                resp_schema = response.get("content", {})
+                for media in resp_schema.values():
+                    schema = media.get("schema", {})
+                    schema_name = _extract_schema_name(schema)
+                    if not schema_name:
+                        for item in schema.get("allOf", []):
+                            schema_name = _extract_schema_name(item)
+                            if schema_name:
+                                break
+                    if schema_name:
+                        cls_node = _find_class_node(schema_name, all_nodes)
+                        to_id = cls_node.id if cls_node else f"external:{schema_name}"
+                        resp_model_ids.append(to_id)
+
+            # Step 4: compute hash_struct / hash_source from fully-resolved data (E4)
+            # hash_struct = structural fields: method, path, status, handler, models
+            handler_id = func_node.id if func_node else ""
+            struct_payload = (
+                method
+                + path
+                + str(status_code)
+                + handler_id
+                + "|".join(sorted(req_model_ids))
+                + "|".join(sorted(resp_model_ids))
+            )
+            route_hash = _sha256(struct_payload)
+            # hash_source == hash_struct: routes have no separate body to hash
+            route_hash_source = route_hash
+
+            # Step 5: construct the ROUTE Node
             route_node = Node(
                 id=route_id,
                 type=NodeType.ROUTE,
                 file=handler_file,
                 lines=handler_lines,
-                hash_struct="",
-                hash_source="",
+                hash_struct=route_hash,
+                hash_source=route_hash_source,
                 method=method,
                 full_path=path,
                 name=route_name,
@@ -288,6 +471,7 @@ def _openapi_to_facts(
             )
             route_nodes.append(route_node)
 
+            # Step 6: emit edges
             # HANDLES edge: route → handler function
             if func_node:
                 edges.append(Edge(
@@ -303,41 +487,23 @@ def _openapi_to_facts(
                     where=route_id,
                 ))
 
-            # RESPONSE_MODEL edges
-            for status_key, response in responses.items():
-                resp_schema = response.get("content", {})
-                for media in resp_schema.values():
-                    schema = media.get("schema", {})
-                    schema_name = _extract_schema_name(schema)
-                    if not schema_name:
-                        # Try allOf
-                        for item in schema.get("allOf", []):
-                            schema_name = _extract_schema_name(item)
-                            if schema_name:
-                                break
-                    if schema_name:
-                        cls_node = _find_class_node(schema_name, all_nodes)
-                        to_id = cls_node.id if cls_node else f"external:{schema_name}"
-                        edges.append(Edge(
-                            type=EdgeType.RESPONSE_MODEL,
-                            from_id=route_id,
-                            to_id=to_id,
-                            meta=(),
-                        ))
-
             # REQUEST_MODEL edges
-            request_body = operation.get("requestBody", {})
-            if request_body:
-                req_schema_name = _extract_body_schema_name(request_body)
-                if req_schema_name:
-                    cls_node = _find_class_node(req_schema_name, all_nodes)
-                    to_id = cls_node.id if cls_node else f"external:{req_schema_name}"
-                    edges.append(Edge(
-                        type=EdgeType.REQUEST_MODEL,
-                        from_id=route_id,
-                        to_id=to_id,
-                        meta=(),
-                    ))
+            for rm_id in req_model_ids:
+                edges.append(Edge(
+                    type=EdgeType.REQUEST_MODEL,
+                    from_id=route_id,
+                    to_id=rm_id,
+                    meta=(),
+                ))
+
+            # RESPONSE_MODEL edges
+            for rm_id in resp_model_ids:
+                edges.append(Edge(
+                    type=EdgeType.RESPONSE_MODEL,
+                    from_id=route_id,
+                    to_id=rm_id,
+                    meta=(),
+                ))
 
     return route_nodes, edges, unresolved
 
@@ -388,7 +554,7 @@ def extract(
     handler_map = data.get("handlers", {})
 
     route_nodes, new_edges, route_unresolved = _openapi_to_facts(
-        openapi_dict, handler_map, nodes
+        openapi_dict, handler_map, nodes, repo_root
     )
 
     return AdapterResult(

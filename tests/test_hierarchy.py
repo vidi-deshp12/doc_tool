@@ -311,3 +311,47 @@ def test_cli_summarize_hierarchy_e2e(tmp_path: Path) -> None:
     node_ids = {s["node_id"] for s in data["summaries"]}
     assert "mod.py" in node_ids
     assert SYSTEM_NODE_ID in node_ids
+
+
+# ---------------------------------------------------------------------------
+# Test 9: HANDLES edge indexed by function — handler sees route in its edges (S4a)
+# ---------------------------------------------------------------------------
+
+def test_handles_edge_reaches_function(tmp_path: Path) -> None:
+    """A FUNCTION node that is the target of a HANDLES edge must receive that edge
+    in its SummaryRequest.edges."""
+    from docgen.facts.schema import EdgeType, NodeType
+
+    func = _node("mod.py::handler", NodeType.FUNCTION, file="mod.py")
+    mod = _node("mod.py", NodeType.MODULE, file="mod.py")
+    route = Node(
+        id="route:POST /api/items",
+        type=NodeType.ROUTE,
+        file="mod.py",
+        lines=(1, 5),
+        hash_struct="rhs",
+        hash_source="rhs",
+        method="POST",
+        full_path="/api/items",
+        status_code=201,
+    )
+    graph = FactGraph(
+        nodes=(func, mod, route),
+        edges=(
+            Edge(type=EdgeType.CONTAINS, from_id="mod.py", to_id="mod.py::handler"),
+            Edge(type=EdgeType.HANDLES, from_id="route:POST /api/items", to_id="mod.py::handler"),
+        ),
+        unresolved=(),
+    )
+
+    rec = RecordingSummarizer()
+    run_hierarchy(graph, rec, tmp_path, existing_cache={}, prompt_version=PROMPT_V)
+
+    handler_req = next(r for r in rec.requests if r.node_id == "mod.py::handler")
+    handles_edges = [e for e in handler_req.edges if e.get("type") == "handles"]
+    assert len(handles_edges) == 1, (
+        f"Expected 1 handles edge in function req, got {handles_edges}"
+    )
+    assert handles_edges[0]["from"] == "route:POST /api/items"
+    assert handles_edges[0]["to"] == "mod.py::handler"
+

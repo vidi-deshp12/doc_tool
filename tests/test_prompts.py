@@ -193,3 +193,31 @@ def test_extract_citations_multiple_and_dedup() -> None:
     text = "First [[a]] and [[b]]. Second [[a]] again. Bad [] and [[unclosed."
     assert extract_citations(text) == ["a", "b"]
     assert CITATION_RE.findall("[[a]] [[b]]") == ["a", "b"]
+
+
+# ---------------------------------------------------------------------------
+# Test 10: handles edge makes route ID citeable (S4b)
+# ---------------------------------------------------------------------------
+
+def test_allowed_fact_ids_includes_handles_target() -> None:
+    """A 'handles' edge must add the route id (in 'from') to allowed_fact_ids (S4b).
+
+    hierarchy.py indexes HANDLES edges by to_id (the function), so the edge the
+    function sees is {from: route_id, to: function_id}.  allowed_fact_ids must
+    add edge['from'] for handles edges so the handler can cite its own route node.
+    """
+    req = _make_request(
+        node_id="mod.py::create",
+        edges=[
+            {
+                "type": "handles",
+                "from": "route:POST /api/articles",
+                "to": "mod.py::create",
+            }
+        ]
+    )
+    ids = allowed_fact_ids(req)
+    assert "route:POST /api/articles" in ids, (
+        f"Route id must be in allowed_fact_ids when a handles edge is present; got {ids}"
+    )
+

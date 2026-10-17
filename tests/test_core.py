@@ -347,6 +347,67 @@ def test_hash_struct_via_ast_dump() -> None:
     assert h1 == h2, "Default values should not affect hash_struct"
 
 
+def test_function_hash_source_per_span() -> None:
+    """Two module-level functions in the same file have different hash_source values."""
+    code = '''def alpha():
+    return 1
+
+
+def beta():
+    return 2
+'''
+    with tempfile.TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir) / "mod.py"
+        path.write_text(code, encoding="utf-8")
+        root = Path(tmpdir)
+        nodes, _, _ = extract_file(path, root)
+
+    fn_alpha = next(n for n in nodes if n.name == "alpha")
+    fn_beta = next(n for n in nodes if n.name == "beta")
+    assert fn_alpha.hash_source != fn_beta.hash_source, (
+        "Two distinct functions must have different hash_source"
+    )
+
+
+def test_function_hash_source_sibling_unchanged() -> None:
+    """Editing one function's body changes its hash_source but not its sibling's."""
+    code_v1 = '''def alpha():
+    return 1
+
+
+def beta():
+    return 2
+'''
+    code_v2 = '''def alpha():
+    return 999  # body changed
+
+
+def beta():
+    return 2
+'''
+    with tempfile.TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir) / "mod.py"
+        root = Path(tmpdir)
+
+        path.write_text(code_v1, encoding="utf-8")
+        nodes_v1, _, _ = extract_file(path, root)
+
+        path.write_text(code_v2, encoding="utf-8")
+        nodes_v2, _, _ = extract_file(path, root)
+
+    alpha_v1 = next(n for n in nodes_v1 if n.name == "alpha")
+    alpha_v2 = next(n for n in nodes_v2 if n.name == "alpha")
+    beta_v1 = next(n for n in nodes_v1 if n.name == "beta")
+    beta_v2 = next(n for n in nodes_v2 if n.name == "beta")
+
+    assert alpha_v1.hash_source != alpha_v2.hash_source, (
+        "Edited function must have different hash_source"
+    )
+    assert beta_v1.hash_source == beta_v2.hash_source, (
+        "Unedited sibling must have the same hash_source"
+    )
+
+
 if __name__ == "__main__":
     # Run tests manually
     test_hash_struct_blank_line_added()

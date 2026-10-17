@@ -96,10 +96,13 @@ LEVEL_INSTRUCTIONS: dict[NodeLevel, str] = {
 }
 
 # Edge types whose `to` value is a node id and may therefore be cited.
-_CITEABLE_EDGE_TYPES = frozenset({"raises", "depends_on", "inherits"})
+# "handles" is included so a handler function can cite its own route node
+# (e.g. [[route:POST /api/articles]]) — route nodes are in facts.json and
+# therefore already in the validator's known_ids set.
+_CITEABLE_EDGE_TYPES = frozenset({"raises", "depends_on", "inherits", "handles"})
 
 # Order in which relational facts are rendered.
-_RENDERED_EDGE_TYPES = ("raises", "depends_on", "calls", "inherits")
+_RENDERED_EDGE_TYPES = ("handles", "raises", "depends_on", "calls", "inherits")
 
 
 def format_citation(fact_id: str) -> str:
@@ -140,7 +143,17 @@ def allowed_fact_ids(req: SummaryRequest) -> list[str]:
             ids.add(child.node_id)
 
     for edge in req.edges:
-        if edge.get("type") in _CITEABLE_EDGE_TYPES:
+        edge_type = edge.get("type")
+        if edge_type not in _CITEABLE_EDGE_TYPES:
+            continue
+        if edge_type == "handles":
+            # The HANDLES edge is stored as {from: route_id, to: function_id}.
+            # The function already owns its own id; the route id (in "from") is the
+            # citeable target we want to add.
+            route_id = edge.get("from", "")
+            if route_id and not route_id.startswith("external:"):
+                ids.add(route_id)
+        else:
             target = edge.get("to", "")
             if target and not target.startswith("external:"):
                 ids.add(target)

@@ -64,7 +64,7 @@ def test_openapi_to_facts_single_route() -> None:
     func_node = _make_func_node("list_items")
     all_nodes = [func_node]
 
-    route_nodes, edges, unresolved = _openapi_to_facts(openapi_dict, handler_map, all_nodes)
+    route_nodes, edges, unresolved = _openapi_to_facts(openapi_dict, handler_map, all_nodes, Path("."))
 
     assert len(route_nodes) == 1
     r = route_nodes[0]
@@ -93,7 +93,7 @@ def test_openapi_to_facts_unmatched_handler_emits_unresolved() -> None:
         }
     }
     handler_map = {"GET /items": {"handler": "ghost_func", "name": ""}}
-    route_nodes, edges, unresolved = _openapi_to_facts(openapi_dict, handler_map, [])
+    route_nodes, edges, unresolved = _openapi_to_facts(openapi_dict, handler_map, [], Path("."))
 
     assert len(route_nodes) == 1
     handles = [e for e in edges if e.type == EdgeType.HANDLES]
@@ -200,3 +200,168 @@ def test_real_repo_route_consistency() -> None:
         f"Missing routes from ground truth: {missing}\n"
         f"Extracted: {sorted(extracted_pairs)}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Tests for E4: route nodes have non-empty hash_struct
+# ---------------------------------------------------------------------------
+
+def test_route_node_hash_struct_non_empty(tmp_path: Path) -> None:
+    """Route nodes must have a non-empty hash_struct (E4)."""
+    openapi_dict = {
+        "paths": {
+            "/items": {"get": {"responses": {"200": {"description": "OK"}}}}
+        }
+    }
+    handler_map = {"GET /items": {"handler": "list_items", "name": ""}}
+    func_node = _make_func_node("list_items")
+
+    route_nodes, _, _ = _openapi_to_facts(openapi_dict, handler_map, [func_node], tmp_path)
+
+    assert route_nodes[0].hash_struct != "", "Route node must have non-empty hash_struct"
+    assert route_nodes[0].hash_source != "", "Route node must have non-empty hash_source"
+
+
+def test_route_hash_struct_changes_with_path(tmp_path: Path) -> None:
+    """Changing the route path must change hash_struct (E4)."""
+    def _make_openapi(path: str) -> dict:
+        return {"paths": {path: {"get": {"responses": {"200": {}}}}}}
+
+    handler_map = {"GET /a": {"handler": "fn", "name": ""}, "GET /b": {"handler": "fn", "name": ""}}
+    fn = _make_func_node("fn")
+
+    nodes_a, _, _ = _openapi_to_facts(_make_openapi("/a"), {"GET /a": handler_map["GET /a"]}, [fn], tmp_path)
+    nodes_b, _, _ = _openapi_to_facts(_make_openapi("/b"), {"GET /b": handler_map["GET /b"]}, [fn], tmp_path)
+
+    assert nodes_a[0].hash_struct != nodes_b[0].hash_struct, (
+        "Different paths must produce different hash_struct"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Tests for E5: request model edges use handler AST annotation
+# ---------------------------------------------------------------------------
+
+def _make_pydantic_node(name: str, file: str = "app/models.py") -> Node:
+    return Node(
+        id=f"{file}::{name}",
+        type=NodeType.CLASS,
+        file=file,
+        lines=(1, 5),
+        hash_struct="x",
+        hash_source="x",
+        name=name,
+        is_pydantic_model=True,
+    )
+
+
+def test_request_model_explicit_body(tmp_path: Path) -> None:
+    """Handler with explicit Body(...) parameter → REQUEST_MODEL to annotation class."""
+    handler_file = tmp_path / "routes.py"
+    handler_file.write_text(
+        "from fastapi import Body\n"
+        "from app.models import ArticleIn\n"
+        "async def create(article: ArticleIn = Body(...)):\n"
+        "    pass\n",
+        encoding="utf-8",
+    )
+    func_node = Node(
+        id="routes.py::create", type=NodeType.FUNCTION,
+        file="routes.py", lines=(3, 4), hash_struct="x", hash_source="x", name="create",
+    )
+    model_node = _make_pydantic_node("ArticleIn", "app/models.py")
+    openapi_dict = {
+        "paths": {
+            "/articles": {
+                "post": {
+                    "responses": {"201": {}},
+                    "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Body_create_articles_post"}}}},
+                }
+            }
+        }
+    }
+    handler_map = {"POST /articles": {"handler": "create", "name": ""}}
+
+    _, edges, _ = _openapi_to_facts(openapi_dict, handler_map, [func_node, model_node], tmp_path)
+
+    req_edges = [e for e in edges if e.type == EdgeType.REQUEST_MODEL]
+    assert len(req_edges) == 1
+    assert req_edges[0].to_id == "app/models.py::ArticleIn", (
+        f"Expected ArticleIn, got {req_edges[0].to_id}"
+    )
+
+
+def test_request_model_implicit_pydantic(tmp_path: Path) -> None:
+    """Handler with bare Pydantic annotation (no Body default) → REQUEST_MODEL."""
+    handler_file = tmp_path / "routes.py"
+    handler_file.write_text(
+        "async def update(item: MyModel):\n"
+        "    pass\n",
+        encoding="utf-8",
+    )
+    func_node = Node(
+        id="routes.py::update", type=NodeType.FUNCTION,
+        file="routes.py", lines=(1, 2), hash_struct="x", hash_source="x", name="update",
+    )
+    model_node = _make_pydantic_node("MyModel", "app/models.py")
+    openapi_dict = {
+        "paths": {"/items": {"put": {"responses": {"200": {}}}}}
+    }
+    handler_map = {"PUT /items": {"handler": "update", "name": ""}}
+
+    _, edges, _ = _openapi_to_facts(openapi_dict, handler_map, [func_node, model_node], tmp_path)
+
+    req_edges = [e for e in edges if e.type == EdgeType.REQUEST_MODEL]
+    assert len(req_edges) == 1
+    assert req_edges[0].to_id == "app/models.py::MyModel"
+
+
+def test_depends_param_not_treated_as_body(tmp_path: Path) -> None:
+    """A parameter with Depends(...) default is NOT a request body."""
+    handler_file = tmp_path / "routes.py"
+    handler_file.write_text(
+        "from fastapi import Depends\n"
+        "async def get(user: UserModel = Depends(get_user)):\n"
+        "    pass\n",
+        encoding="utf-8",
+    )
+    func_node = Node(
+        id="routes.py::get", type=NodeType.FUNCTION,
+        file="routes.py", lines=(2, 3), hash_struct="x", hash_source="x", name="get",
+    )
+    model_node = _make_pydantic_node("UserModel", "app/models.py")
+    openapi_dict = {"paths": {"/": {"get": {"responses": {"200": {}}}}}}
+    handler_map = {"GET /": {"handler": "get", "name": ""}}
+
+    _, edges, _ = _openapi_to_facts(openapi_dict, handler_map, [func_node, model_node], tmp_path)
+
+    req_edges = [e for e in edges if e.type == EdgeType.REQUEST_MODEL]
+    assert req_edges == [], "Depends parameter must not produce REQUEST_MODEL edge"
+
+
+def test_body_auto_name_filtered(tmp_path: Path) -> None:
+    """OpenAPI-derived Body_... names are filtered when no AST model is found."""
+    # No handler source file at tmp_path — AST extraction returns empty
+    func_node = _make_func_node("create", "routes.py")  # file doesn't exist in tmp_path
+    openapi_dict = {
+        "paths": {
+            "/x": {
+                "post": {
+                    "responses": {"200": {}},
+                    "requestBody": {
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/Body_create_x_post"}
+                            }
+                        }
+                    },
+                }
+            }
+        }
+    }
+    handler_map = {"POST /x": {"handler": "create", "name": ""}}
+
+    _, edges, _ = _openapi_to_facts(openapi_dict, handler_map, [func_node], tmp_path)
+
+    req_edges = [e for e in edges if e.type == EdgeType.REQUEST_MODEL]
+    assert req_edges == [], "Body_... auto-generated name must be filtered out"

@@ -5,7 +5,15 @@ the extracted facts. BobShellSummarizer is the real backend: it pipes the determ
 built by ``build_prompt(req)`` into Bob Shell and parses the ``last_message`` from the JSON
 response.
 
-Confirmed working (D-018): `echo "prompt" | bob run --format json --max-cost 0.1`
+Delivery mechanism (D-018 + Windows fix): the prompt is written to a temp file and piped via
+PowerShell ``Get-Content ... | bob run``.  This matches the confirmed-working
+``echo "..." | bob run --format json`` pattern but avoids two Windows-specific traps:
+
+- stdout captured via ``subprocess.PIPE`` deadlocks on .CMD-wrapped Node processes
+  (redirected to a second temp file instead).
+- ``stdin=file`` is not forwarded through the .CMD wrapper to Node
+  (PowerShell handles the pipe natively).
+
 Response shape:
     {
         "type": "result",
@@ -64,11 +72,24 @@ def _call_bob(
     max_turns: int,
     timeout: int,
 ) -> str:
-    """Invoke ``bob run --format json`` with *prompt* on stdin.
+    """Invoke ``bob run --format json`` via a PowerShell pipe.
 
-    Writes the prompt to a temporary file and passes it as stdin to avoid
-    any shell-quoting issues with long, multi-line prompts containing JSON
-    and code fences.  The temp file is deleted in a ``finally`` block.
+    On Windows, ``bob`` is a ``.CMD`` wrapper around Node.js. Two problems
+    arise when calling it from Python subprocess:
+
+    1. **stdout deadlock**: capturing stdout via ``subprocess.PIPE`` deadlocks
+       because the CMD wrapper buffers differently.  Fix: redirect stdout to a
+       temp file and read it after the process exits.
+
+    2. **stdin not forwarded**: passing the prompt via ``stdin=file`` does not
+       work because the CMD wrapper does not forward file-based stdin to the
+       Node.js process.  Fix: invoke PowerShell and use ``Get-Content | bob``
+       — PowerShell handles the pipe natively, exactly as the confirmed-working
+       interactive ``echo "..." | bob run`` does (D-018).
+
+    The prompt is written to a temp file so the PowerShell command line stays
+    short regardless of prompt size.  Both temp files are deleted in a
+    ``finally`` block.
 
     Returns:
         The ``last_message`` string from the JSON response.
@@ -77,35 +98,45 @@ def _call_bob(
         BobShellError: on non-zero exit code, JSON parse failure, or
             ``status != "success"`` in the response.
     """
-    cmd = [
-        bob_exe, "run",
-        "--format", "json",
-        "--max-cost", str(max_cost),
-        "--max-turns", str(max_turns),
-    ]
+    # Write prompt to a temp file — keeps the PowerShell command line short.
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".txt", delete=False, encoding="utf-8"
+    ) as prompt_f:
+        prompt_f.write(prompt)
+        prompt_path = prompt_f.name
 
-    # Write prompt to a temp file.  `delete=False` is required on Windows:
-    # a NamedTemporaryFile cannot be opened twice while still open.
-    tmp = tempfile.NamedTemporaryFile(
-        mode="w", suffix=".txt", encoding="utf-8", delete=False
+    # Write stdout to a temp file to avoid the pipe deadlock (see above).
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".json", delete=False, encoding="utf-8"
+    ) as out_f:
+        out_path = out_f.name
+
+    # PowerShell pipes the prompt file into bob run; bob's stdout goes to
+    # out_path.  Single-quotes around paths are safe for Windows temp paths
+    # (no single-quotes in %TEMP%).  & invokes the bob .CMD as a command.
+    ps_cmd = (
+        f"Get-Content -Encoding UTF8 -Raw '{prompt_path}' | "
+        f"& '{bob_exe}' run --format json "
+        f"--max-cost {max_cost} --max-turns {max_turns}"
     )
-    try:
-        tmp.write(prompt)
-        tmp.flush()
-        tmp.close()
+    cmd = ["powershell", "-NoProfile", "-Command", ps_cmd]
 
-        with open(tmp.name, encoding="utf-8") as stdin_fh:
+    try:
+        with open(out_path, "w", encoding="utf-8") as out_f:
             proc = subprocess.run(
                 cmd,
-                stdin=stdin_fh,
-                stdout=subprocess.PIPE,
+                stdout=out_f,
                 stderr=subprocess.PIPE,
                 text=True,
                 encoding="utf-8",
                 timeout=timeout,
             )
+        with open(out_path, encoding="utf-8") as f:
+            stdout_text = f.read()
     finally:
-        Path(tmp.name).unlink(missing_ok=True)
+        os.unlink(out_path)
+        if os.path.exists(prompt_path):
+            os.unlink(prompt_path)
 
     if proc.returncode != 0:
         stderr_snippet = proc.stderr.strip()[:300]
@@ -114,17 +145,17 @@ def _call_bob(
         )
 
     try:
-        data = json.loads(proc.stdout)
+        data = json.loads(stdout_text)
     except json.JSONDecodeError as exc:
         raise BobShellError(
             f"bob run output is not valid JSON: {exc}. "
-            f"First 200 chars: {proc.stdout[:200]!r}"
+            f"First 200 chars: {stdout_text[:200]!r}"
         ) from exc
 
     if data.get("status") != "success":
         raise BobShellError(
             f"bob run returned status={data.get('status')!r}. "
-            f"Response: {proc.stdout[:300]}"
+            f"Response: {stdout_text[:300]}"
         )
 
     if "last_message" not in data:
@@ -134,7 +165,6 @@ def _call_bob(
         )
 
     return data["last_message"]
-
 
 class BobShellSummarizer:
     """Calls Bob Shell non-interactively to produce cited prose summaries.

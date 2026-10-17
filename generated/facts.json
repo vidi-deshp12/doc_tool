@@ -3001,6 +3001,96 @@
       "type": "calls"
     },
     {
+      "from": "target/app",
+      "to": "target/app/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app",
+      "to": "target/app/api",
+      "type": "contains"
+    },
+    {
+      "from": "target/app",
+      "to": "target/app/core",
+      "type": "contains"
+    },
+    {
+      "from": "target/app",
+      "to": "target/app/db",
+      "type": "contains"
+    },
+    {
+      "from": "target/app",
+      "to": "target/app/main.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app",
+      "to": "target/app/models",
+      "type": "contains"
+    },
+    {
+      "from": "target/app",
+      "to": "target/app/resources",
+      "type": "contains"
+    },
+    {
+      "from": "target/app",
+      "to": "target/app/services",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api",
+      "to": "target/app/api/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api",
+      "to": "target/app/api/dependencies",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api",
+      "to": "target/app/api/errors",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api",
+      "to": "target/app/api/routes",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/dependencies",
+      "to": "target/app/api/dependencies/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/dependencies",
+      "to": "target/app/api/dependencies/articles.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/dependencies",
+      "to": "target/app/api/dependencies/authentication.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/dependencies",
+      "to": "target/app/api/dependencies/comments.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/dependencies",
+      "to": "target/app/api/dependencies/database.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/dependencies",
+      "to": "target/app/api/dependencies/profiles.py",
+      "type": "contains"
+    },
+    {
       "from": "target/app/api/dependencies/articles.py",
       "to": "target/app/api/dependencies/articles.py::check_article_modification_permissions",
       "type": "contains"
@@ -3086,6 +3176,21 @@
       "type": "contains"
     },
     {
+      "from": "target/app/api/errors",
+      "to": "target/app/api/errors/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/errors",
+      "to": "target/app/api/errors/http_error.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/errors",
+      "to": "target/app/api/errors/validation_error.py",
+      "type": "contains"
+    },
+    {
       "from": "target/app/api/errors/http_error.py",
       "to": "target/app/api/errors/http_error.py::http_error_handler",
       "type": "contains"
@@ -3093,6 +3198,66 @@
     {
       "from": "target/app/api/errors/validation_error.py",
       "to": "target/app/api/errors/validation_error.py::http422_error_handler",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/routes",
+      "to": "target/app/api/routes/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/routes",
+      "to": "target/app/api/routes/api.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/routes",
+      "to": "target/app/api/routes/articles",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/routes",
+      "to": "target/app/api/routes/authentication.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/routes",
+      "to": "target/app/api/routes/comments.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/routes",
+      "to": "target/app/api/routes/profiles.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/routes",
+      "to": "target/app/api/routes/tags.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/routes",
+      "to": "target/app/api/routes/users.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/routes/articles",
+      "to": "target/app/api/routes/articles/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/routes/articles",
+      "to": "target/app/api/routes/articles/api.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/routes/articles",
+      "to": "target/app/api/routes/articles/articles_common.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/api/routes/articles",
+      "to": "target/app/api/routes/articles/articles_resource.py",
       "type": "contains"
     },
     {
@@ -3191,6 +3356,31 @@
       "type": "contains"
     },
     {
+      "from": "target/app/core",
+      "to": "target/app/core/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/core",
+      "to": "target/app/core/config.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/core",
+      "to": "target/app/core/events.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/core",
+      "to": "target/app/core/logging.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/core",
+      "to": "target/app/core/settings",
+      "type": "contains"
+    },
+    {
       "from": "target/app/core/config.py",
       "to": "target/app/core/config.py::get_app_settings",
       "type": "contains"
@@ -3213,6 +3403,36 @@
     {
       "from": "target/app/core/logging.py::InterceptHandler",
       "to": "target/app/core/logging.py::InterceptHandler::emit",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/core/settings",
+      "to": "target/app/core/settings/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/core/settings",
+      "to": "target/app/core/settings/app.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/core/settings",
+      "to": "target/app/core/settings/base.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/core/settings",
+      "to": "target/app/core/settings/development.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/core/settings",
+      "to": "target/app/core/settings/production.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/core/settings",
+      "to": "target/app/core/settings/test.py",
       "type": "contains"
     },
     {
@@ -3256,6 +3476,31 @@
       "type": "contains"
     },
     {
+      "from": "target/app/db",
+      "to": "target/app/db/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db",
+      "to": "target/app/db/errors.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db",
+      "to": "target/app/db/events.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db",
+      "to": "target/app/db/queries",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db",
+      "to": "target/app/db/repositories",
+      "type": "contains"
+    },
+    {
       "from": "target/app/db/errors.py",
       "to": "target/app/db/errors.py::EntityDoesNotExist",
       "type": "contains"
@@ -3268,6 +3513,21 @@
     {
       "from": "target/app/db/events.py",
       "to": "target/app/db/events.py::connect_to_db",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/queries",
+      "to": "target/app/db/queries/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/queries",
+      "to": "target/app/db/queries/queries.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/queries",
+      "to": "target/app/db/queries/tables.py",
       "type": "contains"
     },
     {
@@ -3313,6 +3573,41 @@
     {
       "from": "target/app/db/queries/tables.py::TypedTable",
       "to": "target/app/db/queries/tables.py::TypedTable::__init__",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories",
+      "to": "target/app/db/repositories/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories",
+      "to": "target/app/db/repositories/articles.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories",
+      "to": "target/app/db/repositories/base.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories",
+      "to": "target/app/db/repositories/comments.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories",
+      "to": "target/app/db/repositories/profiles.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories",
+      "to": "target/app/db/repositories/tags.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/db/repositories",
+      "to": "target/app/db/repositories/users.py",
       "type": "contains"
     },
     {
@@ -3516,6 +3811,26 @@
       "type": "contains"
     },
     {
+      "from": "target/app/models",
+      "to": "target/app/models/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models",
+      "to": "target/app/models/common.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models",
+      "to": "target/app/models/domain",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models",
+      "to": "target/app/models/schemas",
+      "type": "contains"
+    },
+    {
       "from": "target/app/models/common.py",
       "to": "target/app/models/common.py::DateTimeModelMixin",
       "type": "contains"
@@ -3528,6 +3843,36 @@
     {
       "from": "target/app/models/common.py::DateTimeModelMixin",
       "to": "target/app/models/common.py::DateTimeModelMixin::default_datetime",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/domain",
+      "to": "target/app/models/domain/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/domain",
+      "to": "target/app/models/domain/articles.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/domain",
+      "to": "target/app/models/domain/comments.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/domain",
+      "to": "target/app/models/domain/profiles.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/domain",
+      "to": "target/app/models/domain/rwmodel.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/domain",
+      "to": "target/app/models/domain/users.py",
       "type": "contains"
     },
     {
@@ -3578,6 +3923,46 @@
     {
       "from": "target/app/models/domain/users.py::UserInDB",
       "to": "target/app/models/domain/users.py::UserInDB::check_password",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/schemas",
+      "to": "target/app/models/schemas/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/schemas",
+      "to": "target/app/models/schemas/articles.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/schemas",
+      "to": "target/app/models/schemas/comments.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/schemas",
+      "to": "target/app/models/schemas/jwt.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/schemas",
+      "to": "target/app/models/schemas/profiles.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/schemas",
+      "to": "target/app/models/schemas/rwschema.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/schemas",
+      "to": "target/app/models/schemas/tags.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/models/schemas",
+      "to": "target/app/models/schemas/users.py",
       "type": "contains"
     },
     {
@@ -3673,6 +4058,46 @@
     {
       "from": "target/app/models/schemas/users.py",
       "to": "target/app/models/schemas/users.py::UserWithToken",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/resources",
+      "to": "target/app/resources/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/resources",
+      "to": "target/app/resources/strings.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/services",
+      "to": "target/app/services/__init__.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/services",
+      "to": "target/app/services/articles.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/services",
+      "to": "target/app/services/authentication.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/services",
+      "to": "target/app/services/comments.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/services",
+      "to": "target/app/services/jwt.py",
+      "type": "contains"
+    },
+    {
+      "from": "target/app/services",
+      "to": "target/app/services/security.py",
       "type": "contains"
     },
     {
@@ -7678,32 +8103,32 @@
     },
     {
       "from": "route:POST /api/articles",
-      "to": "external:Body_articles_create_article_api_articles_post",
+      "to": "target/app/models/schemas/articles.py::ArticleInCreate",
       "type": "request_model"
     },
     {
       "from": "route:POST /api/articles/{slug}/comments",
-      "to": "external:Body_comments_create_comment_for_article_api_articles__slug__comments_post",
+      "to": "target/app/models/schemas/comments.py::CommentInCreate",
       "type": "request_model"
     },
     {
       "from": "route:POST /api/users",
-      "to": "external:Body_auth_register_api_users_post",
+      "to": "target/app/models/schemas/users.py::UserInCreate",
       "type": "request_model"
     },
     {
       "from": "route:POST /api/users/login",
-      "to": "external:Body_auth_login_api_users_login_post",
+      "to": "target/app/models/schemas/users.py::UserInLogin",
       "type": "request_model"
     },
     {
       "from": "route:PUT /api/articles/{slug}",
-      "to": "external:Body_articles_update_article_api_articles__slug__put",
+      "to": "target/app/models/schemas/articles.py::ArticleInUpdate",
       "type": "request_model"
     },
     {
       "from": "route:PUT /api/user",
-      "to": "external:Body_users_update_current_user_api_user_put",
+      "to": "target/app/models/schemas/users.py::UserInUpdate",
       "type": "request_model"
     },
     {
@@ -8697,8 +9122,8 @@
     {
       "file": "target/app/api/routes/articles/articles_resource.py",
       "full_path": "/api/articles/{slug}",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "818110b788cc73ac5db8541d4e076c098c380369bd2cd74d30cfcdcd78d23ece",
+      "hash_struct": "818110b788cc73ac5db8541d4e076c098c380369bd2cd74d30cfcdcd78d23ece",
       "id": "route:DELETE /api/articles/{slug}",
       "lines": [
         109,
@@ -8712,8 +9137,8 @@
     {
       "file": "target/app/api/routes/comments.py",
       "full_path": "/api/articles/{slug}/comments/{comment_id}",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "0fbbc1d384a108b3b66089d0cf84c430852b663684883d89ffb3413402f70a25",
+      "hash_struct": "0fbbc1d384a108b3b66089d0cf84c430852b663684883d89ffb3413402f70a25",
       "id": "route:DELETE /api/articles/{slug}/comments/{comment_id}",
       "lines": [
         60,
@@ -8727,8 +9152,8 @@
     {
       "file": "target/app/api/routes/articles/articles_common.py",
       "full_path": "/api/articles/{slug}/favorite",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "bff2b56e2ab9289c3e32e6949c5a1f47657e650af540b0c22f7df044b6d92c8d",
+      "hash_struct": "bff2b56e2ab9289c3e32e6949c5a1f47657e650af540b0c22f7df044b6d92c8d",
       "id": "route:DELETE /api/articles/{slug}/favorite",
       "lines": [
         77,
@@ -8742,8 +9167,8 @@
     {
       "file": "target/app/api/routes/profiles.py",
       "full_path": "/api/profiles/{username}/follow",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "7cb0f641ffd571afd13a43f4cee2b619b9d5b1c95e0826146ae9c09e02ed2a71",
+      "hash_struct": "7cb0f641ffd571afd13a43f4cee2b619b9d5b1c95e0826146ae9c09e02ed2a71",
       "id": "route:DELETE /api/profiles/{username}/follow",
       "lines": [
         57,
@@ -8757,8 +9182,8 @@
     {
       "file": "target/app/api/routes/articles/articles_resource.py",
       "full_path": "/api/articles",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "cdc27f4c10a07a1ba5070f05a17d703f6854db03b95eea24ff5c77afdd6f65bf",
+      "hash_struct": "cdc27f4c10a07a1ba5070f05a17d703f6854db03b95eea24ff5c77afdd6f65bf",
       "id": "route:GET /api/articles",
       "lines": [
         30,
@@ -8772,8 +9197,8 @@
     {
       "file": "target/app/api/routes/articles/articles_common.py",
       "full_path": "/api/articles/feed",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "45fd72004e284e67a8fe2e800b41378cfcb40a345046fd16dbd15388a8260ff7",
+      "hash_struct": "45fd72004e284e67a8fe2e800b41378cfcb40a345046fd16dbd15388a8260ff7",
       "id": "route:GET /api/articles/feed",
       "lines": [
         22,
@@ -8787,8 +9212,8 @@
     {
       "file": "target/app/api/routes/articles/articles_resource.py",
       "full_path": "/api/articles/{slug}",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "0c1792214d094ce3c5da41bd76f2323f90047074602e9f059bd29a5b65d8a9ee",
+      "hash_struct": "0c1792214d094ce3c5da41bd76f2323f90047074602e9f059bd29a5b65d8a9ee",
       "id": "route:GET /api/articles/{slug}",
       "lines": [
         82,
@@ -8802,8 +9227,8 @@
     {
       "file": "target/app/api/routes/comments.py",
       "full_path": "/api/articles/{slug}/comments",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "dcd69cfea3b454fbc525de428cc331902433895c5820e8fcfd15b52daddd6778",
+      "hash_struct": "dcd69cfea3b454fbc525de428cc331902433895c5820e8fcfd15b52daddd6778",
       "id": "route:GET /api/articles/{slug}/comments",
       "lines": [
         26,
@@ -8817,8 +9242,8 @@
     {
       "file": "target/app/api/routes/profiles.py",
       "full_path": "/api/profiles/{username}",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "7af70cb190c4e907906e3ca71be7b337fbab72d93e9ebffa984c451352362c71",
+      "hash_struct": "7af70cb190c4e907906e3ca71be7b337fbab72d93e9ebffa984c451352362c71",
       "id": "route:GET /api/profiles/{username}",
       "lines": [
         16,
@@ -8832,8 +9257,8 @@
     {
       "file": "target/app/api/routes/tags.py",
       "full_path": "/api/tags",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "619dbd23a3fb080ab8dbad48c30d2c5b78e4347263f402174e96604515c8fc2a",
+      "hash_struct": "619dbd23a3fb080ab8dbad48c30d2c5b78e4347263f402174e96604515c8fc2a",
       "id": "route:GET /api/tags",
       "lines": [
         10,
@@ -8847,8 +9272,8 @@
     {
       "file": "target/app/api/routes/users.py",
       "full_path": "/api/user",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "6c2c4e7808dfc349aefe1a6d8552c2915304ccf9541e84cbbd25a6b1641cc035",
+      "hash_struct": "6c2c4e7808dfc349aefe1a6d8552c2915304ccf9541e84cbbd25a6b1641cc035",
       "id": "route:GET /api/user",
       "lines": [
         18,
@@ -8862,8 +9287,8 @@
     {
       "file": "target/app/api/routes/articles/articles_resource.py",
       "full_path": "/api/articles",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "7ab51fac72ea9461aa56e0c067c9693be06da6885890d1a4c4bf67c460cf95d9",
+      "hash_struct": "7ab51fac72ea9461aa56e0c067c9693be06da6885890d1a4c4bf67c460cf95d9",
       "id": "route:POST /api/articles",
       "lines": [
         53,
@@ -8877,8 +9302,8 @@
     {
       "file": "target/app/api/routes/comments.py",
       "full_path": "/api/articles/{slug}/comments",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "ff801ae6268cf75ef4bd65e21b838ede097c8ebf0e11cec12adad5e08222fcba",
+      "hash_struct": "ff801ae6268cf75ef4bd65e21b838ede097c8ebf0e11cec12adad5e08222fcba",
       "id": "route:POST /api/articles/{slug}/comments",
       "lines": [
         40,
@@ -8892,8 +9317,8 @@
     {
       "file": "target/app/api/routes/articles/articles_common.py",
       "full_path": "/api/articles/{slug}/favorite",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "b5bea98b9bbc70fe31a1414439b2d145bc264514c125dd49faf77ce6c0dae5ed",
+      "hash_struct": "b5bea98b9bbc70fe31a1414439b2d145bc264514c125dd49faf77ce6c0dae5ed",
       "id": "route:POST /api/articles/{slug}/favorite",
       "lines": [
         47,
@@ -8907,8 +9332,8 @@
     {
       "file": "target/app/api/routes/profiles.py",
       "full_path": "/api/profiles/{username}/follow",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "3b614f745c1ff50af6bb9fc4be02552f1e0bc086df1ed07a804c1b8c5000e229",
+      "hash_struct": "3b614f745c1ff50af6bb9fc4be02552f1e0bc086df1ed07a804c1b8c5000e229",
       "id": "route:POST /api/profiles/{username}/follow",
       "lines": [
         27,
@@ -8922,8 +9347,8 @@
     {
       "file": "target/app/api/routes/authentication.py",
       "full_path": "/api/users",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "1f670114d7519ca2f02b1b1b321fedddcfbb1743b76c334df3499577507854aa",
+      "hash_struct": "1f670114d7519ca2f02b1b1b321fedddcfbb1743b76c334df3499577507854aa",
       "id": "route:POST /api/users",
       "lines": [
         56,
@@ -8937,8 +9362,8 @@
     {
       "file": "target/app/api/routes/authentication.py",
       "full_path": "/api/users/login",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "91fd2b4070922bda4797eca1b7c571ecd87db935264b177fa6a1588f599272e8",
+      "hash_struct": "91fd2b4070922bda4797eca1b7c571ecd87db935264b177fa6a1588f599272e8",
       "id": "route:POST /api/users/login",
       "lines": [
         22,
@@ -8952,8 +9377,8 @@
     {
       "file": "target/app/api/routes/articles/articles_resource.py",
       "full_path": "/api/articles/{slug}",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "66e1f2b345833c29e91590d5569eb2d54b9ab87160d4139c27de527a78f34223",
+      "hash_struct": "66e1f2b345833c29e91590d5569eb2d54b9ab87160d4139c27de527a78f34223",
       "id": "route:PUT /api/articles/{slug}",
       "lines": [
         89,
@@ -8967,8 +9392,8 @@
     {
       "file": "target/app/api/routes/users.py",
       "full_path": "/api/user",
-      "hash_source": "",
-      "hash_struct": "",
+      "hash_source": "e1da6aae1646348a5d2a0d853c4c0d80077e9a540569cf54fbc657fae23e15f0",
+      "hash_struct": "e1da6aae1646348a5d2a0d853c4c0d80077e9a540569cf54fbc657fae23e15f0",
       "id": "route:PUT /api/user",
       "lines": [
         38,
@@ -8978,6 +9403,18 @@
       "name": "users:update-current-user",
       "status_code": 200,
       "type": "route"
+    },
+    {
+      "file": "",
+      "hash_source": "21d8b021e6e4fb9dbe3a1a5e0360e0c6ecc66020304fab45da40ae25f3e6aa87",
+      "hash_struct": "21d8b021e6e4fb9dbe3a1a5e0360e0c6ecc66020304fab45da40ae25f3e6aa87",
+      "id": "target/app",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "app",
+      "type": "package"
     },
     {
       "file": "target/app/__init__.py",
@@ -8991,6 +9428,18 @@
       "type": "module"
     },
     {
+      "file": "",
+      "hash_source": "fbc89749cb21eb7870d717fa5a75288595865cd4a169769d570a7c80106b9838",
+      "hash_struct": "fbc89749cb21eb7870d717fa5a75288595865cd4a169769d570a7c80106b9838",
+      "id": "target/app/api",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "api",
+      "type": "package"
+    },
+    {
       "file": "target/app/api/__init__.py",
       "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6",
@@ -9000,6 +9449,18 @@
         0
       ],
       "type": "module"
+    },
+    {
+      "file": "",
+      "hash_source": "96a7e7235d7a27413a91c99c0b09b457944b3b227aaf47df16042c265fcaa146",
+      "hash_struct": "96a7e7235d7a27413a91c99c0b09b457944b3b227aaf47df16042c265fcaa146",
+      "id": "target/app/api/dependencies",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "dependencies",
+      "type": "package"
     },
     {
       "file": "target/app/api/dependencies/__init__.py",
@@ -9025,7 +9486,7 @@
     },
     {
       "file": "target/app/api/dependencies/articles.py",
-      "hash_source": "3590b48a3848a9fd05f9592c67e1cdb56f3240fd4919f4685c69c3a0d5c7f5c3",
+      "hash_source": "37668f5e9c20cfd92555d88c7c754819cc09c5af0227e31db74b9edc3d5f0f22",
       "hash_struct": "37954703e86a82a7946576decd0df3251d0cbe62704401770a9299e5a87c2e64",
       "id": "target/app/api/dependencies/articles.py::check_article_modification_permissions",
       "lines": [
@@ -9040,7 +9501,7 @@
     {
       "async_flag": true,
       "file": "target/app/api/dependencies/articles.py",
-      "hash_source": "3590b48a3848a9fd05f9592c67e1cdb56f3240fd4919f4685c69c3a0d5c7f5c3",
+      "hash_source": "031541b296a158af3721c6f573a68cfcc9a52aedee9f64971af67dd372079096",
       "hash_struct": "ef4b10c691e78b9e374af0c87cd776d2612bd12f949a6267be8e0551e3cef2df",
       "id": "target/app/api/dependencies/articles.py::get_article_by_slug_from_path",
       "lines": [
@@ -9054,7 +9515,7 @@
     },
     {
       "file": "target/app/api/dependencies/articles.py",
-      "hash_source": "3590b48a3848a9fd05f9592c67e1cdb56f3240fd4919f4685c69c3a0d5c7f5c3",
+      "hash_source": "f591fa4d39f9ae17d1ccbf3e4bfffb17eddc68fe81956b7cb20a1614e3c2cbd8",
       "hash_struct": "933ae2bc61070649df89b1dbb588ee8cb1c2369b025963d2ebd93b1f8917f16b",
       "id": "target/app/api/dependencies/articles.py::get_articles_filters",
       "lines": [
@@ -9110,7 +9571,7 @@
     },
     {
       "file": "target/app/api/dependencies/authentication.py",
-      "hash_source": "2334aaac799fe602672a9e13c21871b9ac9ba46405e72a54002bd199e8d04069",
+      "hash_source": "963b0f033a5586057fa9fc201cc0bf909994c0642ec7ba4e7e1f2c87ce19b34d",
       "hash_struct": "489aa3b4e0516eecb67f7373f1c6c2e7759b19162cabdb9a820e9bf541bc1fca",
       "id": "target/app/api/dependencies/authentication.py::_get_authorization_header",
       "lines": [
@@ -9124,7 +9585,7 @@
     },
     {
       "file": "target/app/api/dependencies/authentication.py",
-      "hash_source": "2334aaac799fe602672a9e13c21871b9ac9ba46405e72a54002bd199e8d04069",
+      "hash_source": "7c3278faf0e7f6f67a631f782e8fb17ece3bef9839321f6740a8a09aa07c870b",
       "hash_struct": "5b03bc9a7e9512b97405227edb336b5c335f4578af54d154d8be8de810c8b67a",
       "id": "target/app/api/dependencies/authentication.py::_get_authorization_header_optional",
       "lines": [
@@ -9138,7 +9599,7 @@
     },
     {
       "file": "target/app/api/dependencies/authentication.py",
-      "hash_source": "2334aaac799fe602672a9e13c21871b9ac9ba46405e72a54002bd199e8d04069",
+      "hash_source": "0a35ecc45a3bdd10c038619a415ea34172a0744747eef51659b75f5f97d7e1f0",
       "hash_struct": "0e2da7223260387dcdbf1cb4e98d30e386b2130d0ab83649a68d44d9173624c2",
       "id": "target/app/api/dependencies/authentication.py::_get_authorization_header_retriever",
       "lines": [
@@ -9153,7 +9614,7 @@
     {
       "async_flag": true,
       "file": "target/app/api/dependencies/authentication.py",
-      "hash_source": "2334aaac799fe602672a9e13c21871b9ac9ba46405e72a54002bd199e8d04069",
+      "hash_source": "4523b2296dcf436a41ac450eca3943fa6822026c4433b59770e36ac3b6e6fb4b",
       "hash_struct": "7e19a1141aab834f2c8248506bc8f75931f20d3abf6ba138fa8abc77a31643c2",
       "id": "target/app/api/dependencies/authentication.py::_get_current_user",
       "lines": [
@@ -9168,7 +9629,7 @@
     {
       "async_flag": true,
       "file": "target/app/api/dependencies/authentication.py",
-      "hash_source": "2334aaac799fe602672a9e13c21871b9ac9ba46405e72a54002bd199e8d04069",
+      "hash_source": "1bec099e74cd331904c4d03a467e6822cc6ca6781430f62d25e6b58960fb37a4",
       "hash_struct": "cdd97b4cc3c0ccbade69df32a312867b482ee5716bf21e712ec6175eeaf06151",
       "id": "target/app/api/dependencies/authentication.py::_get_current_user_optional",
       "lines": [
@@ -9182,7 +9643,7 @@
     },
     {
       "file": "target/app/api/dependencies/authentication.py",
-      "hash_source": "2334aaac799fe602672a9e13c21871b9ac9ba46405e72a54002bd199e8d04069",
+      "hash_source": "bb68853147eb61905059ab702c6cc536a2b397c6b228dd6c4a9e53fcc2121cbd",
       "hash_struct": "1b80d57d72c805c89a23b61d05f49361fddd8f108d01592f9383d597ff10e280",
       "id": "target/app/api/dependencies/authentication.py::get_current_user_authorizer",
       "lines": [
@@ -9207,7 +9668,7 @@
     },
     {
       "file": "target/app/api/dependencies/comments.py",
-      "hash_source": "d25b027a5438ae8d1188a5de347e0db4bc94fd2f4a8ac7560f009f21192455e0",
+      "hash_source": "60a5f81305278f887962a6c83f82d7eba6d2659c1401b9a524f79927a0f6b4a1",
       "hash_struct": "57c618d8e7c5e031f965a7b9a453e9d2810938b71db1d2f9dc25d223ef51d99f",
       "id": "target/app/api/dependencies/comments.py::check_comment_modification_permissions",
       "lines": [
@@ -9222,7 +9683,7 @@
     {
       "async_flag": true,
       "file": "target/app/api/dependencies/comments.py",
-      "hash_source": "d25b027a5438ae8d1188a5de347e0db4bc94fd2f4a8ac7560f009f21192455e0",
+      "hash_source": "71f4eba2696f0885b8498c6c03fd8dd319490e7e2eb8030ae1dec567e97ab048",
       "hash_struct": "e70547cf45b83ce86933680a4e0727002e3583001a1918f1430e8a35270a4032",
       "id": "target/app/api/dependencies/comments.py::get_comment_by_id_from_path",
       "lines": [
@@ -9248,7 +9709,7 @@
     {
       "async_flag": true,
       "file": "target/app/api/dependencies/database.py",
-      "hash_source": "9024385cd5a46195fec5ab5207384ad27abd4a93d1b1f0b2b19311bc41602130",
+      "hash_source": "8ebec415008274d990ad6d5d7c5aa51a0ac1add45131dadc4a21a5f6a1194598",
       "hash_struct": "4446964264aaa575527345318cbeb23b7a40b9d2b8477ef590c3c283aa73e17c",
       "id": "target/app/api/dependencies/database.py::_get_connection_from_pool",
       "lines": [
@@ -9262,7 +9723,7 @@
     },
     {
       "file": "target/app/api/dependencies/database.py",
-      "hash_source": "9024385cd5a46195fec5ab5207384ad27abd4a93d1b1f0b2b19311bc41602130",
+      "hash_source": "95f259a398edadd15f34c5de847df7f1173aa6bfb5cd6840b7cf3de52807549e",
       "hash_struct": "ceb4138fb3b0aa41906a6b562f44d8438dc5941be8a129b92625173349b57691",
       "id": "target/app/api/dependencies/database.py::_get_db_pool",
       "lines": [
@@ -9276,7 +9737,7 @@
     },
     {
       "file": "target/app/api/dependencies/database.py",
-      "hash_source": "9024385cd5a46195fec5ab5207384ad27abd4a93d1b1f0b2b19311bc41602130",
+      "hash_source": "e83a0129b76dc7071db1108735d8bbffdb2f1261a911dd9735942e8d32821c3e",
       "hash_struct": "77923c81dfffc79db1affee681b6b94fdc74c4a34be0c7e23e495269439a7908",
       "id": "target/app/api/dependencies/database.py::get_repository",
       "lines": [
@@ -9302,7 +9763,7 @@
     {
       "async_flag": true,
       "file": "target/app/api/dependencies/profiles.py",
-      "hash_source": "90a898665781e42e2372f22ce2432b21838a0821120bd9e4c583b0a04623c51d",
+      "hash_source": "45d7424a2d02c949224a386451a7081adca743e3860cedefc1754bffcc263613",
       "hash_struct": "ccb971c776e704d8923014bd71d7a8d1833be056e425efc2c6f0ba1cdb967527",
       "id": "target/app/api/dependencies/profiles.py::get_profile_by_username_from_path",
       "lines": [
@@ -9313,6 +9774,18 @@
       "returns": "Profile",
       "signature": "username: str=Path(..., min_length=1), user: Optional[User]=Depends(get_current_user_authorizer(required=False)), profiles_repo: ProfilesRepository=Depends(get_repository(ProfilesRepository))",
       "type": "function"
+    },
+    {
+      "file": "",
+      "hash_source": "4fb2a9b53df0aa24e7f56d211c603d39261cd7803bd50c052f5cbd4fe40222ca",
+      "hash_struct": "4fb2a9b53df0aa24e7f56d211c603d39261cd7803bd50c052f5cbd4fe40222ca",
+      "id": "target/app/api/errors",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "errors",
+      "type": "package"
     },
     {
       "file": "target/app/api/errors/__init__.py",
@@ -9339,7 +9812,7 @@
     {
       "async_flag": true,
       "file": "target/app/api/errors/http_error.py",
-      "hash_source": "9426d5105b01e985fb0211ddc838d0679c41c23180343f4e91a448fa0cd04297",
+      "hash_source": "eed40f3418b236184d174e221dcd37d797e220aab83e3dcc52721fdbcdf23adc",
       "hash_struct": "edce20721d033bf4110fc6b838ac525239c2f74fcf0d2b5280c7109db3e8599b",
       "id": "target/app/api/errors/http_error.py::http_error_handler",
       "lines": [
@@ -9365,7 +9838,7 @@
     {
       "async_flag": true,
       "file": "target/app/api/errors/validation_error.py",
-      "hash_source": "656c1bb7dbc946813c179278abf26382a4b9eecaf203265ae0337f0b3b7a6f30",
+      "hash_source": "792f26c9e7802ee0de0e67ab9f433de73d33a46beb4b8b58043d6249b4b9e4c9",
       "hash_struct": "75651da35cbb0e87c9cc1eace9a391d05e921c257d83c4a0de8bc19d98e568d9",
       "id": "target/app/api/errors/validation_error.py::http422_error_handler",
       "lines": [
@@ -9376,6 +9849,18 @@
       "returns": "JSONResponse",
       "signature": "_: Request, exc: Union[RequestValidationError, ValidationError]",
       "type": "function"
+    },
+    {
+      "file": "",
+      "hash_source": "b1178bcf7eeeca9e2cd72c064beb176b94022b6240ccf0cdb68ea6b607d76157",
+      "hash_struct": "b1178bcf7eeeca9e2cd72c064beb176b94022b6240ccf0cdb68ea6b607d76157",
+      "id": "target/app/api/routes",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "routes",
+      "type": "package"
     },
     {
       "file": "target/app/api/routes/__init__.py",
@@ -9398,6 +9883,18 @@
         16
       ],
       "type": "module"
+    },
+    {
+      "file": "",
+      "hash_source": "8dbd1ccc99bebe0d92249cd71d4f54b6320dca9e14434e791bb0481e531a5b1c",
+      "hash_struct": "8dbd1ccc99bebe0d92249cd71d4f54b6320dca9e14434e791bb0481e531a5b1c",
+      "id": "target/app/api/routes/articles",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "articles",
+      "type": "package"
     },
     {
       "file": "target/app/api/routes/articles/__init__.py",
@@ -9438,7 +9935,7 @@
         "router.get('/feed', response_model=ListOfArticlesInResponse, name='articles:get-user-feed-articles')"
       ],
       "file": "target/app/api/routes/articles/articles_common.py",
-      "hash_source": "b5383398d1092f1708865e4246e27fc1fdb14becec493ec3255f376435ac637c",
+      "hash_source": "8b584b86f06127dfa97c6951dbcb44fdb0d5e3ff492d1595a5ee18b57ddab196",
       "hash_struct": "eafeb6d10e8329a802573deb0442bc3bf08498510a0799f5f225f30255d87117",
       "id": "target/app/api/routes/articles/articles_common.py::get_articles_for_user_feed",
       "lines": [
@@ -9456,7 +9953,7 @@
         "router.post('/{slug}/favorite', response_model=ArticleInResponse, name='articles:mark-article-favorite')"
       ],
       "file": "target/app/api/routes/articles/articles_common.py",
-      "hash_source": "b5383398d1092f1708865e4246e27fc1fdb14becec493ec3255f376435ac637c",
+      "hash_source": "22506b2ccea025b2aae9af52594e7a81cead7aa1e662cc70beb91625f0e5727b",
       "hash_struct": "d454bc6daa20fc01654ffe610f316bc4ac31f7b55da9636f40169dcc861dfb0d",
       "id": "target/app/api/routes/articles/articles_common.py::mark_article_as_favorite",
       "lines": [
@@ -9474,7 +9971,7 @@
         "router.delete('/{slug}/favorite', response_model=ArticleInResponse, name='articles:unmark-article-favorite')"
       ],
       "file": "target/app/api/routes/articles/articles_common.py",
-      "hash_source": "b5383398d1092f1708865e4246e27fc1fdb14becec493ec3255f376435ac637c",
+      "hash_source": "19cd4bf5336e3cf6e468097c7def6190d6cd0601e0ef5ece16156af87345b500",
       "hash_struct": "080fa86b4ee4cfc067c490a34f7eff492287a5047f11ce3d67ba6c198756b66d",
       "id": "target/app/api/routes/articles/articles_common.py::remove_article_from_favorites",
       "lines": [
@@ -9503,7 +10000,7 @@
         "router.post('', status_code=status.HTTP_201_CREATED, response_model=ArticleInResponse, name='articles:create-article')"
       ],
       "file": "target/app/api/routes/articles/articles_resource.py",
-      "hash_source": "b4865e07ec36608373e41b54d5b7b4bbc0696da19d79c7492f6f0162f33158b4",
+      "hash_source": "46ef832712dd12621f3efc6fc998438fc4e1715f2862e230ea0417db219f4c90",
       "hash_struct": "a9b205d5f6fc3b008640685d19fa3bc5d5097158b7099ed7227b3e754869d2f7",
       "id": "target/app/api/routes/articles/articles_resource.py::create_new_article",
       "lines": [
@@ -9521,7 +10018,7 @@
         "router.delete('/{slug}', status_code=status.HTTP_204_NO_CONTENT, name='articles:delete-article', dependencies=[Depends(check_article_modification_permissions)], response_class=Response)"
       ],
       "file": "target/app/api/routes/articles/articles_resource.py",
-      "hash_source": "b4865e07ec36608373e41b54d5b7b4bbc0696da19d79c7492f6f0162f33158b4",
+      "hash_source": "77f052f110bbb1b01c33b1d911715d4fcb372445b7c84fe2d05e6ae6249cfc26",
       "hash_struct": "9117017cdb160adea5f2956c9fb562ae87897407a9f3c1a4ca18b6951e2e2f50",
       "id": "target/app/api/routes/articles/articles_resource.py::delete_article_by_slug",
       "lines": [
@@ -9539,7 +10036,7 @@
         "router.get('', response_model=ListOfArticlesInResponse, name='articles:list-articles')"
       ],
       "file": "target/app/api/routes/articles/articles_resource.py",
-      "hash_source": "b4865e07ec36608373e41b54d5b7b4bbc0696da19d79c7492f6f0162f33158b4",
+      "hash_source": "3282b615ea19efd10af16c6a7c17170a4e00950d41809298f45153044b175f65",
       "hash_struct": "9d7e3fb016f55a1630da18037d79b81ece1048e0562d468592cf4ecbedaa6cf5",
       "id": "target/app/api/routes/articles/articles_resource.py::list_articles",
       "lines": [
@@ -9557,7 +10054,7 @@
         "router.get('/{slug}', response_model=ArticleInResponse, name='articles:get-article')"
       ],
       "file": "target/app/api/routes/articles/articles_resource.py",
-      "hash_source": "b4865e07ec36608373e41b54d5b7b4bbc0696da19d79c7492f6f0162f33158b4",
+      "hash_source": "1e00a01a8e90b1211d4e5dcbed8b95fa3a25e1e3d0bd97e72126a62093ccbd39",
       "hash_struct": "cf7c4dbf12801ec8108bffbc20b83975455d25b4c93dccf917705804f7dc93f8",
       "id": "target/app/api/routes/articles/articles_resource.py::retrieve_article_by_slug",
       "lines": [
@@ -9575,7 +10072,7 @@
         "router.put('/{slug}', response_model=ArticleInResponse, name='articles:update-article', dependencies=[Depends(check_article_modification_permissions)])"
       ],
       "file": "target/app/api/routes/articles/articles_resource.py",
-      "hash_source": "b4865e07ec36608373e41b54d5b7b4bbc0696da19d79c7492f6f0162f33158b4",
+      "hash_source": "af4c7951ce1bd62feda705347c4a03edd485a7ae20187dafd056965e37298ad3",
       "hash_struct": "e1b26058d9eab75b0907303e8356de3db674a54665f5829e48780bd8e8c06d50",
       "id": "target/app/api/routes/articles/articles_resource.py::update_article_by_slug",
       "lines": [
@@ -9604,7 +10101,7 @@
         "router.post('/login', response_model=UserInResponse, name='auth:login')"
       ],
       "file": "target/app/api/routes/authentication.py",
-      "hash_source": "ca3666735ce796617270684204476e88173b62d59b4bbac92ae5b31d2c9c529c",
+      "hash_source": "30e6d5973b52c410390e860808558eaa2a70279801cb2b9bb57eaaed436c22a5",
       "hash_struct": "5d37d72d5f6f8b2c80fb22c4027a2bd82acb4240076d08bac0630c559860048f",
       "id": "target/app/api/routes/authentication.py::login",
       "lines": [
@@ -9622,7 +10119,7 @@
         "router.post('', status_code=HTTP_201_CREATED, response_model=UserInResponse, name='auth:register')"
       ],
       "file": "target/app/api/routes/authentication.py",
-      "hash_source": "ca3666735ce796617270684204476e88173b62d59b4bbac92ae5b31d2c9c529c",
+      "hash_source": "e47c9395fcc5ca52094d4c1344d54e8feb8dec787da8fa70ee469c8acb43557c",
       "hash_struct": "0626afbb9fdbecd61a9cb84c4e7c9e25237825061d4369ac346c1a75bbb5a046",
       "id": "target/app/api/routes/authentication.py::register",
       "lines": [
@@ -9651,7 +10148,7 @@
         "router.post('', status_code=status.HTTP_201_CREATED, response_model=CommentInResponse, name='comments:create-comment-for-article')"
       ],
       "file": "target/app/api/routes/comments.py",
-      "hash_source": "430e7605d38974890f1c144de9fb114f8dcaffa3b1bc62865f38742391b81d13",
+      "hash_source": "d6db5ffefac227d2a607ed24a34f456c27de3e705b2be773494c55939cc72bce",
       "hash_struct": "9290ead9035564438027b7fd8b1d67da3383a839668170bd808d97d367c0337f",
       "id": "target/app/api/routes/comments.py::create_comment_for_article",
       "lines": [
@@ -9669,7 +10166,7 @@
         "router.delete('/{comment_id}', status_code=status.HTTP_204_NO_CONTENT, name='comments:delete-comment-from-article', dependencies=[Depends(check_comment_modification_permissions)], response_class=Response)"
       ],
       "file": "target/app/api/routes/comments.py",
-      "hash_source": "430e7605d38974890f1c144de9fb114f8dcaffa3b1bc62865f38742391b81d13",
+      "hash_source": "16c073da8101a6898c2a201ed2b833e14e274f409caab07d83067c7af4721af3",
       "hash_struct": "aede4cea3a8b9eaf5234f193cbbf8dd83a1f1b8efd39192d5e761d20283fdee7",
       "id": "target/app/api/routes/comments.py::delete_comment_from_article",
       "lines": [
@@ -9687,7 +10184,7 @@
         "router.get('', response_model=ListOfCommentsInResponse, name='comments:get-comments-for-article')"
       ],
       "file": "target/app/api/routes/comments.py",
-      "hash_source": "430e7605d38974890f1c144de9fb114f8dcaffa3b1bc62865f38742391b81d13",
+      "hash_source": "b1ce2dd9e10f533bc5a4281b061b4b34f280b782f7a614333f69de7764ffebae",
       "hash_struct": "b128ef40502ccff541764ae5bbf52b20603b7ba177d16fe07f50bad0c08fe4f8",
       "id": "target/app/api/routes/comments.py::list_comments_for_article",
       "lines": [
@@ -9716,7 +10213,7 @@
         "router.post('/{username}/follow', response_model=ProfileInResponse, name='profiles:follow-user')"
       ],
       "file": "target/app/api/routes/profiles.py",
-      "hash_source": "1332be6cda10c409abbd4bd7132c4287634061d926d78d927193c96d38a16420",
+      "hash_source": "8441531ec143445f250570968878eeeae246321fb0d3a3055c58e5bd34d7f39b",
       "hash_struct": "78304b936256f1ff2c4ab278678f979aa82f61cdb474f7a4b0cdb5f7e67b7572",
       "id": "target/app/api/routes/profiles.py::follow_for_user",
       "lines": [
@@ -9734,7 +10231,7 @@
         "router.get('/{username}', response_model=ProfileInResponse, name='profiles:get-profile')"
       ],
       "file": "target/app/api/routes/profiles.py",
-      "hash_source": "1332be6cda10c409abbd4bd7132c4287634061d926d78d927193c96d38a16420",
+      "hash_source": "b22cf1154aff2d1d7830e4ff5db2e17c2a18f7c6612c231e0402e7ae80e43c80",
       "hash_struct": "6c017b23c902869a32ea3be0fe436f8fddf96cca382281192aa6f1616cce399d",
       "id": "target/app/api/routes/profiles.py::retrieve_profile_by_username",
       "lines": [
@@ -9752,7 +10249,7 @@
         "router.delete('/{username}/follow', response_model=ProfileInResponse, name='profiles:unsubscribe-from-user')"
       ],
       "file": "target/app/api/routes/profiles.py",
-      "hash_source": "1332be6cda10c409abbd4bd7132c4287634061d926d78d927193c96d38a16420",
+      "hash_source": "15deb2915a5c43816a0d1caa53f12d0ac010edb503e1eb97274fda06481a0589",
       "hash_struct": "ce3c74f542b93dde9a1c3c8efc9005af6002289820de337a0e53d8d30c5024ea",
       "id": "target/app/api/routes/profiles.py::unsubscribe_from_user",
       "lines": [
@@ -9781,7 +10278,7 @@
         "router.get('', response_model=TagsInList, name='tags:get-all')"
       ],
       "file": "target/app/api/routes/tags.py",
-      "hash_source": "533f06f84e649ed08b928bd64a9422c49b7211677d264173e5a2fe75fb917d2a",
+      "hash_source": "929d4bda9e6991ae473d895abfdcb185c61e6476cd0da508f12dc2abae235852",
       "hash_struct": "034f030e1fcc42381a592ee992a63852d5fab1952c719fac5d4c59fcf66a6adf",
       "id": "target/app/api/routes/tags.py::get_all_tags",
       "lines": [
@@ -9810,7 +10307,7 @@
         "router.get('', response_model=UserInResponse, name='users:get-current-user')"
       ],
       "file": "target/app/api/routes/users.py",
-      "hash_source": "2bea6222c64beeeefc328324051137a4d10c6c19063cc007d8f96abf913b613f",
+      "hash_source": "7c5f6609618e7e297e26a18906f36ed9b1c1d42746d954917b3363ebf364ca50",
       "hash_struct": "61ec294c54aae2f1501b4fd2cece7880df30e8ce3bb19b55680df37df096dd13",
       "id": "target/app/api/routes/users.py::retrieve_current_user",
       "lines": [
@@ -9828,7 +10325,7 @@
         "router.put('', response_model=UserInResponse, name='users:update-current-user')"
       ],
       "file": "target/app/api/routes/users.py",
-      "hash_source": "2bea6222c64beeeefc328324051137a4d10c6c19063cc007d8f96abf913b613f",
+      "hash_source": "608bf150cd67c3df630d6f5915bd97389d0a25f306605232a2a114ceb62b502f",
       "hash_struct": "4df43a083b56811eecc93897ff78a5404b791ba4ebfea2cc6a3769caecd817a5",
       "id": "target/app/api/routes/users.py::update_current_user",
       "lines": [
@@ -9839,6 +10336,18 @@
       "returns": "UserInResponse",
       "signature": "user_update: UserInUpdate=Body(..., embed=True, alias='user'), current_user: User=Depends(get_current_user_authorizer()), users_repo: UsersRepository=Depends(get_repository(UsersRepository)), settings: AppSettings=Depends(get_app_settings)",
       "type": "function"
+    },
+    {
+      "file": "",
+      "hash_source": "11b51fd620007982ff03424d1d92b3859b182f9c230c177f20f12a4d3b7a6287",
+      "hash_struct": "11b51fd620007982ff03424d1d92b3859b182f9c230c177f20f12a4d3b7a6287",
+      "id": "target/app/core",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "core",
+      "type": "package"
     },
     {
       "file": "target/app/core/__init__.py",
@@ -9867,7 +10376,7 @@
         "lru_cache"
       ],
       "file": "target/app/core/config.py",
-      "hash_source": "4770869719720b675169500868db617ceb1d100e1386b7062fb7a432ab0e17bc",
+      "hash_source": "be484f72595fca68576f10f1e85a0f670f31c115cf24cdac403b9649db75a4de",
       "hash_struct": "6e365bac0d9227c5514c27be9c0c47521fffc7249ae3252a691d36168659a40a",
       "id": "target/app/core/config.py::get_app_settings",
       "lines": [
@@ -9891,7 +10400,7 @@
     },
     {
       "file": "target/app/core/events.py",
-      "hash_source": "9c8c0a910f81404571496f65cd81b6410db26ec32669e1e6af58b4d1981f4282",
+      "hash_source": "e238eb5c6f3bd430ff2e6527e8fd2d49e17ad57d19880e03a5e144fc2a2966ae",
       "hash_struct": "d66625b8f7fa74fcc8e7d92ac9a232d591eb847b43c2dde30bcbef76e550de43",
       "id": "target/app/core/events.py::create_start_app_handler",
       "lines": [
@@ -9905,7 +10414,7 @@
     },
     {
       "file": "target/app/core/events.py",
-      "hash_source": "9c8c0a910f81404571496f65cd81b6410db26ec32669e1e6af58b4d1981f4282",
+      "hash_source": "2639207c7d69e093e4ceb60920f73e0dc25b95743d1034fab0f7b7f6a7a3eb1d",
       "hash_struct": "211d328d365c9dd89c58fce7c5eeef749474b17213e52b8606a5a3019363139c",
       "id": "target/app/core/events.py::create_stop_app_handler",
       "lines": [
@@ -9957,6 +10466,18 @@
       "returns": "None",
       "signature": "self, record: logging.LogRecord",
       "type": "function"
+    },
+    {
+      "file": "",
+      "hash_source": "92a48546ce12468c47be51a407369959dc15c68570f7d82898fdc4e9ef5314fb",
+      "hash_struct": "92a48546ce12468c47be51a407369959dc15c68570f7d82898fdc4e9ef5314fb",
+      "id": "target/app/core/settings",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "settings",
+      "type": "package"
     },
     {
       "file": "target/app/core/settings/__init__.py",
@@ -10525,6 +11046,18 @@
       "type": "class"
     },
     {
+      "file": "",
+      "hash_source": "33ee26df3f6b6fe50738cadf4072c1fef5a33ab3b0a3aac4bed49e95fd1c5725",
+      "hash_struct": "33ee26df3f6b6fe50738cadf4072c1fef5a33ab3b0a3aac4bed49e95fd1c5725",
+      "id": "target/app/db",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "db",
+      "type": "package"
+    },
+    {
       "file": "target/app/db/__init__.py",
       "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6",
@@ -10576,7 +11109,7 @@
     {
       "async_flag": true,
       "file": "target/app/db/events.py",
-      "hash_source": "521ddc1735eb81fe3354c8ee6999c3e5055f0ffc968ff686fa6f3fff3050f852",
+      "hash_source": "1dcdce14caa5e84211b8382cc70f64ad0e28ac7126b68f4043913482615f490a",
       "hash_struct": "a462050945c568f52275500f50213877f5c9cfe22fc0b65eff55295eb9a6f446",
       "id": "target/app/db/events.py::close_db_connection",
       "lines": [
@@ -10591,7 +11124,7 @@
     {
       "async_flag": true,
       "file": "target/app/db/events.py",
-      "hash_source": "521ddc1735eb81fe3354c8ee6999c3e5055f0ffc968ff686fa6f3fff3050f852",
+      "hash_source": "7ca9021e967b8ccd2c78c04beec3262ef5ea1916b07614fb9e8e022a0b05d94f",
       "hash_struct": "d4052031d3a384d5dc163cc86a8e38b0f6f033924afbdac238368d7384426a25",
       "id": "target/app/db/events.py::connect_to_db",
       "lines": [
@@ -10602,6 +11135,18 @@
       "returns": "None",
       "signature": "app: FastAPI, settings: AppSettings",
       "type": "function"
+    },
+    {
+      "file": "",
+      "hash_source": "90aebceb94f19f67f959f6b29f1c9a561f24b61d2d6f96378473d2dcbfbe76f3",
+      "hash_struct": "90aebceb94f19f67f959f6b29f1c9a561f24b61d2d6f96378473d2dcbfbe76f3",
+      "id": "target/app/db/queries",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "queries",
+      "type": "package"
     },
     {
       "file": "target/app/db/queries/__init__.py",
@@ -10855,6 +11400,18 @@
       ],
       "name": "Users",
       "type": "class"
+    },
+    {
+      "file": "",
+      "hash_source": "ea63db7fe547bfa985b59044cf88948ab24aaa6584a89528c07d2e4e4bcd8f07",
+      "hash_struct": "ea63db7fe547bfa985b59044cf88948ab24aaa6584a89528c07d2e4e4bcd8f07",
+      "id": "target/app/db/repositories",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "repositories",
+      "type": "package"
     },
     {
       "file": "target/app/db/repositories/__init__.py",
@@ -11558,7 +12115,7 @@
     },
     {
       "file": "target/app/main.py",
-      "hash_source": "96cd6a70551cddf0d3f312b88746a1da750ecaaf789de38d956ab41770914695",
+      "hash_source": "e20899d4e5cdd6615dd6086a5f2ea39348a69561f0b9bab1efdc7e82d2220646",
       "hash_struct": "8c4a700e5784f6b809ebabd270d1b2c1e8802d16b62f024a36512833c24eb128",
       "id": "target/app/main.py::get_application",
       "lines": [
@@ -11568,6 +12125,18 @@
       "name": "get_application",
       "returns": "FastAPI",
       "type": "function"
+    },
+    {
+      "file": "",
+      "hash_source": "ed87a3e69e0343f8918e69e2b49a67d39d768a9c630632bab895a96b73198c78",
+      "hash_struct": "ed87a3e69e0343f8918e69e2b49a67d39d768a9c630632bab895a96b73198c78",
+      "id": "target/app/models",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "models",
+      "type": "package"
     },
     {
       "file": "target/app/models/__init__.py",
@@ -11659,6 +12228,18 @@
       ],
       "name": "IDModelMixin",
       "type": "class"
+    },
+    {
+      "file": "",
+      "hash_source": "3fc0e8dbfcab9d24c57b81d92ed1610794cea63a78c03f6a94c1b024a28ddd01",
+      "hash_struct": "3fc0e8dbfcab9d24c57b81d92ed1610794cea63a78c03f6a94c1b024a28ddd01",
+      "id": "target/app/models/domain",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "domain",
+      "type": "package"
     },
     {
       "file": "target/app/models/domain/__init__.py",
@@ -11891,7 +12472,7 @@
     },
     {
       "file": "target/app/models/domain/rwmodel.py",
-      "hash_source": "b3c784163f187ce8e36b97c74d9723d81635b56453e4ccf98da0ef5d0b4e6045",
+      "hash_source": "a8a5513cd4a464582ce6ba3f525596cd1b75562adf108def8f1601dbf9a48ef8",
       "hash_struct": "0c041029213df7593125e3002ab30ebd9612244aeb3c541587cfff066a41feb7",
       "id": "target/app/models/domain/rwmodel.py::convert_datetime_to_realworld",
       "lines": [
@@ -11905,7 +12486,7 @@
     },
     {
       "file": "target/app/models/domain/rwmodel.py",
-      "hash_source": "b3c784163f187ce8e36b97c74d9723d81635b56453e4ccf98da0ef5d0b4e6045",
+      "hash_source": "3c0fa8167e9f9859d468299a428b0041640f31db625f93f0e6b0c1d84b2576d8",
       "hash_struct": "1adf33f5c1b314b09eea4b52cdeea46cd4aab08e4703d7b0b630cfbe3e4a8f68",
       "id": "target/app/models/domain/rwmodel.py::convert_field_to_camel_case",
       "lines": [
@@ -12060,6 +12641,18 @@
       "returns": "bool",
       "signature": "self, password: str",
       "type": "function"
+    },
+    {
+      "file": "",
+      "hash_source": "e4dd77bba48e2e6427337e1ccc6938a724b715296a2f25e46e77fe87121ef117",
+      "hash_struct": "e4dd77bba48e2e6427337e1ccc6938a724b715296a2f25e46e77fe87121ef117",
+      "id": "target/app/models/schemas",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "schemas",
+      "type": "package"
     },
     {
       "file": "target/app/models/schemas/__init__.py",
@@ -12741,6 +13334,18 @@
       "type": "class"
     },
     {
+      "file": "",
+      "hash_source": "c2276158bcddbafe63aeb8f855479021de294e896ac6d5f1f2566af3ef14fe22",
+      "hash_struct": "c2276158bcddbafe63aeb8f855479021de294e896ac6d5f1f2566af3ef14fe22",
+      "id": "target/app/resources",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "resources",
+      "type": "package"
+    },
+    {
       "file": "target/app/resources/__init__.py",
       "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6",
@@ -12761,6 +13366,18 @@
         25
       ],
       "type": "module"
+    },
+    {
+      "file": "",
+      "hash_source": "286efa2ed400a9e890668f80c21fd83197b2f7472f04fdc0f28266b83ffa55da",
+      "hash_struct": "286efa2ed400a9e890668f80c21fd83197b2f7472f04fdc0f28266b83ffa55da",
+      "id": "target/app/services",
+      "lines": [
+        0,
+        0
+      ],
+      "name": "services",
+      "type": "package"
     },
     {
       "file": "target/app/services/__init__.py",
@@ -12787,7 +13404,7 @@
     {
       "async_flag": true,
       "file": "target/app/services/articles.py",
-      "hash_source": "08baa4bfef3e9b3c0e7a914aa8e54484f302fd130fce0a463cb044e362ac64f1",
+      "hash_source": "149a483e95b969a1e2a18bd5786154879eb71cab1bea5e7fd35c69c5303405ce",
       "hash_struct": "bb8d2c98813fe3ed7f39a2f95ca064db20731890510d331ed44f94d9b82df84c",
       "id": "target/app/services/articles.py::check_article_exists",
       "lines": [
@@ -12801,7 +13418,7 @@
     },
     {
       "file": "target/app/services/articles.py",
-      "hash_source": "08baa4bfef3e9b3c0e7a914aa8e54484f302fd130fce0a463cb044e362ac64f1",
+      "hash_source": "e7e2585510a319c333bcb957af63379270cd23d4235adf61becf07b9accae8b6",
       "hash_struct": "2bbd21f02c56f988324aeada838c0ee2932ee634afb9f3c0b90b9c9554aec336",
       "id": "target/app/services/articles.py::check_user_can_modify_article",
       "lines": [
@@ -12815,7 +13432,7 @@
     },
     {
       "file": "target/app/services/articles.py",
-      "hash_source": "08baa4bfef3e9b3c0e7a914aa8e54484f302fd130fce0a463cb044e362ac64f1",
+      "hash_source": "1a9e30dbf218349a62a47f30093910812065ed8d2479035608c715add1d89fd8",
       "hash_struct": "435a4783794e44cae7457c93bfcac146fd028af50cc1eb771b308aaa609bb867",
       "id": "target/app/services/articles.py::get_slug_for_article",
       "lines": [
@@ -12841,7 +13458,7 @@
     {
       "async_flag": true,
       "file": "target/app/services/authentication.py",
-      "hash_source": "1e6ddd8061261413704a041c92a1d24ec53c47c3d9f89134a67b17166c990abd",
+      "hash_source": "11e87f1cfb9e8829750c49ee98ffe2787bfc8543b78bbab1b84d9fa2ec065193",
       "hash_struct": "0778d547e9c9dc1af5b9c65c4ba70b66820a56ef2ef7bcca66113f065da4563c",
       "id": "target/app/services/authentication.py::check_email_is_taken",
       "lines": [
@@ -12856,7 +13473,7 @@
     {
       "async_flag": true,
       "file": "target/app/services/authentication.py",
-      "hash_source": "1e6ddd8061261413704a041c92a1d24ec53c47c3d9f89134a67b17166c990abd",
+      "hash_source": "e5ac9e18f4482fd832237bee6e24c15a3460f23559a3772ae2fefba45e304abc",
       "hash_struct": "99a31f3c61c903ff664926813aa0395c7baf49c02dd6bf1a2bc4acbbf794b818",
       "id": "target/app/services/authentication.py::check_username_is_taken",
       "lines": [
@@ -12881,7 +13498,7 @@
     },
     {
       "file": "target/app/services/comments.py",
-      "hash_source": "edb132adcd2da6286022cdea176fe67dd5acc13d095df581002ea4757e156133",
+      "hash_source": "83c291d5c75cdc1f17cc0badfc6a69ee99582265f96866fa731d543ce4cd03d2",
       "hash_struct": "507c4e1ab2412d50737826c14221860eb5c3ab59f8d3906487a02a23fe4a16db",
       "id": "target/app/services/comments.py::check_user_can_modify_comment",
       "lines": [
@@ -12906,7 +13523,7 @@
     },
     {
       "file": "target/app/services/jwt.py",
-      "hash_source": "97e498395564857f545d7c41f258401db7029987c5332565f3e5d1f261febd49",
+      "hash_source": "015bcec0fc07dd49e8dd7d1acacfc57e89ae8fa7e14aba82166577f8ceb6e5fb",
       "hash_struct": "4fb7f645f06ca5fe04211c3d80c8561894a931af62cd1e12d78ec31edc491201",
       "id": "target/app/services/jwt.py::create_access_token_for_user",
       "lines": [
@@ -12920,7 +13537,7 @@
     },
     {
       "file": "target/app/services/jwt.py",
-      "hash_source": "97e498395564857f545d7c41f258401db7029987c5332565f3e5d1f261febd49",
+      "hash_source": "2ec450d468d11d1d35d9c9b8012797356363e325d5054fda652288fe22c145f4",
       "hash_struct": "4b6a2865f6cb5631a7fd9d966d3ee52f3533325e856a68d50d8030781590ece3",
       "id": "target/app/services/jwt.py::create_jwt_token",
       "lines": [
@@ -12934,7 +13551,7 @@
     },
     {
       "file": "target/app/services/jwt.py",
-      "hash_source": "97e498395564857f545d7c41f258401db7029987c5332565f3e5d1f261febd49",
+      "hash_source": "8f51ef50d45635748c4ea5504d23030d376f823ff37e76a0a9b2e0b3157be977",
       "hash_struct": "ced0ca8d34c01db1a1018a1869e921e128314a02d051bdfb34fbd96514118b23",
       "id": "target/app/services/jwt.py::get_username_from_token",
       "lines": [
@@ -12959,7 +13576,7 @@
     },
     {
       "file": "target/app/services/security.py",
-      "hash_source": "661741ca7dc0374b51979b58fcf843ae0c319e7358e9c69e4d164092ff03972d",
+      "hash_source": "f0ebee240603cb2364493dbd67f3308c8849773c2eb5097232d32ba05cfd97a6",
       "hash_struct": "97f66d3119da60ca1d3b19de000a4ac6b2d6ff6c90c87fe08ea258db90602f3a",
       "id": "target/app/services/security.py::generate_salt",
       "lines": [
@@ -12972,7 +13589,7 @@
     },
     {
       "file": "target/app/services/security.py",
-      "hash_source": "661741ca7dc0374b51979b58fcf843ae0c319e7358e9c69e4d164092ff03972d",
+      "hash_source": "06df1481909e7f868ff75b244e92ff835137af219763f9d5423f1791497c347c",
       "hash_struct": "704989f08de3d437d2ec6728438b10a54fa6474fe9bb0e9f0a0f76f97e4c645f",
       "id": "target/app/services/security.py::get_password_hash",
       "lines": [
@@ -12986,7 +13603,7 @@
     },
     {
       "file": "target/app/services/security.py",
-      "hash_source": "661741ca7dc0374b51979b58fcf843ae0c319e7358e9c69e4d164092ff03972d",
+      "hash_source": "24290886ee42f2c338e900d3084cbe72ddbfe7ecb41cb9d929ad5aabea563aca",
       "hash_struct": "9a1b6f97290f241e4d4da7f93667c66f5705a0e18958fdc793754b89016943e7",
       "id": "target/app/services/security.py::verify_password",
       "lines": [

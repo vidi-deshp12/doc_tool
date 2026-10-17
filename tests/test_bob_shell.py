@@ -38,8 +38,15 @@ _ERROR_RESPONSE = json.dumps({
 })
 
 
-def _make_proc(stdout: str = _GOOD_RESPONSE, returncode: int = 0) -> SimpleNamespace:
-    return SimpleNamespace(stdout=stdout, stderr="", returncode=returncode)
+def _make_proc(response: str = _GOOD_RESPONSE, returncode: int = 0):
+    """Return a fake subprocess.run callable that writes *response* to the stdout file."""
+    def fake_run(*args, **kwargs):
+        # The new _call_bob passes stdout=<open file handle>; write the response there.
+        stdout_fh = kwargs.get("stdout")
+        if stdout_fh is not None and hasattr(stdout_fh, "write"):
+            stdout_fh.write(response)
+        return SimpleNamespace(stderr="", returncode=returncode)
+    return fake_run
 
 
 def _make_request(node_id: str = "mod.py::f") -> SummaryRequest:
@@ -58,7 +65,7 @@ def _make_request(node_id: str = "mod.py::f") -> SummaryRequest:
 def test_bob_shell_success(monkeypatch: pytest.MonkeyPatch) -> None:
     import subprocess
     monkeypatch.setenv("BOB_API_KEY", "test-key")
-    monkeypatch.setattr(subprocess, "run", lambda *a, **kw: _make_proc())
+    monkeypatch.setattr(subprocess, "run", _make_proc())
 
     s = BobShellSummarizer(max_cost=0.1, max_turns=5)
     result = s.summarize(_make_request())
@@ -75,7 +82,7 @@ def test_bob_shell_success(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_bob_shell_error_status(monkeypatch: pytest.MonkeyPatch) -> None:
     import subprocess
     monkeypatch.setenv("BOB_API_KEY", "test-key")
-    monkeypatch.setattr(subprocess, "run", lambda *a, **kw: _make_proc(_ERROR_RESPONSE))
+    monkeypatch.setattr(subprocess, "run", _make_proc(_ERROR_RESPONSE))
 
     s = BobShellSummarizer()
     with pytest.raises(BobShellError, match="status="):
@@ -89,10 +96,7 @@ def test_bob_shell_error_status(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_bob_shell_nonzero_exit(monkeypatch: pytest.MonkeyPatch) -> None:
     import subprocess
     monkeypatch.setenv("BOB_API_KEY", "test-key")
-    monkeypatch.setattr(
-        subprocess, "run",
-        lambda *a, **kw: _make_proc(stdout="", returncode=1),
-    )
+    monkeypatch.setattr(subprocess, "run", _make_proc(returncode=1))
 
     s = BobShellSummarizer()
     with pytest.raises(BobShellError, match="exited with code 1"):
@@ -107,7 +111,7 @@ def test_bob_shell_missing_last_message(monkeypatch: pytest.MonkeyPatch) -> None
     import subprocess
     bad = json.dumps({"type": "result", "status": "success", "stats": {}})
     monkeypatch.setenv("BOB_API_KEY", "test-key")
-    monkeypatch.setattr(subprocess, "run", lambda *a, **kw: _make_proc(bad))
+    monkeypatch.setattr(subprocess, "run", _make_proc(bad))
 
     s = BobShellSummarizer()
     with pytest.raises(BobShellError, match="last_message"):
@@ -127,9 +131,16 @@ def test_bob_shell_retry_succeeds_on_second_attempt(
 
     def fake_run(*args, **kwargs):
         call_count[0] += 1
+        stdout_fh = kwargs.get("stdout")
         if call_count[0] == 1:
-            return _make_proc(stdout="not json", returncode=0)
-        return _make_proc()
+            # First attempt: write invalid JSON to stdout file
+            if stdout_fh is not None and hasattr(stdout_fh, "write"):
+                stdout_fh.write("not json")
+            return SimpleNamespace(stderr="", returncode=0)
+        # Second attempt: write good response to stdout file
+        if stdout_fh is not None and hasattr(stdout_fh, "write"):
+            stdout_fh.write(_GOOD_RESPONSE)
+        return SimpleNamespace(stderr="", returncode=0)
 
     monkeypatch.setenv("BOB_API_KEY", "test-key")
     monkeypatch.setattr(subprocess, "run", fake_run)
@@ -151,7 +162,7 @@ def test_bob_shell_retry_exhausted(monkeypatch: pytest.MonkeyPatch) -> None:
     import subprocess
 
     monkeypatch.setenv("BOB_API_KEY", "test-key")
-    monkeypatch.setattr(subprocess, "run", lambda *a, **kw: _make_proc(_ERROR_RESPONSE))
+    monkeypatch.setattr(subprocess, "run", _make_proc(_ERROR_RESPONSE))
     monkeypatch.setattr("docgen.summarize.bob_shell.time.sleep", lambda s: None)
 
     s = BobShellSummarizer()

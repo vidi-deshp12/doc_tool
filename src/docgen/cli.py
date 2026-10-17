@@ -112,6 +112,15 @@ def _run_extract(args: argparse.Namespace) -> None:
     all_edges.extend(calls_edges)
     all_unresolved.extend(body_unresolved)
 
+    # Step 5b: Synthesize PACKAGE nodes from directory structure.
+    # Runs after body facts so all MODULE nodes exist; runs before the FastAPI
+    # adapter so route extraction can see the package hierarchy.
+    from docgen.extract.packages import synthesize_packages
+    pkg_nodes, pkg_edges = synthesize_packages(all_nodes, source_root=config.source_root)
+    all_nodes.extend(pkg_nodes)
+    all_edges.extend(pkg_edges)
+    print(f"  packages: {len(pkg_nodes)} synthesized from directory structure", file=sys.stderr)
+
     # Step 6: Dynamic pattern scan
     scan_unresolved = scan_for_unresolved(module_paths, path_to_info, repo_root)
     all_unresolved.extend(scan_unresolved)

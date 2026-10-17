@@ -170,21 +170,29 @@ def topological_order(
 # ---------------------------------------------------------------------------
 
 def _build_edges_by_from(graph: FactGraph) -> dict[str, list[dict[str, Any]]]:
-    """Index relational edges (raises/depends_on/calls/inherits) by their source node."""
+    """Index relational edges by the node that should see them in its SummaryRequest.
+
+    For raises/depends_on/calls/inherits: indexed by ``from_id`` (the function).
+    For handles: indexed by ``to_id`` (the handler function) so the handler sees
+    which route it serves.  This lets the function's prompt mention the full path,
+    method, and status code, and lets the handler cite its own route ID.
+    """
     from docgen.facts.schema import EdgeType as ET  # local import to avoid cycle confusion
 
-    relevant = {ET.RAISES, ET.DEPENDS_ON, ET.CALLS, ET.INHERITS}
+    by_from_types = {ET.RAISES, ET.DEPENDS_ON, ET.CALLS, ET.INHERITS}
     result: dict[str, list[dict[str, Any]]] = {}
     for edge in graph.edges:
-        if edge.type in relevant:
-            result.setdefault(edge.from_id, []).append(
-                {
-                    "type": edge.type.value,
-                    "from": edge.from_id,
-                    "to": edge.to_id,
-                    "meta": dict(edge.meta),
-                }
-            )
+        edge_dict = {
+            "type": edge.type.value,
+            "from": edge.from_id,
+            "to": edge.to_id,
+            "meta": dict(edge.meta),
+        }
+        if edge.type in by_from_types:
+            result.setdefault(edge.from_id, []).append(edge_dict)
+        elif edge.type is ET.HANDLES:
+            # Index by the handler function (to_id) so the function sees it
+            result.setdefault(edge.to_id, []).append(edge_dict)
     return result
 
 
