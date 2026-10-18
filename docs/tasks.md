@@ -47,11 +47,11 @@ Status legend: `[ ]` todo, `[x]` done, `[~]` in progress. Dates are the plan fro
 - [ ] **2b.7 Summarizer gate.** No broken citations; user reads 10 summaries and confirms accuracy.
 
 ## Phase 3: Renderers and freshness (Oct 12-13)
-- [ ] **3.1 Renderers.** Architecture overview, per-module pages, Mermaid dependency diagram (import graph), API endpoint table. Render only from facts + summaries.
-- [ ] **3.2 Manifest.** Page → fact IDs + `hash_struct` at generation time.
-- [ ] **3.3 `check`.** Re-extract, compare, exit 1 and list stale pages on drift.
-- [ ] **3.4 `update`.** Regenerate only stale pages; early cutoff for ancestors.
-- [ ] **3.5 Freshness gate (3 tests).** (1) fresh run → check passes. (2) edit one file → check fails naming the right pages. (3) update rebuilds only those → check passes. Harmless edit (comment/format) → no drift.
+- [x] **3.1 Renderers.** Architecture overview, per-module pages, Mermaid dependency diagram (import graph), API endpoint table. Render only from facts + summaries.
+- [x] **3.2 Manifest.** Page → fact IDs + `hash_struct` at generation time.
+- [x] **3.3 `check`.** Re-extract, compare, exit 1 and list stale pages on drift.
+- [x] **3.4 `update`.** Regenerate only stale pages; early cutoff for ancestors.
+- [x] **3.5 Freshness gate (3 tests).** (1) fresh run → check passes. (2) edit one file → check fails naming the right pages. (3) update rebuilds only those → check passes. Harmless edit (comment/format) → no drift.
 
 ## Phase 3e: Eval and showcase repo (Oct 13-14; called Phase 3.5 in the handoff)
 - [ ] **3e.1 Eval command.** Route/model recall; claim sample sheet; drift false-positive suite; incremental savings count.

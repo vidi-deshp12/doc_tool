@@ -1,0 +1,10 @@
+[repo]
+root = "."
+source_root = "."
+exclude = []
+
+[adapter]
+name = "none"
+
+[output]
+dir = "out"

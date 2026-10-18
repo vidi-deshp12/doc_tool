@@ -1,0 +1,1858 @@
+{
+  "pages": {
+    "generated/pages/api.md": {
+      "fact_ids": [
+        "external:HTTPValidationError",
+        "route:DELETE /api/articles/{slug}",
+        "route:DELETE /api/articles/{slug}/comments/{comment_id}",
+        "route:DELETE /api/articles/{slug}/favorite",
+        "route:DELETE /api/profiles/{username}/follow",
+        "route:GET /api/articles",
+        "route:GET /api/articles/feed",
+        "route:GET /api/articles/{slug}",
+        "route:GET /api/articles/{slug}/comments",
+        "route:GET /api/profiles/{username}",
+        "route:GET /api/tags",
+        "route:GET /api/user",
+        "route:POST /api/articles",
+        "route:POST /api/articles/{slug}/comments",
+        "route:POST /api/articles/{slug}/favorite",
+        "route:POST /api/profiles/{username}/follow",
+        "route:POST /api/users",
+        "route:POST /api/users/login",
+        "route:PUT /api/articles/{slug}",
+        "route:PUT /api/user",
+        "target/app/api/routes/articles/articles_common.py::get_articles_for_user_feed",
+        "target/app/api/routes/articles/articles_common.py::mark_article_as_favorite",
+        "target/app/api/routes/articles/articles_common.py::remove_article_from_favorites",
+        "target/app/api/routes/articles/articles_resource.py::create_new_article",
+        "target/app/api/routes/articles/articles_resource.py::delete_article_by_slug",
+        "target/app/api/routes/articles/articles_resource.py::list_articles",
+        "target/app/api/routes/articles/articles_resource.py::retrieve_article_by_slug",
+        "target/app/api/routes/articles/articles_resource.py::update_article_by_slug",
+        "target/app/api/routes/authentication.py::login",
+        "target/app/api/routes/authentication.py::register",
+        "target/app/api/routes/comments.py::create_comment_for_article",
+        "target/app/api/routes/comments.py::delete_comment_from_article",
+        "target/app/api/routes/comments.py::list_comments_for_article",
+        "target/app/api/routes/profiles.py::follow_for_user",
+        "target/app/api/routes/profiles.py::retrieve_profile_by_username",
+        "target/app/api/routes/profiles.py::unsubscribe_from_user",
+        "target/app/api/routes/tags.py::get_all_tags",
+        "target/app/api/routes/users.py::retrieve_current_user",
+        "target/app/api/routes/users.py::update_current_user",
+        "target/app/models/schemas/articles.py::ArticleInCreate",
+        "target/app/models/schemas/articles.py::ArticleInResponse",
+        "target/app/models/schemas/articles.py::ArticleInUpdate",
+        "target/app/models/schemas/articles.py::ListOfArticlesInResponse",
+        "target/app/models/schemas/comments.py::CommentInCreate",
+        "target/app/models/schemas/comments.py::CommentInResponse",
+        "target/app/models/schemas/comments.py::ListOfCommentsInResponse",
+        "target/app/models/schemas/profiles.py::ProfileInResponse",
+        "target/app/models/schemas/tags.py::TagsInList",
+        "target/app/models/schemas/users.py::UserInCreate",
+        "target/app/models/schemas/users.py::UserInLogin",
+        "target/app/models/schemas/users.py::UserInResponse",
+        "target/app/models/schemas/users.py::UserInUpdate"
+      ],
+      "hashes": {
+        "route:DELETE /api/articles/{slug}": {
+          "hash_source": "818110b788cc73ac5db8541d4e076c098c380369bd2cd74d30cfcdcd78d23ece",
+          "hash_struct": "818110b788cc73ac5db8541d4e076c098c380369bd2cd74d30cfcdcd78d23ece"
+        },
+        "route:DELETE /api/articles/{slug}/comments/{comment_id}": {
+          "hash_source": "0fbbc1d384a108b3b66089d0cf84c430852b663684883d89ffb3413402f70a25",
+          "hash_struct": "0fbbc1d384a108b3b66089d0cf84c430852b663684883d89ffb3413402f70a25"
+        },
+        "route:DELETE /api/articles/{slug}/favorite": {
+          "hash_source": "bff2b56e2ab9289c3e32e6949c5a1f47657e650af540b0c22f7df044b6d92c8d",
+          "hash_struct": "bff2b56e2ab9289c3e32e6949c5a1f47657e650af540b0c22f7df044b6d92c8d"
+        },
+        "route:DELETE /api/profiles/{username}/follow": {
+          "hash_source": "7cb0f641ffd571afd13a43f4cee2b619b9d5b1c95e0826146ae9c09e02ed2a71",
+          "hash_struct": "7cb0f641ffd571afd13a43f4cee2b619b9d5b1c95e0826146ae9c09e02ed2a71"
+        },
+        "route:GET /api/articles": {
+          "hash_source": "cdc27f4c10a07a1ba5070f05a17d703f6854db03b95eea24ff5c77afdd6f65bf",
+          "hash_struct": "cdc27f4c10a07a1ba5070f05a17d703f6854db03b95eea24ff5c77afdd6f65bf"
+        },
+        "route:GET /api/articles/feed": {
+          "hash_source": "45fd72004e284e67a8fe2e800b41378cfcb40a345046fd16dbd15388a8260ff7",
+          "hash_struct": "45fd72004e284e67a8fe2e800b41378cfcb40a345046fd16dbd15388a8260ff7"
+        },
+        "route:GET /api/articles/{slug}": {
+          "hash_source": "0c1792214d094ce3c5da41bd76f2323f90047074602e9f059bd29a5b65d8a9ee",
+          "hash_struct": "0c1792214d094ce3c5da41bd76f2323f90047074602e9f059bd29a5b65d8a9ee"
+        },
+        "route:GET /api/articles/{slug}/comments": {
+          "hash_source": "dcd69cfea3b454fbc525de428cc331902433895c5820e8fcfd15b52daddd6778",
+          "hash_struct": "dcd69cfea3b454fbc525de428cc331902433895c5820e8fcfd15b52daddd6778"
+        },
+        "route:GET /api/profiles/{username}": {
+          "hash_source": "7af70cb190c4e907906e3ca71be7b337fbab72d93e9ebffa984c451352362c71",
+          "hash_struct": "7af70cb190c4e907906e3ca71be7b337fbab72d93e9ebffa984c451352362c71"
+        },
+        "route:GET /api/tags": {
+          "hash_source": "619dbd23a3fb080ab8dbad48c30d2c5b78e4347263f402174e96604515c8fc2a",
+          "hash_struct": "619dbd23a3fb080ab8dbad48c30d2c5b78e4347263f402174e96604515c8fc2a"
+        },
+        "route:GET /api/user": {
+          "hash_source": "6c2c4e7808dfc349aefe1a6d8552c2915304ccf9541e84cbbd25a6b1641cc035",
+          "hash_struct": "6c2c4e7808dfc349aefe1a6d8552c2915304ccf9541e84cbbd25a6b1641cc035"
+        },
+        "route:POST /api/articles": {
+          "hash_source": "7ab51fac72ea9461aa56e0c067c9693be06da6885890d1a4c4bf67c460cf95d9",
+          "hash_struct": "7ab51fac72ea9461aa56e0c067c9693be06da6885890d1a4c4bf67c460cf95d9"
+        },
+        "route:POST /api/articles/{slug}/comments": {
+          "hash_source": "ff801ae6268cf75ef4bd65e21b838ede097c8ebf0e11cec12adad5e08222fcba",
+          "hash_struct": "ff801ae6268cf75ef4bd65e21b838ede097c8ebf0e11cec12adad5e08222fcba"
+        },
+        "route:POST /api/articles/{slug}/favorite": {
+          "hash_source": "b5bea98b9bbc70fe31a1414439b2d145bc264514c125dd49faf77ce6c0dae5ed",
+          "hash_struct": "b5bea98b9bbc70fe31a1414439b2d145bc264514c125dd49faf77ce6c0dae5ed"
+        },
+        "route:POST /api/profiles/{username}/follow": {
+          "hash_source": "3b614f745c1ff50af6bb9fc4be02552f1e0bc086df1ed07a804c1b8c5000e229",
+          "hash_struct": "3b614f745c1ff50af6bb9fc4be02552f1e0bc086df1ed07a804c1b8c5000e229"
+        },
+        "route:POST /api/users": {
+          "hash_source": "1f670114d7519ca2f02b1b1b321fedddcfbb1743b76c334df3499577507854aa",
+          "hash_struct": "1f670114d7519ca2f02b1b1b321fedddcfbb1743b76c334df3499577507854aa"
+        },
+        "route:POST /api/users/login": {
+          "hash_source": "91fd2b4070922bda4797eca1b7c571ecd87db935264b177fa6a1588f599272e8",
+          "hash_struct": "91fd2b4070922bda4797eca1b7c571ecd87db935264b177fa6a1588f599272e8"
+        },
+        "route:PUT /api/articles/{slug}": {
+          "hash_source": "66e1f2b345833c29e91590d5569eb2d54b9ab87160d4139c27de527a78f34223",
+          "hash_struct": "66e1f2b345833c29e91590d5569eb2d54b9ab87160d4139c27de527a78f34223"
+        },
+        "route:PUT /api/user": {
+          "hash_source": "e1da6aae1646348a5d2a0d853c4c0d80077e9a540569cf54fbc657fae23e15f0",
+          "hash_struct": "e1da6aae1646348a5d2a0d853c4c0d80077e9a540569cf54fbc657fae23e15f0"
+        },
+        "target/app/api/routes/articles/articles_common.py::get_articles_for_user_feed": {
+          "hash_source": "8b584b86f06127dfa97c6951dbcb44fdb0d5e3ff492d1595a5ee18b57ddab196",
+          "hash_struct": "eafeb6d10e8329a802573deb0442bc3bf08498510a0799f5f225f30255d87117"
+        },
+        "target/app/api/routes/articles/articles_common.py::mark_article_as_favorite": {
+          "hash_source": "22506b2ccea025b2aae9af52594e7a81cead7aa1e662cc70beb91625f0e5727b",
+          "hash_struct": "d454bc6daa20fc01654ffe610f316bc4ac31f7b55da9636f40169dcc861dfb0d"
+        },
+        "target/app/api/routes/articles/articles_common.py::remove_article_from_favorites": {
+          "hash_source": "19cd4bf5336e3cf6e468097c7def6190d6cd0601e0ef5ece16156af87345b500",
+          "hash_struct": "080fa86b4ee4cfc067c490a34f7eff492287a5047f11ce3d67ba6c198756b66d"
+        },
+        "target/app/api/routes/articles/articles_resource.py::create_new_article": {
+          "hash_source": "46ef832712dd12621f3efc6fc998438fc4e1715f2862e230ea0417db219f4c90",
+          "hash_struct": "a9b205d5f6fc3b008640685d19fa3bc5d5097158b7099ed7227b3e754869d2f7"
+        },
+        "target/app/api/routes/articles/articles_resource.py::delete_article_by_slug": {
+          "hash_source": "77f052f110bbb1b01c33b1d911715d4fcb372445b7c84fe2d05e6ae6249cfc26",
+          "hash_struct": "9117017cdb160adea5f2956c9fb562ae87897407a9f3c1a4ca18b6951e2e2f50"
+        },
+        "target/app/api/routes/articles/articles_resource.py::list_articles": {
+          "hash_source": "3282b615ea19efd10af16c6a7c17170a4e00950d41809298f45153044b175f65",
+          "hash_struct": "9d7e3fb016f55a1630da18037d79b81ece1048e0562d468592cf4ecbedaa6cf5"
+        },
+        "target/app/api/routes/articles/articles_resource.py::retrieve_article_by_slug": {
+          "hash_source": "1e00a01a8e90b1211d4e5dcbed8b95fa3a25e1e3d0bd97e72126a62093ccbd39",
+          "hash_struct": "cf7c4dbf12801ec8108bffbc20b83975455d25b4c93dccf917705804f7dc93f8"
+        },
+        "target/app/api/routes/articles/articles_resource.py::update_article_by_slug": {
+          "hash_source": "af4c7951ce1bd62feda705347c4a03edd485a7ae20187dafd056965e37298ad3",
+          "hash_struct": "e1b26058d9eab75b0907303e8356de3db674a54665f5829e48780bd8e8c06d50"
+        },
+        "target/app/api/routes/authentication.py::login": {
+          "hash_source": "30e6d5973b52c410390e860808558eaa2a70279801cb2b9bb57eaaed436c22a5",
+          "hash_struct": "5d37d72d5f6f8b2c80fb22c4027a2bd82acb4240076d08bac0630c559860048f"
+        },
+        "target/app/api/routes/authentication.py::register": {
+          "hash_source": "e47c9395fcc5ca52094d4c1344d54e8feb8dec787da8fa70ee469c8acb43557c",
+          "hash_struct": "0626afbb9fdbecd61a9cb84c4e7c9e25237825061d4369ac346c1a75bbb5a046"
+        },
+        "target/app/api/routes/comments.py::create_comment_for_article": {
+          "hash_source": "d6db5ffefac227d2a607ed24a34f456c27de3e705b2be773494c55939cc72bce",
+          "hash_struct": "9290ead9035564438027b7fd8b1d67da3383a839668170bd808d97d367c0337f"
+        },
+        "target/app/api/routes/comments.py::delete_comment_from_article": {
+          "hash_source": "16c073da8101a6898c2a201ed2b833e14e274f409caab07d83067c7af4721af3",
+          "hash_struct": "aede4cea3a8b9eaf5234f193cbbf8dd83a1f1b8efd39192d5e761d20283fdee7"
+        },
+        "target/app/api/routes/comments.py::list_comments_for_article": {
+          "hash_source": "b1ce2dd9e10f533bc5a4281b061b4b34f280b782f7a614333f69de7764ffebae",
+          "hash_struct": "b128ef40502ccff541764ae5bbf52b20603b7ba177d16fe07f50bad0c08fe4f8"
+        },
+        "target/app/api/routes/profiles.py::follow_for_user": {
+          "hash_source": "8441531ec143445f250570968878eeeae246321fb0d3a3055c58e5bd34d7f39b",
+          "hash_struct": "78304b936256f1ff2c4ab278678f979aa82f61cdb474f7a4b0cdb5f7e67b7572"
+        },
+        "target/app/api/routes/profiles.py::retrieve_profile_by_username": {
+          "hash_source": "b22cf1154aff2d1d7830e4ff5db2e17c2a18f7c6612c231e0402e7ae80e43c80",
+          "hash_struct": "6c017b23c902869a32ea3be0fe436f8fddf96cca382281192aa6f1616cce399d"
+        },
+        "target/app/api/routes/profiles.py::unsubscribe_from_user": {
+          "hash_source": "15deb2915a5c43816a0d1caa53f12d0ac010edb503e1eb97274fda06481a0589",
+          "hash_struct": "ce3c74f542b93dde9a1c3c8efc9005af6002289820de337a0e53d8d30c5024ea"
+        },
+        "target/app/api/routes/tags.py::get_all_tags": {
+          "hash_source": "929d4bda9e6991ae473d895abfdcb185c61e6476cd0da508f12dc2abae235852",
+          "hash_struct": "034f030e1fcc42381a592ee992a63852d5fab1952c719fac5d4c59fcf66a6adf"
+        },
+        "target/app/api/routes/users.py::retrieve_current_user": {
+          "hash_source": "7c5f6609618e7e297e26a18906f36ed9b1c1d42746d954917b3363ebf364ca50",
+          "hash_struct": "61ec294c54aae2f1501b4fd2cece7880df30e8ce3bb19b55680df37df096dd13"
+        },
+        "target/app/api/routes/users.py::update_current_user": {
+          "hash_source": "608bf150cd67c3df630d6f5915bd97389d0a25f306605232a2a114ceb62b502f",
+          "hash_struct": "4df43a083b56811eecc93897ff78a5404b791ba4ebfea2cc6a3769caecd817a5"
+        },
+        "target/app/models/schemas/articles.py::ArticleInCreate": {
+          "hash_source": "703616f8ef112baed2e63c65c1d9967eaf965b7c748dbbb01c8d654df3cd386f",
+          "hash_struct": "dce4c42bf96858d2e3d73f1812349313c61017571683cc1d9ed1451c3804bad2"
+        },
+        "target/app/models/schemas/articles.py::ArticleInResponse": {
+          "hash_source": "c7e1a1589bc2d912e5a0bda101093f2c1d522270416d1934fa401a29e8b79281",
+          "hash_struct": "b819b3e23fa5bcfc870ab79d217f5807c19ec7020098e8013f465edf8f29faec"
+        },
+        "target/app/models/schemas/articles.py::ArticleInUpdate": {
+          "hash_source": "a3e7c5b8ba03f0abc3f26e35be3939c6f0e6f3b5a04a8b64d0a3c0eaaff40c4f",
+          "hash_struct": "e9f81d5e916ad643de866ad5d77499bb498d767a377ce8755eb507749e5fa128"
+        },
+        "target/app/models/schemas/articles.py::ListOfArticlesInResponse": {
+          "hash_source": "70c5a842c8797a1bd42a1263e9a5842af6bd80f090de66b9a73d8f472da0fae3",
+          "hash_struct": "a8493044bd1039deb18fe1f88127b3d662c76d1367b7d35cdae43053d7a268d5"
+        },
+        "target/app/models/schemas/comments.py::CommentInCreate": {
+          "hash_source": "a9869cc9f6a61cc2dea9411eb5b2a8bbf0f1ef0525523df4932740b49aab28a4",
+          "hash_struct": "06dac021bd525cebc51c6117bb782563ae29170d31f81e159fb6edebf778baf8"
+        },
+        "target/app/models/schemas/comments.py::CommentInResponse": {
+          "hash_source": "c1be75aebde706727b48125ff4b88b3d978936e7510a55c284882f37145e68b1",
+          "hash_struct": "25f484f7aecc97b11a834583c11b87c63262f85fc1eadbb101c77a7cab9b71c2"
+        },
+        "target/app/models/schemas/comments.py::ListOfCommentsInResponse": {
+          "hash_source": "336751a8e56bdfa348b1e31bb2dfa2d7b535d5b7607311dc43bd3aefbd2a6f61",
+          "hash_struct": "1f0b8bee445c55ee4bc24adaedab70383dd5927f5f3214f5af35536df8578651"
+        },
+        "target/app/models/schemas/profiles.py::ProfileInResponse": {
+          "hash_source": "6bb3dc80243183e88a4cae3f2d66844b021e6f70475c3a5aaadf94744da7e474",
+          "hash_struct": "c9b12561978970a6ec622488dd56b99bb96bed000202a0b6869160a2f02f7e3a"
+        },
+        "target/app/models/schemas/tags.py::TagsInList": {
+          "hash_source": "cf5699409695640a75e48d4f14518aa50650bc78674fc8c74e61509b641dc587",
+          "hash_struct": "8f16183ef28ed71b695d774696204b7786d2c9549dfb4204971c4bf8720dca27"
+        },
+        "target/app/models/schemas/users.py::UserInCreate": {
+          "hash_source": "231dc03c0635acb26a7ea3a8c42050f977aa39efb4d833cea49382206b41bc23",
+          "hash_struct": "edf68f71608036f5aff8dafd1240c01037d0e4157747639ea999d0bbe57e2237"
+        },
+        "target/app/models/schemas/users.py::UserInLogin": {
+          "hash_source": "970c5df40365ccc530970931f30f07f67f16bb5a954d445a52efe512382dae1d",
+          "hash_struct": "f116262b98a478da81ac06f7e5e8a4d9a2903d41e612d389b16afb8509ea24e4"
+        },
+        "target/app/models/schemas/users.py::UserInResponse": {
+          "hash_source": "73712309eec556347a69a7af2d7e0c5001a97f472c891d110f512cc4dde6610f",
+          "hash_struct": "502da87b818d73204cc606dfaa3e36f98317ac2d29a42ac68d692e65dfa385eb"
+        },
+        "target/app/models/schemas/users.py::UserInUpdate": {
+          "hash_source": "eb3ab4a22fe4db652d7f0d398181515e1732dea813b383e26e2e33fd337bd7f9",
+          "hash_struct": "8476a9d5187ebec578384a791eced7e7b5a77678281b7c42850b22dc7cb83201"
+        }
+      }
+    },
+    "generated/pages/index.md": {
+      "fact_ids": [
+        "system",
+        "target/app",
+        "target/app/api",
+        "target/app/api/dependencies",
+        "target/app/api/errors",
+        "target/app/api/routes",
+        "target/app/api/routes/articles",
+        "target/app/core",
+        "target/app/core/settings",
+        "target/app/db",
+        "target/app/db/queries",
+        "target/app/db/repositories",
+        "target/app/models",
+        "target/app/models/domain",
+        "target/app/models/schemas",
+        "target/app/resources",
+        "target/app/services"
+      ],
+      "hashes": {
+        "target/app": {
+          "hash_source": "21d8b021e6e4fb9dbe3a1a5e0360e0c6ecc66020304fab45da40ae25f3e6aa87",
+          "hash_struct": "21d8b021e6e4fb9dbe3a1a5e0360e0c6ecc66020304fab45da40ae25f3e6aa87"
+        },
+        "target/app/api": {
+          "hash_source": "fbc89749cb21eb7870d717fa5a75288595865cd4a169769d570a7c80106b9838",
+          "hash_struct": "fbc89749cb21eb7870d717fa5a75288595865cd4a169769d570a7c80106b9838"
+        },
+        "target/app/api/dependencies": {
+          "hash_source": "96a7e7235d7a27413a91c99c0b09b457944b3b227aaf47df16042c265fcaa146",
+          "hash_struct": "96a7e7235d7a27413a91c99c0b09b457944b3b227aaf47df16042c265fcaa146"
+        },
+        "target/app/api/errors": {
+          "hash_source": "4fb2a9b53df0aa24e7f56d211c603d39261cd7803bd50c052f5cbd4fe40222ca",
+          "hash_struct": "4fb2a9b53df0aa24e7f56d211c603d39261cd7803bd50c052f5cbd4fe40222ca"
+        },
+        "target/app/api/routes": {
+          "hash_source": "b1178bcf7eeeca9e2cd72c064beb176b94022b6240ccf0cdb68ea6b607d76157",
+          "hash_struct": "b1178bcf7eeeca9e2cd72c064beb176b94022b6240ccf0cdb68ea6b607d76157"
+        },
+        "target/app/api/routes/articles": {
+          "hash_source": "8dbd1ccc99bebe0d92249cd71d4f54b6320dca9e14434e791bb0481e531a5b1c",
+          "hash_struct": "8dbd1ccc99bebe0d92249cd71d4f54b6320dca9e14434e791bb0481e531a5b1c"
+        },
+        "target/app/core": {
+          "hash_source": "11b51fd620007982ff03424d1d92b3859b182f9c230c177f20f12a4d3b7a6287",
+          "hash_struct": "11b51fd620007982ff03424d1d92b3859b182f9c230c177f20f12a4d3b7a6287"
+        },
+        "target/app/core/settings": {
+          "hash_source": "92a48546ce12468c47be51a407369959dc15c68570f7d82898fdc4e9ef5314fb",
+          "hash_struct": "92a48546ce12468c47be51a407369959dc15c68570f7d82898fdc4e9ef5314fb"
+        },
+        "target/app/db": {
+          "hash_source": "33ee26df3f6b6fe50738cadf4072c1fef5a33ab3b0a3aac4bed49e95fd1c5725",
+          "hash_struct": "33ee26df3f6b6fe50738cadf4072c1fef5a33ab3b0a3aac4bed49e95fd1c5725"
+        },
+        "target/app/db/queries": {
+          "hash_source": "90aebceb94f19f67f959f6b29f1c9a561f24b61d2d6f96378473d2dcbfbe76f3",
+          "hash_struct": "90aebceb94f19f67f959f6b29f1c9a561f24b61d2d6f96378473d2dcbfbe76f3"
+        },
+        "target/app/db/repositories": {
+          "hash_source": "ea63db7fe547bfa985b59044cf88948ab24aaa6584a89528c07d2e4e4bcd8f07",
+          "hash_struct": "ea63db7fe547bfa985b59044cf88948ab24aaa6584a89528c07d2e4e4bcd8f07"
+        },
+        "target/app/models": {
+          "hash_source": "ed87a3e69e0343f8918e69e2b49a67d39d768a9c630632bab895a96b73198c78",
+          "hash_struct": "ed87a3e69e0343f8918e69e2b49a67d39d768a9c630632bab895a96b73198c78"
+        },
+        "target/app/models/domain": {
+          "hash_source": "3fc0e8dbfcab9d24c57b81d92ed1610794cea63a78c03f6a94c1b024a28ddd01",
+          "hash_struct": "3fc0e8dbfcab9d24c57b81d92ed1610794cea63a78c03f6a94c1b024a28ddd01"
+        },
+        "target/app/models/schemas": {
+          "hash_source": "e4dd77bba48e2e6427337e1ccc6938a724b715296a2f25e46e77fe87121ef117",
+          "hash_struct": "e4dd77bba48e2e6427337e1ccc6938a724b715296a2f25e46e77fe87121ef117"
+        },
+        "target/app/resources": {
+          "hash_source": "c2276158bcddbafe63aeb8f855479021de294e896ac6d5f1f2566af3ef14fe22",
+          "hash_struct": "c2276158bcddbafe63aeb8f855479021de294e896ac6d5f1f2566af3ef14fe22"
+        },
+        "target/app/services": {
+          "hash_source": "286efa2ed400a9e890668f80c21fd83197b2f7472f04fdc0f28266b83ffa55da",
+          "hash_struct": "286efa2ed400a9e890668f80c21fd83197b2f7472f04fdc0f28266b83ffa55da"
+        }
+      }
+    },
+    "generated/pages/target/app/__init__.md": {
+      "fact_ids": [
+        "target/app/__init__.py"
+      ],
+      "hashes": {
+        "target/app/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/api/__init__.md": {
+      "fact_ids": [
+        "target/app/api/__init__.py"
+      ],
+      "hashes": {
+        "target/app/api/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/api/dependencies/__init__.md": {
+      "fact_ids": [
+        "target/app/api/dependencies/__init__.py"
+      ],
+      "hashes": {
+        "target/app/api/dependencies/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/api/dependencies/articles.md": {
+      "fact_ids": [
+        "target/app/api/dependencies/articles.py",
+        "target/app/api/dependencies/articles.py::check_article_modification_permissions",
+        "target/app/api/dependencies/articles.py::get_article_by_slug_from_path",
+        "target/app/api/dependencies/articles.py::get_articles_filters"
+      ],
+      "hashes": {
+        "target/app/api/dependencies/articles.py": {
+          "hash_source": "3590b48a3848a9fd05f9592c67e1cdb56f3240fd4919f4685c69c3a0d5c7f5c3",
+          "hash_struct": "4f4f9bec63b053074b415b1b849b5b4389235a4cce9176c18952869f6f549b4a"
+        },
+        "target/app/api/dependencies/articles.py::check_article_modification_permissions": {
+          "hash_source": "37668f5e9c20cfd92555d88c7c754819cc09c5af0227e31db74b9edc3d5f0f22",
+          "hash_struct": "37954703e86a82a7946576decd0df3251d0cbe62704401770a9299e5a87c2e64"
+        },
+        "target/app/api/dependencies/articles.py::get_article_by_slug_from_path": {
+          "hash_source": "031541b296a158af3721c6f573a68cfcc9a52aedee9f64971af67dd372079096",
+          "hash_struct": "ef4b10c691e78b9e374af0c87cd776d2612bd12f949a6267be8e0551e3cef2df"
+        },
+        "target/app/api/dependencies/articles.py::get_articles_filters": {
+          "hash_source": "f591fa4d39f9ae17d1ccbf3e4bfffb17eddc68fe81956b7cb20a1614e3c2cbd8",
+          "hash_struct": "933ae2bc61070649df89b1dbb588ee8cb1c2369b025963d2ebd93b1f8917f16b"
+        }
+      }
+    },
+    "generated/pages/target/app/api/dependencies/authentication.md": {
+      "fact_ids": [
+        "target/app/api/dependencies/authentication.py",
+        "target/app/api/dependencies/authentication.py::RWAPIKeyHeader",
+        "target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__",
+        "target/app/api/dependencies/authentication.py::_get_authorization_header",
+        "target/app/api/dependencies/authentication.py::_get_authorization_header_optional",
+        "target/app/api/dependencies/authentication.py::_get_authorization_header_retriever",
+        "target/app/api/dependencies/authentication.py::_get_current_user",
+        "target/app/api/dependencies/authentication.py::_get_current_user_optional",
+        "target/app/api/dependencies/authentication.py::get_current_user_authorizer"
+      ],
+      "hashes": {
+        "target/app/api/dependencies/authentication.py": {
+          "hash_source": "2334aaac799fe602672a9e13c21871b9ac9ba46405e72a54002bd199e8d04069",
+          "hash_struct": "25e8870cf193d686487b4efac36aa0ded851ca6e8bd2828d73e3aad5c8e1f9a6"
+        },
+        "target/app/api/dependencies/authentication.py::RWAPIKeyHeader": {
+          "hash_source": "8ac58b752d6d8e20cadff3adb5422c59b256bd397f53f54af475f8b07b3e47a7",
+          "hash_struct": "ef54383e36b096ed1588f039be0dd306ebaca6f9449963a840f1ce59e46bb4c3"
+        },
+        "target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__": {
+          "hash_source": "75f5c1be7cbebb08f54700b0b8abc4d0ce329ebbee84bae567acad6d8bf1bbe5",
+          "hash_struct": "b5216d793eb36f42e784ec35f90e659d8755ba91fc7596321c5de313c74a7756"
+        },
+        "target/app/api/dependencies/authentication.py::_get_authorization_header": {
+          "hash_source": "963b0f033a5586057fa9fc201cc0bf909994c0642ec7ba4e7e1f2c87ce19b34d",
+          "hash_struct": "489aa3b4e0516eecb67f7373f1c6c2e7759b19162cabdb9a820e9bf541bc1fca"
+        },
+        "target/app/api/dependencies/authentication.py::_get_authorization_header_optional": {
+          "hash_source": "7c3278faf0e7f6f67a631f782e8fb17ece3bef9839321f6740a8a09aa07c870b",
+          "hash_struct": "5b03bc9a7e9512b97405227edb336b5c335f4578af54d154d8be8de810c8b67a"
+        },
+        "target/app/api/dependencies/authentication.py::_get_authorization_header_retriever": {
+          "hash_source": "0a35ecc45a3bdd10c038619a415ea34172a0744747eef51659b75f5f97d7e1f0",
+          "hash_struct": "0e2da7223260387dcdbf1cb4e98d30e386b2130d0ab83649a68d44d9173624c2"
+        },
+        "target/app/api/dependencies/authentication.py::_get_current_user": {
+          "hash_source": "4523b2296dcf436a41ac450eca3943fa6822026c4433b59770e36ac3b6e6fb4b",
+          "hash_struct": "7e19a1141aab834f2c8248506bc8f75931f20d3abf6ba138fa8abc77a31643c2"
+        },
+        "target/app/api/dependencies/authentication.py::_get_current_user_optional": {
+          "hash_source": "1bec099e74cd331904c4d03a467e6822cc6ca6781430f62d25e6b58960fb37a4",
+          "hash_struct": "cdd97b4cc3c0ccbade69df32a312867b482ee5716bf21e712ec6175eeaf06151"
+        },
+        "target/app/api/dependencies/authentication.py::get_current_user_authorizer": {
+          "hash_source": "bb68853147eb61905059ab702c6cc536a2b397c6b228dd6c4a9e53fcc2121cbd",
+          "hash_struct": "1b80d57d72c805c89a23b61d05f49361fddd8f108d01592f9383d597ff10e280"
+        }
+      }
+    },
+    "generated/pages/target/app/api/dependencies/comments.md": {
+      "fact_ids": [
+        "target/app/api/dependencies/comments.py",
+        "target/app/api/dependencies/comments.py::check_comment_modification_permissions",
+        "target/app/api/dependencies/comments.py::get_comment_by_id_from_path"
+      ],
+      "hashes": {
+        "target/app/api/dependencies/comments.py": {
+          "hash_source": "d25b027a5438ae8d1188a5de347e0db4bc94fd2f4a8ac7560f009f21192455e0",
+          "hash_struct": "58431580ee68b5da5ac4e0abd7783e2ae394e98f9e423fd6d6f4dd9ff8ac4e56"
+        },
+        "target/app/api/dependencies/comments.py::check_comment_modification_permissions": {
+          "hash_source": "60a5f81305278f887962a6c83f82d7eba6d2659c1401b9a524f79927a0f6b4a1",
+          "hash_struct": "57c618d8e7c5e031f965a7b9a453e9d2810938b71db1d2f9dc25d223ef51d99f"
+        },
+        "target/app/api/dependencies/comments.py::get_comment_by_id_from_path": {
+          "hash_source": "71f4eba2696f0885b8498c6c03fd8dd319490e7e2eb8030ae1dec567e97ab048",
+          "hash_struct": "e70547cf45b83ce86933680a4e0727002e3583001a1918f1430e8a35270a4032"
+        }
+      }
+    },
+    "generated/pages/target/app/api/dependencies/database.md": {
+      "fact_ids": [
+        "target/app/api/dependencies/database.py",
+        "target/app/api/dependencies/database.py::_get_connection_from_pool",
+        "target/app/api/dependencies/database.py::_get_db_pool",
+        "target/app/api/dependencies/database.py::get_repository"
+      ],
+      "hashes": {
+        "target/app/api/dependencies/database.py": {
+          "hash_source": "9024385cd5a46195fec5ab5207384ad27abd4a93d1b1f0b2b19311bc41602130",
+          "hash_struct": "73b6619d1658445f614194738e45c0165f8742d18f3a88c636f5e3b59001a406"
+        },
+        "target/app/api/dependencies/database.py::_get_connection_from_pool": {
+          "hash_source": "8ebec415008274d990ad6d5d7c5aa51a0ac1add45131dadc4a21a5f6a1194598",
+          "hash_struct": "4446964264aaa575527345318cbeb23b7a40b9d2b8477ef590c3c283aa73e17c"
+        },
+        "target/app/api/dependencies/database.py::_get_db_pool": {
+          "hash_source": "95f259a398edadd15f34c5de847df7f1173aa6bfb5cd6840b7cf3de52807549e",
+          "hash_struct": "ceb4138fb3b0aa41906a6b562f44d8438dc5941be8a129b92625173349b57691"
+        },
+        "target/app/api/dependencies/database.py::get_repository": {
+          "hash_source": "e83a0129b76dc7071db1108735d8bbffdb2f1261a911dd9735942e8d32821c3e",
+          "hash_struct": "77923c81dfffc79db1affee681b6b94fdc74c4a34be0c7e23e495269439a7908"
+        }
+      }
+    },
+    "generated/pages/target/app/api/dependencies/profiles.md": {
+      "fact_ids": [
+        "target/app/api/dependencies/profiles.py",
+        "target/app/api/dependencies/profiles.py::get_profile_by_username_from_path"
+      ],
+      "hashes": {
+        "target/app/api/dependencies/profiles.py": {
+          "hash_source": "90a898665781e42e2372f22ce2432b21838a0821120bd9e4c583b0a04623c51d",
+          "hash_struct": "375fcef832c41d4b5e24df3d1f5725a207ee123548b3fb2a068f20c2f32748d4"
+        },
+        "target/app/api/dependencies/profiles.py::get_profile_by_username_from_path": {
+          "hash_source": "45d7424a2d02c949224a386451a7081adca743e3860cedefc1754bffcc263613",
+          "hash_struct": "ccb971c776e704d8923014bd71d7a8d1833be056e425efc2c6f0ba1cdb967527"
+        }
+      }
+    },
+    "generated/pages/target/app/api/errors/__init__.md": {
+      "fact_ids": [
+        "target/app/api/errors/__init__.py"
+      ],
+      "hashes": {
+        "target/app/api/errors/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/api/errors/http_error.md": {
+      "fact_ids": [
+        "target/app/api/errors/http_error.py",
+        "target/app/api/errors/http_error.py::http_error_handler"
+      ],
+      "hashes": {
+        "target/app/api/errors/http_error.py": {
+          "hash_source": "9426d5105b01e985fb0211ddc838d0679c41c23180343f4e91a448fa0cd04297",
+          "hash_struct": "9ec7d1c0d84d4dcd7311d5db8b46b5f79ac99a55cf55792844453c9ac0a00722"
+        },
+        "target/app/api/errors/http_error.py::http_error_handler": {
+          "hash_source": "eed40f3418b236184d174e221dcd37d797e220aab83e3dcc52721fdbcdf23adc",
+          "hash_struct": "edce20721d033bf4110fc6b838ac525239c2f74fcf0d2b5280c7109db3e8599b"
+        }
+      }
+    },
+    "generated/pages/target/app/api/errors/validation_error.md": {
+      "fact_ids": [
+        "target/app/api/errors/validation_error.py",
+        "target/app/api/errors/validation_error.py::http422_error_handler"
+      ],
+      "hashes": {
+        "target/app/api/errors/validation_error.py": {
+          "hash_source": "656c1bb7dbc946813c179278abf26382a4b9eecaf203265ae0337f0b3b7a6f30",
+          "hash_struct": "aac259ef6463bbd546389d431ff360dbecde4f0c0b4b3f00f92b90bab280b3f2"
+        },
+        "target/app/api/errors/validation_error.py::http422_error_handler": {
+          "hash_source": "792f26c9e7802ee0de0e67ab9f433de73d33a46beb4b8b58043d6249b4b9e4c9",
+          "hash_struct": "75651da35cbb0e87c9cc1eace9a391d05e921c257d83c4a0de8bc19d98e568d9"
+        }
+      }
+    },
+    "generated/pages/target/app/api/routes/__init__.md": {
+      "fact_ids": [
+        "target/app/api/routes/__init__.py"
+      ],
+      "hashes": {
+        "target/app/api/routes/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/api/routes/api.md": {
+      "fact_ids": [
+        "target/app/api/routes/api.py"
+      ],
+      "hashes": {
+        "target/app/api/routes/api.py": {
+          "hash_source": "91101aae57bbd74c4eadba781414fc575b95730216ca6ac1371e44312a789535",
+          "hash_struct": "76af9da5be65c03494c29eca883fdba201377b381a07c8617e48ee289188806e"
+        }
+      }
+    },
+    "generated/pages/target/app/api/routes/articles/__init__.md": {
+      "fact_ids": [
+        "target/app/api/routes/articles/__init__.py"
+      ],
+      "hashes": {
+        "target/app/api/routes/articles/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/api/routes/articles/api.md": {
+      "fact_ids": [
+        "target/app/api/routes/articles/api.py"
+      ],
+      "hashes": {
+        "target/app/api/routes/articles/api.py": {
+          "hash_source": "babb91ea6c731fdd1ce62551e8c46b9d46466322d694682315d27f7ebb47c139",
+          "hash_struct": "570b9f09c8b5e8feac69ee58be0d0a0ad44200b3c8a9107e5f1b31523b7d1b8b"
+        }
+      }
+    },
+    "generated/pages/target/app/api/routes/articles/articles_common.md": {
+      "fact_ids": [
+        "target/app/api/routes/articles/articles_common.py",
+        "target/app/api/routes/articles/articles_common.py::get_articles_for_user_feed",
+        "target/app/api/routes/articles/articles_common.py::mark_article_as_favorite",
+        "target/app/api/routes/articles/articles_common.py::remove_article_from_favorites"
+      ],
+      "hashes": {
+        "target/app/api/routes/articles/articles_common.py": {
+          "hash_source": "b5383398d1092f1708865e4246e27fc1fdb14becec493ec3255f376435ac637c",
+          "hash_struct": "fd6552f7085d7ba4ba7266283d7a5b14ab2ed6e9a9effc5e72adfe10dcb37ee4"
+        },
+        "target/app/api/routes/articles/articles_common.py::get_articles_for_user_feed": {
+          "hash_source": "8b584b86f06127dfa97c6951dbcb44fdb0d5e3ff492d1595a5ee18b57ddab196",
+          "hash_struct": "eafeb6d10e8329a802573deb0442bc3bf08498510a0799f5f225f30255d87117"
+        },
+        "target/app/api/routes/articles/articles_common.py::mark_article_as_favorite": {
+          "hash_source": "22506b2ccea025b2aae9af52594e7a81cead7aa1e662cc70beb91625f0e5727b",
+          "hash_struct": "d454bc6daa20fc01654ffe610f316bc4ac31f7b55da9636f40169dcc861dfb0d"
+        },
+        "target/app/api/routes/articles/articles_common.py::remove_article_from_favorites": {
+          "hash_source": "19cd4bf5336e3cf6e468097c7def6190d6cd0601e0ef5ece16156af87345b500",
+          "hash_struct": "080fa86b4ee4cfc067c490a34f7eff492287a5047f11ce3d67ba6c198756b66d"
+        }
+      }
+    },
+    "generated/pages/target/app/api/routes/articles/articles_resource.md": {
+      "fact_ids": [
+        "target/app/api/routes/articles/articles_resource.py",
+        "target/app/api/routes/articles/articles_resource.py::create_new_article",
+        "target/app/api/routes/articles/articles_resource.py::delete_article_by_slug",
+        "target/app/api/routes/articles/articles_resource.py::list_articles",
+        "target/app/api/routes/articles/articles_resource.py::retrieve_article_by_slug",
+        "target/app/api/routes/articles/articles_resource.py::update_article_by_slug"
+      ],
+      "hashes": {
+        "target/app/api/routes/articles/articles_resource.py": {
+          "hash_source": "b4865e07ec36608373e41b54d5b7b4bbc0696da19d79c7492f6f0162f33158b4",
+          "hash_struct": "5058309bca856beb619534909bf1d90d62213bbc8468311c2c6091d230b5a8b7"
+        },
+        "target/app/api/routes/articles/articles_resource.py::create_new_article": {
+          "hash_source": "46ef832712dd12621f3efc6fc998438fc4e1715f2862e230ea0417db219f4c90",
+          "hash_struct": "a9b205d5f6fc3b008640685d19fa3bc5d5097158b7099ed7227b3e754869d2f7"
+        },
+        "target/app/api/routes/articles/articles_resource.py::delete_article_by_slug": {
+          "hash_source": "77f052f110bbb1b01c33b1d911715d4fcb372445b7c84fe2d05e6ae6249cfc26",
+          "hash_struct": "9117017cdb160adea5f2956c9fb562ae87897407a9f3c1a4ca18b6951e2e2f50"
+        },
+        "target/app/api/routes/articles/articles_resource.py::list_articles": {
+          "hash_source": "3282b615ea19efd10af16c6a7c17170a4e00950d41809298f45153044b175f65",
+          "hash_struct": "9d7e3fb016f55a1630da18037d79b81ece1048e0562d468592cf4ecbedaa6cf5"
+        },
+        "target/app/api/routes/articles/articles_resource.py::retrieve_article_by_slug": {
+          "hash_source": "1e00a01a8e90b1211d4e5dcbed8b95fa3a25e1e3d0bd97e72126a62093ccbd39",
+          "hash_struct": "cf7c4dbf12801ec8108bffbc20b83975455d25b4c93dccf917705804f7dc93f8"
+        },
+        "target/app/api/routes/articles/articles_resource.py::update_article_by_slug": {
+          "hash_source": "af4c7951ce1bd62feda705347c4a03edd485a7ae20187dafd056965e37298ad3",
+          "hash_struct": "e1b26058d9eab75b0907303e8356de3db674a54665f5829e48780bd8e8c06d50"
+        }
+      }
+    },
+    "generated/pages/target/app/api/routes/authentication.md": {
+      "fact_ids": [
+        "target/app/api/routes/authentication.py",
+        "target/app/api/routes/authentication.py::login",
+        "target/app/api/routes/authentication.py::register"
+      ],
+      "hashes": {
+        "target/app/api/routes/authentication.py": {
+          "hash_source": "ca3666735ce796617270684204476e88173b62d59b4bbac92ae5b31d2c9c529c",
+          "hash_struct": "fd4d2cae06120ddf2b74690cb1583808f856b2e86bb80377720161cb437677b4"
+        },
+        "target/app/api/routes/authentication.py::login": {
+          "hash_source": "30e6d5973b52c410390e860808558eaa2a70279801cb2b9bb57eaaed436c22a5",
+          "hash_struct": "5d37d72d5f6f8b2c80fb22c4027a2bd82acb4240076d08bac0630c559860048f"
+        },
+        "target/app/api/routes/authentication.py::register": {
+          "hash_source": "e47c9395fcc5ca52094d4c1344d54e8feb8dec787da8fa70ee469c8acb43557c",
+          "hash_struct": "0626afbb9fdbecd61a9cb84c4e7c9e25237825061d4369ac346c1a75bbb5a046"
+        }
+      }
+    },
+    "generated/pages/target/app/api/routes/comments.md": {
+      "fact_ids": [
+        "target/app/api/routes/comments.py",
+        "target/app/api/routes/comments.py::create_comment_for_article",
+        "target/app/api/routes/comments.py::delete_comment_from_article",
+        "target/app/api/routes/comments.py::list_comments_for_article"
+      ],
+      "hashes": {
+        "target/app/api/routes/comments.py": {
+          "hash_source": "430e7605d38974890f1c144de9fb114f8dcaffa3b1bc62865f38742391b81d13",
+          "hash_struct": "044c385aaa2e69844bcce538a70a591df10f02c0dadecd3df70b8601ead8194e"
+        },
+        "target/app/api/routes/comments.py::create_comment_for_article": {
+          "hash_source": "d6db5ffefac227d2a607ed24a34f456c27de3e705b2be773494c55939cc72bce",
+          "hash_struct": "9290ead9035564438027b7fd8b1d67da3383a839668170bd808d97d367c0337f"
+        },
+        "target/app/api/routes/comments.py::delete_comment_from_article": {
+          "hash_source": "16c073da8101a6898c2a201ed2b833e14e274f409caab07d83067c7af4721af3",
+          "hash_struct": "aede4cea3a8b9eaf5234f193cbbf8dd83a1f1b8efd39192d5e761d20283fdee7"
+        },
+        "target/app/api/routes/comments.py::list_comments_for_article": {
+          "hash_source": "b1ce2dd9e10f533bc5a4281b061b4b34f280b782f7a614333f69de7764ffebae",
+          "hash_struct": "b128ef40502ccff541764ae5bbf52b20603b7ba177d16fe07f50bad0c08fe4f8"
+        }
+      }
+    },
+    "generated/pages/target/app/api/routes/profiles.md": {
+      "fact_ids": [
+        "target/app/api/routes/profiles.py",
+        "target/app/api/routes/profiles.py::follow_for_user",
+        "target/app/api/routes/profiles.py::retrieve_profile_by_username",
+        "target/app/api/routes/profiles.py::unsubscribe_from_user"
+      ],
+      "hashes": {
+        "target/app/api/routes/profiles.py": {
+          "hash_source": "1332be6cda10c409abbd4bd7132c4287634061d926d78d927193c96d38a16420",
+          "hash_struct": "35927b2dee94bccd531a6efff6a4a4c0c0caea7563ad3af91cb9de834595c34b"
+        },
+        "target/app/api/routes/profiles.py::follow_for_user": {
+          "hash_source": "8441531ec143445f250570968878eeeae246321fb0d3a3055c58e5bd34d7f39b",
+          "hash_struct": "78304b936256f1ff2c4ab278678f979aa82f61cdb474f7a4b0cdb5f7e67b7572"
+        },
+        "target/app/api/routes/profiles.py::retrieve_profile_by_username": {
+          "hash_source": "b22cf1154aff2d1d7830e4ff5db2e17c2a18f7c6612c231e0402e7ae80e43c80",
+          "hash_struct": "6c017b23c902869a32ea3be0fe436f8fddf96cca382281192aa6f1616cce399d"
+        },
+        "target/app/api/routes/profiles.py::unsubscribe_from_user": {
+          "hash_source": "15deb2915a5c43816a0d1caa53f12d0ac010edb503e1eb97274fda06481a0589",
+          "hash_struct": "ce3c74f542b93dde9a1c3c8efc9005af6002289820de337a0e53d8d30c5024ea"
+        }
+      }
+    },
+    "generated/pages/target/app/api/routes/tags.md": {
+      "fact_ids": [
+        "target/app/api/routes/tags.py",
+        "target/app/api/routes/tags.py::get_all_tags"
+      ],
+      "hashes": {
+        "target/app/api/routes/tags.py": {
+          "hash_source": "533f06f84e649ed08b928bd64a9422c49b7211677d264173e5a2fe75fb917d2a",
+          "hash_struct": "de5d04dde6db6d6526e62cf8dfd46bbf78aa4756738afcabc9177ffecaa2c10b"
+        },
+        "target/app/api/routes/tags.py::get_all_tags": {
+          "hash_source": "929d4bda9e6991ae473d895abfdcb185c61e6476cd0da508f12dc2abae235852",
+          "hash_struct": "034f030e1fcc42381a592ee992a63852d5fab1952c719fac5d4c59fcf66a6adf"
+        }
+      }
+    },
+    "generated/pages/target/app/api/routes/users.md": {
+      "fact_ids": [
+        "target/app/api/routes/users.py",
+        "target/app/api/routes/users.py::retrieve_current_user",
+        "target/app/api/routes/users.py::update_current_user"
+      ],
+      "hashes": {
+        "target/app/api/routes/users.py": {
+          "hash_source": "2bea6222c64beeeefc328324051137a4d10c6c19063cc007d8f96abf913b613f",
+          "hash_struct": "ec187515a47a8a89db73f157611ab44499b124f68e7f19d62a470cdacd8aceed"
+        },
+        "target/app/api/routes/users.py::retrieve_current_user": {
+          "hash_source": "7c5f6609618e7e297e26a18906f36ed9b1c1d42746d954917b3363ebf364ca50",
+          "hash_struct": "61ec294c54aae2f1501b4fd2cece7880df30e8ce3bb19b55680df37df096dd13"
+        },
+        "target/app/api/routes/users.py::update_current_user": {
+          "hash_source": "608bf150cd67c3df630d6f5915bd97389d0a25f306605232a2a114ceb62b502f",
+          "hash_struct": "4df43a083b56811eecc93897ff78a5404b791ba4ebfea2cc6a3769caecd817a5"
+        }
+      }
+    },
+    "generated/pages/target/app/core/__init__.md": {
+      "fact_ids": [
+        "target/app/core/__init__.py"
+      ],
+      "hashes": {
+        "target/app/core/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/core/config.md": {
+      "fact_ids": [
+        "target/app/core/config.py",
+        "target/app/core/config.py::get_app_settings"
+      ],
+      "hashes": {
+        "target/app/core/config.py": {
+          "hash_source": "4770869719720b675169500868db617ceb1d100e1386b7062fb7a432ab0e17bc",
+          "hash_struct": "1b032339d5ca4221173eb321942c0e1f722670f61431f5524f7684e5d99f44d6"
+        },
+        "target/app/core/config.py::get_app_settings": {
+          "hash_source": "be484f72595fca68576f10f1e85a0f670f31c115cf24cdac403b9649db75a4de",
+          "hash_struct": "6e365bac0d9227c5514c27be9c0c47521fffc7249ae3252a691d36168659a40a"
+        }
+      }
+    },
+    "generated/pages/target/app/core/events.md": {
+      "fact_ids": [
+        "target/app/core/events.py",
+        "target/app/core/events.py::create_start_app_handler",
+        "target/app/core/events.py::create_stop_app_handler"
+      ],
+      "hashes": {
+        "target/app/core/events.py": {
+          "hash_source": "9c8c0a910f81404571496f65cd81b6410db26ec32669e1e6af58b4d1981f4282",
+          "hash_struct": "371d23bf25763bf511135d3b5310714d492cc5d9032462c08307799d5d70f270"
+        },
+        "target/app/core/events.py::create_start_app_handler": {
+          "hash_source": "e238eb5c6f3bd430ff2e6527e8fd2d49e17ad57d19880e03a5e144fc2a2966ae",
+          "hash_struct": "d66625b8f7fa74fcc8e7d92ac9a232d591eb847b43c2dde30bcbef76e550de43"
+        },
+        "target/app/core/events.py::create_stop_app_handler": {
+          "hash_source": "2639207c7d69e093e4ceb60920f73e0dc25b95743d1034fab0f7b7f6a7a3eb1d",
+          "hash_struct": "211d328d365c9dd89c58fce7c5eeef749474b17213e52b8606a5a3019363139c"
+        }
+      }
+    },
+    "generated/pages/target/app/core/logging.md": {
+      "fact_ids": [
+        "target/app/core/logging.py",
+        "target/app/core/logging.py::InterceptHandler",
+        "target/app/core/logging.py::InterceptHandler::emit"
+      ],
+      "hashes": {
+        "target/app/core/logging.py": {
+          "hash_source": "3051e63f4b3afe9768955fc334fcb19a4fada844ec9111770c6e4a25e34d53bf",
+          "hash_struct": "647f50d2e652087e95c7fd3361aaa0e607a122cd9cb6e9129f7454d3a1a35b56"
+        },
+        "target/app/core/logging.py::InterceptHandler": {
+          "hash_source": "39948381524bfe2509f15c1fd8b497aae9e70ed2c8cce59396621717bdc3fe35",
+          "hash_struct": "0252d29addd1412e3780fdab25d7e1202f34297e372ab71e5b3ced0e52f9c058"
+        },
+        "target/app/core/logging.py::InterceptHandler::emit": {
+          "hash_source": "52fd85afc403bb0859a56bd7d0eaedc1286fcacae80beaee8904b800df17b1c4",
+          "hash_struct": "b45b86476a0ce1c3795a05173b91aa2bd0008ba6558b8e2f0a1a536fa7475aeb"
+        }
+      }
+    },
+    "generated/pages/target/app/core/settings/__init__.md": {
+      "fact_ids": [
+        "target/app/core/settings/__init__.py"
+      ],
+      "hashes": {
+        "target/app/core/settings/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/core/settings/app.md": {
+      "fact_ids": [
+        "target/app/core/settings/app.py",
+        "target/app/core/settings/app.py::AppSettings",
+        "target/app/core/settings/app.py::AppSettings::configure_logging",
+        "target/app/core/settings/app.py::AppSettings::fastapi_kwargs"
+      ],
+      "hashes": {
+        "target/app/core/settings/app.py": {
+          "hash_source": "9e6d94f3bf190c7c1157b5bbdbc4c47be0122f66989081a5070ec46da255feeb",
+          "hash_struct": "ca3209f5fd4ad5560bf2f00d2668a1e61586740b7b49bb2d3a618b53e0db7d22"
+        },
+        "target/app/core/settings/app.py::AppSettings": {
+          "hash_source": "f9c25fecad03af004392f4c216a1392c4c4bd1ca20fb0832a55780b76b9a2d6a",
+          "hash_struct": "f5b9934974ed180261dcc719557299e62759f3b537aaf66ac69800f843d869a3"
+        },
+        "target/app/core/settings/app.py::AppSettings::configure_logging": {
+          "hash_source": "87fafd73e780797e0eaa10320926cc0da8e25546d3635fee3196128af207775c",
+          "hash_struct": "a76da0933b74906f32143fe98a0592714489bfb6d4523317b94fe703fbdb47b3"
+        },
+        "target/app/core/settings/app.py::AppSettings::fastapi_kwargs": {
+          "hash_source": "e865ef6a8e66cc1a336f2d56bce8eecc9ae3745f851d4e7d68d256ff72f9d783",
+          "hash_struct": "3b6e5ccc1a008153467385766c70570e173b6ead621e67ced8112d5fe45342e0"
+        }
+      }
+    },
+    "generated/pages/target/app/core/settings/base.md": {
+      "fact_ids": [
+        "target/app/core/settings/base.py",
+        "target/app/core/settings/base.py::AppEnvTypes",
+        "target/app/core/settings/base.py::BaseAppSettings"
+      ],
+      "hashes": {
+        "target/app/core/settings/base.py": {
+          "hash_source": "f9810912ab05f3b74d4a13dcf066ddbfbde6104a434cec1607c9905669e7771c",
+          "hash_struct": "3b419d7151db901d8a254e0c82c512146b765499db838cbfee007f26906fc86d"
+        },
+        "target/app/core/settings/base.py::AppEnvTypes": {
+          "hash_source": "c6141cfde2e240c6e85fc1daa9878acc39b945f4f6eff3f6516d676eee58a17e",
+          "hash_struct": "f312a24be7cd5d22b473854a19a2415c41a67b7005924714149608bba24df253"
+        },
+        "target/app/core/settings/base.py::BaseAppSettings": {
+          "hash_source": "e675fd09d51263c0eb750cbb752953cef69bd8fa05d9401a55ea1b8bebd6054e",
+          "hash_struct": "82747747237f7df5760361efa3269003e4b68654d7745cf98b9f0fa9a9b2d643"
+        }
+      }
+    },
+    "generated/pages/target/app/core/settings/development.md": {
+      "fact_ids": [
+        "target/app/core/settings/development.py",
+        "target/app/core/settings/development.py::DevAppSettings"
+      ],
+      "hashes": {
+        "target/app/core/settings/development.py": {
+          "hash_source": "2fc15aa07237daa654697f0fdaa3fa8735e0bc2b59f6290f830ef4a653edf1e3",
+          "hash_struct": "182923a40846341a1e87c6568b745acde61f4cb562d77c4a8d14e9b451f12d42"
+        },
+        "target/app/core/settings/development.py::DevAppSettings": {
+          "hash_source": "a8a6307de19eb5c88d9c111392ae9dc5b5e32d857d404d50f3855c5b4afb4cb7",
+          "hash_struct": "a37a2c6e8224c9870b9254f8d71966045571ad37d0aa957d973625917bd7743d"
+        }
+      }
+    },
+    "generated/pages/target/app/core/settings/production.md": {
+      "fact_ids": [
+        "target/app/core/settings/production.py",
+        "target/app/core/settings/production.py::ProdAppSettings"
+      ],
+      "hashes": {
+        "target/app/core/settings/production.py": {
+          "hash_source": "948f12b7df450c4c3c0d0df84d793f438960ad21a5fa50e48d73eb34445f344b",
+          "hash_struct": "9a5dd830b8353d27ac362dab45797466cc4710ad218ff36202a70ed7dba0bc97"
+        },
+        "target/app/core/settings/production.py::ProdAppSettings": {
+          "hash_source": "3411ca2154ecb27d7fbe756652eb66f8cc3e0050e2254383ad74ab0762c59440",
+          "hash_struct": "651b7af9bc770dba5a3c0005ad0c6c67b1703c674a6143142833b39a6cdc2db0"
+        }
+      }
+    },
+    "generated/pages/target/app/core/settings/test.md": {
+      "fact_ids": [
+        "target/app/core/settings/test.py",
+        "target/app/core/settings/test.py::TestAppSettings"
+      ],
+      "hashes": {
+        "target/app/core/settings/test.py": {
+          "hash_source": "eb5391801429d19d131d793553ac92946273d373739c4c2c632b43485953f9ba",
+          "hash_struct": "3eb74ef67ac81f101169ac429e447d239da8053b7e0e8e66e256323169a83943"
+        },
+        "target/app/core/settings/test.py::TestAppSettings": {
+          "hash_source": "b104a8ad7a249a3e988f335203bd68136bf89c5862fd66aa83c8106eecd34ee2",
+          "hash_struct": "79681448509c545f4a4252a2f6bb27fff3e78727937656b8fd093448bfa6f10a"
+        }
+      }
+    },
+    "generated/pages/target/app/db/__init__.md": {
+      "fact_ids": [
+        "target/app/db/__init__.py"
+      ],
+      "hashes": {
+        "target/app/db/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/db/errors.md": {
+      "fact_ids": [
+        "target/app/db/errors.py",
+        "target/app/db/errors.py::EntityDoesNotExist"
+      ],
+      "hashes": {
+        "target/app/db/errors.py": {
+          "hash_source": "35017dedf366d951900b4d8b944a19b795a4d2e2e22edb637bd66e1d03131bd3",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        },
+        "target/app/db/errors.py::EntityDoesNotExist": {
+          "hash_source": "35017dedf366d951900b4d8b944a19b795a4d2e2e22edb637bd66e1d03131bd3",
+          "hash_struct": "384ab6e01bd97efe10642686d47568c5bfa085ac8bea3601762f52c28a079b27"
+        }
+      }
+    },
+    "generated/pages/target/app/db/events.md": {
+      "fact_ids": [
+        "target/app/db/events.py",
+        "target/app/db/events.py::close_db_connection",
+        "target/app/db/events.py::connect_to_db"
+      ],
+      "hashes": {
+        "target/app/db/events.py": {
+          "hash_source": "521ddc1735eb81fe3354c8ee6999c3e5055f0ffc968ff686fa6f3fff3050f852",
+          "hash_struct": "f7c4c5e25e00d43e75359a4c0972099cc990c6fdc9532664cbc0667b7033ace9"
+        },
+        "target/app/db/events.py::close_db_connection": {
+          "hash_source": "1dcdce14caa5e84211b8382cc70f64ad0e28ac7126b68f4043913482615f490a",
+          "hash_struct": "a462050945c568f52275500f50213877f5c9cfe22fc0b65eff55295eb9a6f446"
+        },
+        "target/app/db/events.py::connect_to_db": {
+          "hash_source": "7ca9021e967b8ccd2c78c04beec3262ef5ea1916b07614fb9e8e022a0b05d94f",
+          "hash_struct": "d4052031d3a384d5dc163cc86a8e38b0f6f033924afbdac238368d7384426a25"
+        }
+      }
+    },
+    "generated/pages/target/app/db/queries/__init__.md": {
+      "fact_ids": [
+        "target/app/db/queries/__init__.py"
+      ],
+      "hashes": {
+        "target/app/db/queries/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/db/queries/queries.md": {
+      "fact_ids": [
+        "target/app/db/queries/queries.py"
+      ],
+      "hashes": {
+        "target/app/db/queries/queries.py": {
+          "hash_source": "57c88867c5556731de1f6ec69a5986ecca46784adcd8e2ee28f0a70f33b800f2",
+          "hash_struct": "d57e01f7e075595f2ec1b690b5c88520512107a98e2bfbe5b7eec9fe7c168ee8"
+        }
+      }
+    },
+    "generated/pages/target/app/db/queries/tables.md": {
+      "fact_ids": [
+        "target/app/db/queries/tables.py",
+        "target/app/db/queries/tables.py::Articles",
+        "target/app/db/queries/tables.py::ArticlesToTags",
+        "target/app/db/queries/tables.py::Favorites",
+        "target/app/db/queries/tables.py::Parameter",
+        "target/app/db/queries/tables.py::Parameter::__init__",
+        "target/app/db/queries/tables.py::Tags",
+        "target/app/db/queries/tables.py::TypedTable",
+        "target/app/db/queries/tables.py::TypedTable::__init__",
+        "target/app/db/queries/tables.py::Users"
+      ],
+      "hashes": {
+        "target/app/db/queries/tables.py": {
+          "hash_source": "25a1f6ec06cfae0c9aa103732f78a937edb527c3224224c5689d27287fb64fbd",
+          "hash_struct": "d383f8b1a33ae4d03831133152784fd47ae0c65d2c554afdbd69e1ce85f92dc7"
+        },
+        "target/app/db/queries/tables.py::Articles": {
+          "hash_source": "11734acf441fb1f9f70b34535fbdebc9f3254946585fb7f5b1c7f0834c740fbe",
+          "hash_struct": "b4750ba0cd4129435ebae3cababcd5d950393437f70dbb39bcb2006d20f5b9cd"
+        },
+        "target/app/db/queries/tables.py::ArticlesToTags": {
+          "hash_source": "c02d310b188088ed2e29b465376b776cc4e0d7b834fe18807a5299f1f8e1cb8a",
+          "hash_struct": "82df7a089164d3a6fa1837cc6b91923c1058aab86c4053bab6e30f514cc709d7"
+        },
+        "target/app/db/queries/tables.py::Favorites": {
+          "hash_source": "fbbf8577a3c78ea4db176d77b209730d2f471f36efbda4b8d67544e0d40a55d4",
+          "hash_struct": "921f70ed16e3898d0a4cbd850e7c9ed4a2782b10f1b0c0dd617b4444a037fee9"
+        },
+        "target/app/db/queries/tables.py::Parameter": {
+          "hash_source": "fea00b24f770a604623faa34467cbdf4d69754300e30e89163d2b77ee86c7308",
+          "hash_struct": "724dbc8568776c1d2f403521d2ff2576987646c29abc08631d7db00891502fd5"
+        },
+        "target/app/db/queries/tables.py::Parameter::__init__": {
+          "hash_source": "1abd873adc04882335fa1962ffbeb807a7dffcd1e860b1cc92d91c277e4b0e35",
+          "hash_struct": "5405e3e5502464a1dffbc12cb461f3fca287f25781d4831e7ff32dd229736c34"
+        },
+        "target/app/db/queries/tables.py::Tags": {
+          "hash_source": "05ff04a293bb0d3ef60b4341d71760afb68026e29bbff1916897a09b0ff64514",
+          "hash_struct": "00bf9e33178227826bb28e7f738f745115abf3ea36726765a0e49ae40c094590"
+        },
+        "target/app/db/queries/tables.py::TypedTable": {
+          "hash_source": "12ee72f809ba4c7df09245afde537a5ce016a4941440d90b3194812d44d256fd",
+          "hash_struct": "b367deffae3f93e4f7e254e0832bc8045941e3d983b1cf6337a94d18544c15de"
+        },
+        "target/app/db/queries/tables.py::TypedTable::__init__": {
+          "hash_source": "dce61c194afe90698829093fec7c9b642495539650ebca558730b60385876ea5",
+          "hash_struct": "c7726446727b450f87193f9745eaf68f85548bcb529b0d4e332207794c8dade2"
+        },
+        "target/app/db/queries/tables.py::Users": {
+          "hash_source": "e1c62c8884bb74818f852a02b2c69a52ba88de69e4563db6268085d742950c1f",
+          "hash_struct": "d3edd79f45c98db9552dc43ef1e1360ad1fa442b3921a20225bfd9f18e6f30c8"
+        }
+      }
+    },
+    "generated/pages/target/app/db/repositories/__init__.md": {
+      "fact_ids": [
+        "target/app/db/repositories/__init__.py"
+      ],
+      "hashes": {
+        "target/app/db/repositories/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/db/repositories/articles.md": {
+      "fact_ids": [
+        "target/app/db/repositories/articles.py",
+        "target/app/db/repositories/articles.py::ArticlesRepository",
+        "target/app/db/repositories/articles.py::ArticlesRepository::__init__",
+        "target/app/db/repositories/articles.py::ArticlesRepository::_get_article_from_db_record",
+        "target/app/db/repositories/articles.py::ArticlesRepository::_link_article_with_tags",
+        "target/app/db/repositories/articles.py::ArticlesRepository::add_article_into_favorites",
+        "target/app/db/repositories/articles.py::ArticlesRepository::create_article",
+        "target/app/db/repositories/articles.py::ArticlesRepository::delete_article",
+        "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles",
+        "target/app/db/repositories/articles.py::ArticlesRepository::get_article_by_slug",
+        "target/app/db/repositories/articles.py::ArticlesRepository::get_articles_for_user_feed",
+        "target/app/db/repositories/articles.py::ArticlesRepository::get_favorites_count_for_article_by_slug",
+        "target/app/db/repositories/articles.py::ArticlesRepository::get_tags_for_article_by_slug",
+        "target/app/db/repositories/articles.py::ArticlesRepository::is_article_favorited_by_user",
+        "target/app/db/repositories/articles.py::ArticlesRepository::remove_article_from_favorites",
+        "target/app/db/repositories/articles.py::ArticlesRepository::update_article"
+      ],
+      "hashes": {
+        "target/app/db/repositories/articles.py": {
+          "hash_source": "bb6d8c92e2acdcc3e11f9aa6e509e35b3a7cdb0366b58c35c1a2e6b0f9974fab",
+          "hash_struct": "7952e8adddd454f1421bb60d56b3f575266ddf1ec12ef3fb4b8bbf3fce80c808"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository": {
+          "hash_source": "7128468072043c69d324b49994708f70966342ff7b17dbb2252d6dcc5b33b27f",
+          "hash_struct": "35bdc23a593c7bf1584bde5d2909b99320931eb345adafcdd8bcd561925e5ca2"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::__init__": {
+          "hash_source": "a7aeaff08a3c634ee8aa07199fce2ed545a06f430d6b1566c96f71eafa4eb8fb",
+          "hash_struct": "00d33ffc539968c0b02f755e2204a4c72a4ecbab9e8f7f3559de004c72f0573b"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::_get_article_from_db_record": {
+          "hash_source": "e69e069802828773043421ed9c37e4d4d8d184d21b6c37a34f051d26c93e2c2b",
+          "hash_struct": "2ec6a5e95ff430e01e6d437c752b410d2f5f90e03a11d546e839fff83cebd8e4"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::_link_article_with_tags": {
+          "hash_source": "9325794dd5f7c50f0fc483d51553e9802ed810fb3c46edbd9adea8d24eb4764b",
+          "hash_struct": "48697bb886076fde8065543227a5a8225cb0a81db900b3f507b5f0351b06ed99"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::add_article_into_favorites": {
+          "hash_source": "43426debb371509ce497fb79fbd4d3e46d6761fbae5dd5bf5add71182a2d4431",
+          "hash_struct": "07434f98b5044de26ae1aeaf06b9ba4a40c4b0200b4d28132dc5220d18b46525"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::create_article": {
+          "hash_source": "ac05f663684b2aefce2f76cf756e10a9d197de45e82468aed9301afece8e28e9",
+          "hash_struct": "982b98eefaddfb6acf8209bc69a73c0620792abc22934e1cd2b4ae39f9760a87"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::delete_article": {
+          "hash_source": "637a6aecb3ea738c19ee1e3f089fd765d3f24a7409c588dd6120e13e63167e93",
+          "hash_struct": "37d73a7023b048e786be847575bc5aceaa5a52241cca8d7eb6e10d943fdcb4f8"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::filter_articles": {
+          "hash_source": "cd1c02d1dd918bc4eb1c9b107b122a6f912629e3373794892b5f8e401e97097d",
+          "hash_struct": "71b32bf2ea4eca0ccc97074f4dc3d2312d74137f3e0e2aadb674f65176ec101b"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::get_article_by_slug": {
+          "hash_source": "67025065d2b0a8fd12ddf9cbb294a83e8d02b4539f91e5b6fea407640e3c1b41",
+          "hash_struct": "ec2ecd3707ee9502a353d666985453a5cbd43042787afe49f5b40c9b8a4b0674"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::get_articles_for_user_feed": {
+          "hash_source": "e3abae5af42eba5388b1fd3facb016504ba565a25f31ce8819cd1a63bb15b9e3",
+          "hash_struct": "39d327e51ae0a3689115dbb94a3c6fbde6922e4fe1902d0070068ebf0c4f53f6"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::get_favorites_count_for_article_by_slug": {
+          "hash_source": "73e58d3edb68e96e9e1cd69710cc98fcc69f1557abcaa4900b608385afa4cf89",
+          "hash_struct": "6adf6a98261ed162ea5e642d4e95da44bb6f4bf60da2178d1d04982c37627c56"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::get_tags_for_article_by_slug": {
+          "hash_source": "1cd6652e77878f48534d848099ea8a8d64633bcda2e4066852b318536dcd2f37",
+          "hash_struct": "0697db62ae594e0a9a02fec43ea5b0940ac1e0a78bfe10f322ec6e222f101c40"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::is_article_favorited_by_user": {
+          "hash_source": "9d450d31d58fbf8595f1b66a58bfd53cd800bab857299085f40d0fb9778a0fdb",
+          "hash_struct": "34b916611b116da13d65c195f0a29aba5101d4a96258e076fed7a02ca01c806f"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::remove_article_from_favorites": {
+          "hash_source": "785d2f453bacea0a7f10433b83809d04a1e90f5a63e79f33544e6f751272af06",
+          "hash_struct": "a5afad78a49a556d4f3655dd273fb047e9fcc2a3b0dab6ba7b187454cb448011"
+        },
+        "target/app/db/repositories/articles.py::ArticlesRepository::update_article": {
+          "hash_source": "bc17af55401c61c27ba47406a7db297f403eb2e0ae1f0a7b855c77f556f3fb7c",
+          "hash_struct": "f2e83adbd23aca0f7d731da030d2a2c3a465fdb7abe8aa1f26f1ff15e2ba0cbb"
+        }
+      }
+    },
+    "generated/pages/target/app/db/repositories/base.md": {
+      "fact_ids": [
+        "target/app/db/repositories/base.py",
+        "target/app/db/repositories/base.py::BaseRepository",
+        "target/app/db/repositories/base.py::BaseRepository::__init__",
+        "target/app/db/repositories/base.py::BaseRepository::connection"
+      ],
+      "hashes": {
+        "target/app/db/repositories/base.py": {
+          "hash_source": "1bde2a49533b1c9982b3b9a163ccf9d7b181189145e70e645a14f92fb7aee643",
+          "hash_struct": "a876c8eb5468f7ceb08352ae43cb5d15626cdfd27e956eb6c75828c913e46d0e"
+        },
+        "target/app/db/repositories/base.py::BaseRepository": {
+          "hash_source": "0fb06ed394222e01e387e724d9374c8c5d46b68a70db92cef6eda81aa9f3ce22",
+          "hash_struct": "2756a9de10b8b284e8cd6a74c34d1d571310e1871c83197e283faa710d6f2ea6"
+        },
+        "target/app/db/repositories/base.py::BaseRepository::__init__": {
+          "hash_source": "7532ef7aa90155cbfcd47fd7aa6969d263b781299cc970e5c99fb73544342f5a",
+          "hash_struct": "00d33ffc539968c0b02f755e2204a4c72a4ecbab9e8f7f3559de004c72f0573b"
+        },
+        "target/app/db/repositories/base.py::BaseRepository::connection": {
+          "hash_source": "ee5b9c95520dde536721752278bd7abc63884e5db9d08549c28eda8d460a337e",
+          "hash_struct": "a15f5becf70606808a5d2afb0544b4407e3543bddde9790af26a4cf3a7af38cf"
+        }
+      }
+    },
+    "generated/pages/target/app/db/repositories/comments.md": {
+      "fact_ids": [
+        "target/app/db/repositories/comments.py",
+        "target/app/db/repositories/comments.py::CommentsRepository",
+        "target/app/db/repositories/comments.py::CommentsRepository::__init__",
+        "target/app/db/repositories/comments.py::CommentsRepository::_get_comment_from_db_record",
+        "target/app/db/repositories/comments.py::CommentsRepository::create_comment_for_article",
+        "target/app/db/repositories/comments.py::CommentsRepository::delete_comment",
+        "target/app/db/repositories/comments.py::CommentsRepository::get_comment_by_id",
+        "target/app/db/repositories/comments.py::CommentsRepository::get_comments_for_article"
+      ],
+      "hashes": {
+        "target/app/db/repositories/comments.py": {
+          "hash_source": "800a81ac299c9038699d6e20fce2e7238f74ae7bb294c987e5874c7caa61303e",
+          "hash_struct": "4e1462ff989b75afdf57d226ea6c7e54d79c19b5aeef525579ca1623447b3853"
+        },
+        "target/app/db/repositories/comments.py::CommentsRepository": {
+          "hash_source": "e352e42279f7e233516c3bc46f74a60f6792453204eaa5b69f1aa97cc2db4f27",
+          "hash_struct": "2323b2f083af545e4be39c57f08f552d5002c988a1a87659a692362b03e99ddb"
+        },
+        "target/app/db/repositories/comments.py::CommentsRepository::__init__": {
+          "hash_source": "4736d1e7e9038ce623e56b70577bdfcc550d9acd6dcdb0fbb72d267bd3eb45de",
+          "hash_struct": "00d33ffc539968c0b02f755e2204a4c72a4ecbab9e8f7f3559de004c72f0573b"
+        },
+        "target/app/db/repositories/comments.py::CommentsRepository::_get_comment_from_db_record": {
+          "hash_source": "21cda19305d56107a67b01dcdd7ebe6cb01393d4a919dad7d1c514ad3d0dc8bb",
+          "hash_struct": "a0d682bcf742f585c473d571f631fabaac79cd91532171ae4b8a107bdb6241b0"
+        },
+        "target/app/db/repositories/comments.py::CommentsRepository::create_comment_for_article": {
+          "hash_source": "7023563e9ca733d6e0decde56ddd040902fe5925a21421b9f3ca055fb1976deb",
+          "hash_struct": "2aefd40deefb49c226fdbbafad7cfd146b5fc12bef7e3ec17d0bd4a2bf866e1b"
+        },
+        "target/app/db/repositories/comments.py::CommentsRepository::delete_comment": {
+          "hash_source": "020c10d0e59d906605462f9600bc2434a978af6e9f4f66e17982279b7a16e941",
+          "hash_struct": "39b04d4113b7c9d467573ab69b8d3e671e042f0a804b7e14ba304b560957bb83"
+        },
+        "target/app/db/repositories/comments.py::CommentsRepository::get_comment_by_id": {
+          "hash_source": "f4dc2d6d419609e4986fd347bce1b69321608e91412b653e84e53ab306295f28",
+          "hash_struct": "f42db00c62f1b77483f5b48e5aa089a81f56ecaeb5e78a6748e5cd1af26a22d7"
+        },
+        "target/app/db/repositories/comments.py::CommentsRepository::get_comments_for_article": {
+          "hash_source": "ca2b223a75741f597300a07299b65b0738cf7de9caf3cec66d362680aa011ca3",
+          "hash_struct": "a7549bd4ce1b0e488796326dc3c1a71f68734054d37d069e47063179e7e8e777"
+        }
+      }
+    },
+    "generated/pages/target/app/db/repositories/profiles.md": {
+      "fact_ids": [
+        "target/app/db/repositories/profiles.py",
+        "target/app/db/repositories/profiles.py::ProfilesRepository",
+        "target/app/db/repositories/profiles.py::ProfilesRepository::__init__",
+        "target/app/db/repositories/profiles.py::ProfilesRepository::add_user_into_followers",
+        "target/app/db/repositories/profiles.py::ProfilesRepository::get_profile_by_username",
+        "target/app/db/repositories/profiles.py::ProfilesRepository::is_user_following_for_another_user",
+        "target/app/db/repositories/profiles.py::ProfilesRepository::remove_user_from_followers"
+      ],
+      "hashes": {
+        "target/app/db/repositories/profiles.py": {
+          "hash_source": "227323a95db81aad101363d8b97e44a8e2f02613dc3ef08065186b273d2192cd",
+          "hash_struct": "a37ca994dc46a8e0ee5dcf535771f36225ecacc8d706a397ce031d6a386f6a92"
+        },
+        "target/app/db/repositories/profiles.py::ProfilesRepository": {
+          "hash_source": "888bd78981e75d6f0e1fd515ecd5ac321070a87df85e5e14b24727d1d50ae0d1",
+          "hash_struct": "1bd3288726f926fea08729f0ee058ef503b00f1b9599e2f92c8e3423cf0fe211"
+        },
+        "target/app/db/repositories/profiles.py::ProfilesRepository::__init__": {
+          "hash_source": "bdfc7c3a32ecee7d9e3ecb487d10c586ba5b0488fbd26f51c70494668d87fe6c",
+          "hash_struct": "1c2dacf29e0b8beb4ace27e60d7ed986cb61fb9f6dd4873596b715da4aef1c98"
+        },
+        "target/app/db/repositories/profiles.py::ProfilesRepository::add_user_into_followers": {
+          "hash_source": "e5bb890a8ec1d19f018d946d92f381005526b9f449b89d4835ee6c74c6429d98",
+          "hash_struct": "716dced557a3547fc7a4bd74074f6183f0e9a37fc8dad1f0054b751f44c0547b"
+        },
+        "target/app/db/repositories/profiles.py::ProfilesRepository::get_profile_by_username": {
+          "hash_source": "02c584cefc4f8a8af6751fd5f31dd6b3adb320b4a6e2f4fcbae1a4db9416c51c",
+          "hash_struct": "ad8edf69833396c02c31ce1ebf0430752354c9063435afc0d2873814b777dba3"
+        },
+        "target/app/db/repositories/profiles.py::ProfilesRepository::is_user_following_for_another_user": {
+          "hash_source": "15abfaf58a942db3217cccfb731bd0cc866fbfdd2e6261fcb0581566b39759e3",
+          "hash_struct": "fb5356e749852d8e1ac676690101a662ea06332eab1bfb26674fc1ec060528c1"
+        },
+        "target/app/db/repositories/profiles.py::ProfilesRepository::remove_user_from_followers": {
+          "hash_source": "bd30c790f6ef7e856d955202e49f918e3377927385ba24fee7465ea0da421554",
+          "hash_struct": "ab40e748bcb083a0aab6f2cdadbadd991120b8126b284638c6cdea0e36fede96"
+        }
+      }
+    },
+    "generated/pages/target/app/db/repositories/tags.md": {
+      "fact_ids": [
+        "target/app/db/repositories/tags.py",
+        "target/app/db/repositories/tags.py::TagsRepository",
+        "target/app/db/repositories/tags.py::TagsRepository::create_tags_that_dont_exist",
+        "target/app/db/repositories/tags.py::TagsRepository::get_all_tags"
+      ],
+      "hashes": {
+        "target/app/db/repositories/tags.py": {
+          "hash_source": "c56388c9dc7f7e03b6d77b39cbe91de26f0cfdaefc69464b9efd85abbcf649d8",
+          "hash_struct": "b85664771c18cb09eb84ce6de0f4e25ebe7ecb35e6603c714f19b38ad9112d09"
+        },
+        "target/app/db/repositories/tags.py::TagsRepository": {
+          "hash_source": "1a947273821fa0de201a342190ba90c56e1da01221d631b0325842d5caaa7edd",
+          "hash_struct": "afd8100e21a69823dd4be7002f95a3c58c84562d0dbd2df8c4d73ffe855c4845"
+        },
+        "target/app/db/repositories/tags.py::TagsRepository::create_tags_that_dont_exist": {
+          "hash_source": "8fa44dbfdaa603dca76ac8ee3bbf9885ae620eccbe03ed8bca209b911a08be6b",
+          "hash_struct": "65f0fd74e0e060b2e16d36beee8dca03bb035a3a65fec228389a16fb062e756f"
+        },
+        "target/app/db/repositories/tags.py::TagsRepository::get_all_tags": {
+          "hash_source": "715901fc29c8844381bc84525a4d402517651da56562796667f32a9ea91c930b",
+          "hash_struct": "38c113808de567c115f9cff68cc9f9ed91ac283fcc1fa656f981acfdb67c3429"
+        }
+      }
+    },
+    "generated/pages/target/app/db/repositories/users.md": {
+      "fact_ids": [
+        "target/app/db/repositories/users.py",
+        "target/app/db/repositories/users.py::UsersRepository",
+        "target/app/db/repositories/users.py::UsersRepository::create_user",
+        "target/app/db/repositories/users.py::UsersRepository::get_user_by_email",
+        "target/app/db/repositories/users.py::UsersRepository::get_user_by_username",
+        "target/app/db/repositories/users.py::UsersRepository::update_user"
+      ],
+      "hashes": {
+        "target/app/db/repositories/users.py": {
+          "hash_source": "dcc803ef99968fefe5c7177250fbadb64e748686a318338cf915a1653777acaf",
+          "hash_struct": "b186bc87ade2869a81727642a2c894d62899c298bf15f1e69bb93e8b2e337631"
+        },
+        "target/app/db/repositories/users.py::UsersRepository": {
+          "hash_source": "cf419e80c30b54b4aa5af29fdc0cb9cd20d160804df3afb5563404534653cdd1",
+          "hash_struct": "03991652c3bcb5d7a56ce26753b63946c2fa2754da10fb254091fdbb04447b94"
+        },
+        "target/app/db/repositories/users.py::UsersRepository::create_user": {
+          "hash_source": "54cf78174ebe794c21d96c0fe3bec80c3b1705892b36bd29f5b9f74c51f5b239",
+          "hash_struct": "477cdb07ed4c908512f41ff679d8eeba9ac9c8826a0a5ade5eec3010a7cc6354"
+        },
+        "target/app/db/repositories/users.py::UsersRepository::get_user_by_email": {
+          "hash_source": "460abd7885086d8b9b705e93971cf68a897186354cd308f25f7e7936bccc15ae",
+          "hash_struct": "e0468fed08208c56bdf3efec514200371e463e1c1e423f18c22e1a0d3f1f880b"
+        },
+        "target/app/db/repositories/users.py::UsersRepository::get_user_by_username": {
+          "hash_source": "dc363a093fe0126b9b9d136c5bf608328f27391253c9d1e74769f1cb3943e957",
+          "hash_struct": "6123ef45878c7a84d4d4394db15de3f09e15850e5863ff14b79b0413edb74f2e"
+        },
+        "target/app/db/repositories/users.py::UsersRepository::update_user": {
+          "hash_source": "785fa4fb1660694e1539fed2ac5449454740a58f149c8540a73141d5b6eef651",
+          "hash_struct": "08299bcace8648cb9571eb583a6c21077c5f3a6a2b4dbfa21cf7a0062b1d33cd"
+        }
+      }
+    },
+    "generated/pages/target/app/main.md": {
+      "fact_ids": [
+        "target/app/main.py",
+        "target/app/main.py::get_application"
+      ],
+      "hashes": {
+        "target/app/main.py": {
+          "hash_source": "96cd6a70551cddf0d3f312b88746a1da750ecaaf789de38d956ab41770914695",
+          "hash_struct": "cf6cc1f0ac37f3a851efc40d0d19ddfbbb7af9093e6da9bf1e23d4be314ceef4"
+        },
+        "target/app/main.py::get_application": {
+          "hash_source": "e20899d4e5cdd6615dd6086a5f2ea39348a69561f0b9bab1efdc7e82d2220646",
+          "hash_struct": "8c4a700e5784f6b809ebabd270d1b2c1e8802d16b62f024a36512833c24eb128"
+        }
+      }
+    },
+    "generated/pages/target/app/models/__init__.md": {
+      "fact_ids": [
+        "target/app/models/__init__.py"
+      ],
+      "hashes": {
+        "target/app/models/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/models/common.md": {
+      "fact_ids": [
+        "target/app/models/common.py",
+        "target/app/models/common.py::DateTimeModelMixin",
+        "target/app/models/common.py::DateTimeModelMixin::default_datetime",
+        "target/app/models/common.py::IDModelMixin"
+      ],
+      "hashes": {
+        "target/app/models/common.py": {
+          "hash_source": "1893b8b0b5f075c086494114ccf60be33d16d2f7e55a2f57e99b22d49dbcc49d",
+          "hash_struct": "df1fff6383a580ecf163faae680da3c181b7b51d8712216d7b4c2a86ea9a9566"
+        },
+        "target/app/models/common.py::DateTimeModelMixin": {
+          "hash_source": "8c4138c15f1b303548c1d325bc3fb921aacaf81c5ff8106e717a64eff151a752",
+          "hash_struct": "e669e50072089d9b47a14bf94f9d27370b17e619c7f48e8743229f328af8d45d"
+        },
+        "target/app/models/common.py::DateTimeModelMixin::default_datetime": {
+          "hash_source": "c65bab1ff4673c84314378c62d8c992127cc36ddcb38b1a434605ae69a8804b2",
+          "hash_struct": "7d6c31dc64238ea3f3feb225a17ad243b9cfb15c3772d6cfcfff2d3194fbe5a5"
+        },
+        "target/app/models/common.py::IDModelMixin": {
+          "hash_source": "b60332aa234aec9d31c00b49c18c37248a85d33c661c6ee09134c3fe97eda67c",
+          "hash_struct": "ece0b03c4cd1d8b4eb9be230e3ffa033002fa0dabe0afbf9c4df8c7340bcd427"
+        }
+      }
+    },
+    "generated/pages/target/app/models/domain/__init__.md": {
+      "fact_ids": [
+        "target/app/models/domain/__init__.py"
+      ],
+      "hashes": {
+        "target/app/models/domain/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/models/domain/articles.md": {
+      "fact_ids": [
+        "target/app/models/domain/articles.py",
+        "target/app/models/domain/articles.py::Article"
+      ],
+      "hashes": {
+        "target/app/models/domain/articles.py": {
+          "hash_source": "c868e01fa6d4f4352d893b106ad6f13a7cbdf0780bdb3be3525315a216c74589",
+          "hash_struct": "76e228c151dcf7b849333d3738a10a8b828f1d2a3d7a3b4b0718ec0f6df894bc"
+        },
+        "target/app/models/domain/articles.py::Article": {
+          "hash_source": "8c6062448c24e08a1d75a0488177404de01d0e7e999eb582cdd67be6a09b4e76",
+          "hash_struct": "0b03c7b804353e2a3de335635ff5184516af96c02440f772667c79782e5c548b"
+        }
+      }
+    },
+    "generated/pages/target/app/models/domain/comments.md": {
+      "fact_ids": [
+        "target/app/models/domain/comments.py",
+        "target/app/models/domain/comments.py::Comment"
+      ],
+      "hashes": {
+        "target/app/models/domain/comments.py": {
+          "hash_source": "c81cf6b2e3f0dc15a15c65478057229b0fe5eb5f0a704474c375e825d5f2cf3f",
+          "hash_struct": "b7c29bc175da1d5371658f98b7d4756e29ca86b590ecd7b4d29b1c949a74ce16"
+        },
+        "target/app/models/domain/comments.py::Comment": {
+          "hash_source": "a6720c9912a64fafe9e55af54e3ab8f2358cb83277bac92ad4d8d81fb48d0636",
+          "hash_struct": "6fef1f96c2d467990eaf2bd71db11962366ad09d5673ee197e22c1dd24fe5fba"
+        }
+      }
+    },
+    "generated/pages/target/app/models/domain/profiles.md": {
+      "fact_ids": [
+        "target/app/models/domain/profiles.py",
+        "target/app/models/domain/profiles.py::Profile"
+      ],
+      "hashes": {
+        "target/app/models/domain/profiles.py": {
+          "hash_source": "c452b81e01b55fec67ebd836bb4a1715f2461794b2a3a30a0c6f77f897b7a269",
+          "hash_struct": "1bc7e648e9046b4b9b6f2326948c5175444b730db40e348a24b4c0c8c5eab181"
+        },
+        "target/app/models/domain/profiles.py::Profile": {
+          "hash_source": "24fdef84de4cd3250fb09f1e619289fe8d0f706286e4d27e30b11ab2d9bc2e44",
+          "hash_struct": "a954e8bae6d0b6b7f227efba4508cee1de9ed929dd0680a091a4fa0144236740"
+        }
+      }
+    },
+    "generated/pages/target/app/models/domain/rwmodel.md": {
+      "fact_ids": [
+        "target/app/models/domain/rwmodel.py",
+        "target/app/models/domain/rwmodel.py::RWModel",
+        "target/app/models/domain/rwmodel.py::convert_datetime_to_realworld",
+        "target/app/models/domain/rwmodel.py::convert_field_to_camel_case"
+      ],
+      "hashes": {
+        "target/app/models/domain/rwmodel.py": {
+          "hash_source": "b3c784163f187ce8e36b97c74d9723d81635b56453e4ccf98da0ef5d0b4e6045",
+          "hash_struct": "e9befaec4665715d01d1ae60be08297f6505127b9a3335f02b6ed754be1d4a01"
+        },
+        "target/app/models/domain/rwmodel.py::RWModel": {
+          "hash_source": "313f6202a6837e76f42ab074dec9e061849d15bb21ee6f86c5933e57abf75818",
+          "hash_struct": "b4d78f5d696b9f086ac9923dd6923076d8baa99ad7b1d5edfdcd604c4fd7e185"
+        },
+        "target/app/models/domain/rwmodel.py::convert_datetime_to_realworld": {
+          "hash_source": "a8a5513cd4a464582ce6ba3f525596cd1b75562adf108def8f1601dbf9a48ef8",
+          "hash_struct": "0c041029213df7593125e3002ab30ebd9612244aeb3c541587cfff066a41feb7"
+        },
+        "target/app/models/domain/rwmodel.py::convert_field_to_camel_case": {
+          "hash_source": "3c0fa8167e9f9859d468299a428b0041640f31db625f93f0e6b0c1d84b2576d8",
+          "hash_struct": "1adf33f5c1b314b09eea4b52cdeea46cd4aab08e4703d7b0b630cfbe3e4a8f68"
+        }
+      }
+    },
+    "generated/pages/target/app/models/domain/users.md": {
+      "fact_ids": [
+        "target/app/models/domain/users.py",
+        "target/app/models/domain/users.py::User",
+        "target/app/models/domain/users.py::UserInDB",
+        "target/app/models/domain/users.py::UserInDB::change_password",
+        "target/app/models/domain/users.py::UserInDB::check_password"
+      ],
+      "hashes": {
+        "target/app/models/domain/users.py": {
+          "hash_source": "2d2969de250f220f341656165a67c2358d29d476d476707c47785400298d92d1",
+          "hash_struct": "6a84e910dc36b2c3893672d30b2ec12b856a887045f04e32625c7ac3eb5e3908"
+        },
+        "target/app/models/domain/users.py::User": {
+          "hash_source": "0a4cb6af3d74fca7a55fe596259e9ffecd1bcd201a50c07bc00181021260d2ce",
+          "hash_struct": "06c2830374f75155f3aea40d8afb2e513a6c767bb4787502bf90309417290361"
+        },
+        "target/app/models/domain/users.py::UserInDB": {
+          "hash_source": "4eba39917afb3e9c8ebe420579fdcf5829c95d65686b3be746001df89eb91b23",
+          "hash_struct": "30138030022f8dbb7d3774b32267e4099e819612a822172cce3fa5b04faa5042"
+        },
+        "target/app/models/domain/users.py::UserInDB::change_password": {
+          "hash_source": "32e5d89c1a3d2abb126142752eb346d0a8dae27e33167f8ddde632a80a79c362",
+          "hash_struct": "f1b23ba2eafa8c1257330a52a43ee0869dc55f483519ffcb5487c7f2c30644dd"
+        },
+        "target/app/models/domain/users.py::UserInDB::check_password": {
+          "hash_source": "a04dbec01822dc906e07e7f6987b9fbe043a3e89eeee5b1f9972fa3bb0bb3719",
+          "hash_struct": "656ab35cac5ae60270adc7b269eb76b33dd5b82ffc43ae284d507a7f2831cbc1"
+        }
+      }
+    },
+    "generated/pages/target/app/models/schemas/__init__.md": {
+      "fact_ids": [
+        "target/app/models/schemas/__init__.py"
+      ],
+      "hashes": {
+        "target/app/models/schemas/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/models/schemas/articles.md": {
+      "fact_ids": [
+        "target/app/models/schemas/articles.py",
+        "target/app/models/schemas/articles.py::ArticleForResponse",
+        "target/app/models/schemas/articles.py::ArticleInCreate",
+        "target/app/models/schemas/articles.py::ArticleInResponse",
+        "target/app/models/schemas/articles.py::ArticleInUpdate",
+        "target/app/models/schemas/articles.py::ArticlesFilters",
+        "target/app/models/schemas/articles.py::ListOfArticlesInResponse"
+      ],
+      "hashes": {
+        "target/app/models/schemas/articles.py": {
+          "hash_source": "7348977a78615832911bb5ca15f4a4193b7e52f894b311d691121d75a97a53ec",
+          "hash_struct": "aa8a404df709d382074255d1c2a5dbb198a1e2c5e82bd9e561685befb3673f5d"
+        },
+        "target/app/models/schemas/articles.py::ArticleForResponse": {
+          "hash_source": "bd9402ea0604fae11fdeff5e3b31eb5f2d6eb1aa0de938db1c9288803eea1120",
+          "hash_struct": "260451d65fe017c869dbf384e3caeedc577ee7dcdb7949fe56fedc75c8b12ae5"
+        },
+        "target/app/models/schemas/articles.py::ArticleInCreate": {
+          "hash_source": "703616f8ef112baed2e63c65c1d9967eaf965b7c748dbbb01c8d654df3cd386f",
+          "hash_struct": "dce4c42bf96858d2e3d73f1812349313c61017571683cc1d9ed1451c3804bad2"
+        },
+        "target/app/models/schemas/articles.py::ArticleInResponse": {
+          "hash_source": "c7e1a1589bc2d912e5a0bda101093f2c1d522270416d1934fa401a29e8b79281",
+          "hash_struct": "b819b3e23fa5bcfc870ab79d217f5807c19ec7020098e8013f465edf8f29faec"
+        },
+        "target/app/models/schemas/articles.py::ArticleInUpdate": {
+          "hash_source": "a3e7c5b8ba03f0abc3f26e35be3939c6f0e6f3b5a04a8b64d0a3c0eaaff40c4f",
+          "hash_struct": "e9f81d5e916ad643de866ad5d77499bb498d767a377ce8755eb507749e5fa128"
+        },
+        "target/app/models/schemas/articles.py::ArticlesFilters": {
+          "hash_source": "4c2b2202f4b6b58a79492ec2186c0f453ab6009f215b23bf92518c75ff1dd552",
+          "hash_struct": "37d492df64ad43719ee4e61ee2b2fa57c708e7f033e17e14c258b40b25170169"
+        },
+        "target/app/models/schemas/articles.py::ListOfArticlesInResponse": {
+          "hash_source": "70c5a842c8797a1bd42a1263e9a5842af6bd80f090de66b9a73d8f472da0fae3",
+          "hash_struct": "a8493044bd1039deb18fe1f88127b3d662c76d1367b7d35cdae43053d7a268d5"
+        }
+      }
+    },
+    "generated/pages/target/app/models/schemas/comments.md": {
+      "fact_ids": [
+        "target/app/models/schemas/comments.py",
+        "target/app/models/schemas/comments.py::CommentInCreate",
+        "target/app/models/schemas/comments.py::CommentInResponse",
+        "target/app/models/schemas/comments.py::ListOfCommentsInResponse"
+      ],
+      "hashes": {
+        "target/app/models/schemas/comments.py": {
+          "hash_source": "3ac1b7a60b44c8070fff6c78f6efcc6d8a5847cbb31ee9e370b2b1e2a9b13334",
+          "hash_struct": "4f379981371c3da299c0bed6bbc75149035f4a08dbc7f3177b6696ea5703cd03"
+        },
+        "target/app/models/schemas/comments.py::CommentInCreate": {
+          "hash_source": "a9869cc9f6a61cc2dea9411eb5b2a8bbf0f1ef0525523df4932740b49aab28a4",
+          "hash_struct": "06dac021bd525cebc51c6117bb782563ae29170d31f81e159fb6edebf778baf8"
+        },
+        "target/app/models/schemas/comments.py::CommentInResponse": {
+          "hash_source": "c1be75aebde706727b48125ff4b88b3d978936e7510a55c284882f37145e68b1",
+          "hash_struct": "25f484f7aecc97b11a834583c11b87c63262f85fc1eadbb101c77a7cab9b71c2"
+        },
+        "target/app/models/schemas/comments.py::ListOfCommentsInResponse": {
+          "hash_source": "336751a8e56bdfa348b1e31bb2dfa2d7b535d5b7607311dc43bd3aefbd2a6f61",
+          "hash_struct": "1f0b8bee445c55ee4bc24adaedab70383dd5927f5f3214f5af35536df8578651"
+        }
+      }
+    },
+    "generated/pages/target/app/models/schemas/jwt.md": {
+      "fact_ids": [
+        "target/app/models/schemas/jwt.py",
+        "target/app/models/schemas/jwt.py::JWTMeta",
+        "target/app/models/schemas/jwt.py::JWTUser"
+      ],
+      "hashes": {
+        "target/app/models/schemas/jwt.py": {
+          "hash_source": "a632220dd76e1e98beb8518c92ca535b6e9d6b0f2d3b4cfefd43cc1aed980654",
+          "hash_struct": "9f81d237e98fc98f7bd625f9b446011f62ea991205ea5c04f2acae293e86524c"
+        },
+        "target/app/models/schemas/jwt.py::JWTMeta": {
+          "hash_source": "d57dd8b4b6d4de7bc04f1bc6cfd622d113e086c6648feeac7d05f762668e0d6a",
+          "hash_struct": "896ffa74c6b941da44c358f68c44cc6381a56faeed542d3d9fd3dfd054d2d93a"
+        },
+        "target/app/models/schemas/jwt.py::JWTUser": {
+          "hash_source": "36e9d5edfd4f2754521cfbee330d696d23ccf5387949a9165cb86fb6b4c5f58a",
+          "hash_struct": "b7fb38c57cc51dec673668ae76b2c49bd58f5a86ec7439fcbf12f7bf022045b7"
+        }
+      }
+    },
+    "generated/pages/target/app/models/schemas/profiles.md": {
+      "fact_ids": [
+        "target/app/models/schemas/profiles.py",
+        "target/app/models/schemas/profiles.py::ProfileInResponse"
+      ],
+      "hashes": {
+        "target/app/models/schemas/profiles.py": {
+          "hash_source": "ab317f6e14904bc880ddca3949fb690bd758d18533a09960175e84dedecd4e91",
+          "hash_struct": "54c02b581098c1c02e05cd5ad095fac30e82546914ba180c173e403e2493e346"
+        },
+        "target/app/models/schemas/profiles.py::ProfileInResponse": {
+          "hash_source": "6bb3dc80243183e88a4cae3f2d66844b021e6f70475c3a5aaadf94744da7e474",
+          "hash_struct": "c9b12561978970a6ec622488dd56b99bb96bed000202a0b6869160a2f02f7e3a"
+        }
+      }
+    },
+    "generated/pages/target/app/models/schemas/rwschema.md": {
+      "fact_ids": [
+        "target/app/models/schemas/rwschema.py",
+        "target/app/models/schemas/rwschema.py::RWSchema"
+      ],
+      "hashes": {
+        "target/app/models/schemas/rwschema.py": {
+          "hash_source": "790ec9b6a976de9c95cab59b82089bf9477d4b32fd6c75cdbe6299b725df8307",
+          "hash_struct": "4de97b2645a71aa4fd321b1cc199f08bcea8d8cd445a5934bdc6215a452e4b24"
+        },
+        "target/app/models/schemas/rwschema.py::RWSchema": {
+          "hash_source": "c297ee15a377d3cf049a153c13343f1b950777eb9b08f71859af35a7179ad37a",
+          "hash_struct": "0ed196c5b58df9860ce75cdc7a93e035795cc8e44d0a092eedb5b49efdd4de36"
+        }
+      }
+    },
+    "generated/pages/target/app/models/schemas/tags.md": {
+      "fact_ids": [
+        "target/app/models/schemas/tags.py",
+        "target/app/models/schemas/tags.py::TagsInList"
+      ],
+      "hashes": {
+        "target/app/models/schemas/tags.py": {
+          "hash_source": "e2ae33012d4ec9b0c1d613121b3e6f9724d104cf4e3f13123c7a24a2394d50db",
+          "hash_struct": "06db237e36da12737fd8c37c95322e08609776d2d85d281727bfe911d4c12f69"
+        },
+        "target/app/models/schemas/tags.py::TagsInList": {
+          "hash_source": "cf5699409695640a75e48d4f14518aa50650bc78674fc8c74e61509b641dc587",
+          "hash_struct": "8f16183ef28ed71b695d774696204b7786d2c9549dfb4204971c4bf8720dca27"
+        }
+      }
+    },
+    "generated/pages/target/app/models/schemas/users.md": {
+      "fact_ids": [
+        "target/app/models/schemas/users.py",
+        "target/app/models/schemas/users.py::UserInCreate",
+        "target/app/models/schemas/users.py::UserInLogin",
+        "target/app/models/schemas/users.py::UserInResponse",
+        "target/app/models/schemas/users.py::UserInUpdate",
+        "target/app/models/schemas/users.py::UserWithToken"
+      ],
+      "hashes": {
+        "target/app/models/schemas/users.py": {
+          "hash_source": "a8c8767811e1840ffd6cb31770e2eb1b83466a23b049147f54ee9d04cffbcc74",
+          "hash_struct": "9054f7f1acebb3aca230f6c0ffe861326df03676ddffd07e96cb030ce85399a3"
+        },
+        "target/app/models/schemas/users.py::UserInCreate": {
+          "hash_source": "231dc03c0635acb26a7ea3a8c42050f977aa39efb4d833cea49382206b41bc23",
+          "hash_struct": "edf68f71608036f5aff8dafd1240c01037d0e4157747639ea999d0bbe57e2237"
+        },
+        "target/app/models/schemas/users.py::UserInLogin": {
+          "hash_source": "970c5df40365ccc530970931f30f07f67f16bb5a954d445a52efe512382dae1d",
+          "hash_struct": "f116262b98a478da81ac06f7e5e8a4d9a2903d41e612d389b16afb8509ea24e4"
+        },
+        "target/app/models/schemas/users.py::UserInResponse": {
+          "hash_source": "73712309eec556347a69a7af2d7e0c5001a97f472c891d110f512cc4dde6610f",
+          "hash_struct": "502da87b818d73204cc606dfaa3e36f98317ac2d29a42ac68d692e65dfa385eb"
+        },
+        "target/app/models/schemas/users.py::UserInUpdate": {
+          "hash_source": "eb3ab4a22fe4db652d7f0d398181515e1732dea813b383e26e2e33fd337bd7f9",
+          "hash_struct": "8476a9d5187ebec578384a791eced7e7b5a77678281b7c42850b22dc7cb83201"
+        },
+        "target/app/models/schemas/users.py::UserWithToken": {
+          "hash_source": "c8ddf7212bbbb74e46cbef3cf14b20fa8553da1b4a361ad3b7a02ae7f249db5e",
+          "hash_struct": "185bd708720aae0c19a34f7368661d15ecdcff75513df45d4a94642e7fe91e48"
+        }
+      }
+    },
+    "generated/pages/target/app/resources/__init__.md": {
+      "fact_ids": [
+        "target/app/resources/__init__.py"
+      ],
+      "hashes": {
+        "target/app/resources/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/resources/strings.md": {
+      "fact_ids": [
+        "target/app/resources/strings.py"
+      ],
+      "hashes": {
+        "target/app/resources/strings.py": {
+          "hash_source": "aab2dbcfdbb146a6e36b4bea212a38ded24be2a8baf3604391c843da9534b393",
+          "hash_struct": "78c91454f0d506f14f4c65a1ba205e9b3e31123c3a26b8af2dada7375c485365"
+        }
+      }
+    },
+    "generated/pages/target/app/services/__init__.md": {
+      "fact_ids": [
+        "target/app/services/__init__.py"
+      ],
+      "hashes": {
+        "target/app/services/__init__.py": {
+          "hash_source": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "hash_struct": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6"
+        }
+      }
+    },
+    "generated/pages/target/app/services/articles.md": {
+      "fact_ids": [
+        "target/app/services/articles.py",
+        "target/app/services/articles.py::check_article_exists",
+        "target/app/services/articles.py::check_user_can_modify_article",
+        "target/app/services/articles.py::get_slug_for_article"
+      ],
+      "hashes": {
+        "target/app/services/articles.py": {
+          "hash_source": "08baa4bfef3e9b3c0e7a914aa8e54484f302fd130fce0a463cb044e362ac64f1",
+          "hash_struct": "8cf3922373e635103f0694d89c5c21c0c33892cf01c6cc298b8620aa81063d4d"
+        },
+        "target/app/services/articles.py::check_article_exists": {
+          "hash_source": "149a483e95b969a1e2a18bd5786154879eb71cab1bea5e7fd35c69c5303405ce",
+          "hash_struct": "bb8d2c98813fe3ed7f39a2f95ca064db20731890510d331ed44f94d9b82df84c"
+        },
+        "target/app/services/articles.py::check_user_can_modify_article": {
+          "hash_source": "e7e2585510a319c333bcb957af63379270cd23d4235adf61becf07b9accae8b6",
+          "hash_struct": "2bbd21f02c56f988324aeada838c0ee2932ee634afb9f3c0b90b9c9554aec336"
+        },
+        "target/app/services/articles.py::get_slug_for_article": {
+          "hash_source": "1a9e30dbf218349a62a47f30093910812065ed8d2479035608c715add1d89fd8",
+          "hash_struct": "435a4783794e44cae7457c93bfcac146fd028af50cc1eb771b308aaa609bb867"
+        }
+      }
+    },
+    "generated/pages/target/app/services/authentication.md": {
+      "fact_ids": [
+        "target/app/services/authentication.py",
+        "target/app/services/authentication.py::check_email_is_taken",
+        "target/app/services/authentication.py::check_username_is_taken"
+      ],
+      "hashes": {
+        "target/app/services/authentication.py": {
+          "hash_source": "1e6ddd8061261413704a041c92a1d24ec53c47c3d9f89134a67b17166c990abd",
+          "hash_struct": "2592c5f981046dd52f5298a8a182c33caaa0ecd03fa6a47d6d92cfaf48d45d96"
+        },
+        "target/app/services/authentication.py::check_email_is_taken": {
+          "hash_source": "11e87f1cfb9e8829750c49ee98ffe2787bfc8543b78bbab1b84d9fa2ec065193",
+          "hash_struct": "0778d547e9c9dc1af5b9c65c4ba70b66820a56ef2ef7bcca66113f065da4563c"
+        },
+        "target/app/services/authentication.py::check_username_is_taken": {
+          "hash_source": "e5ac9e18f4482fd832237bee6e24c15a3460f23559a3772ae2fefba45e304abc",
+          "hash_struct": "99a31f3c61c903ff664926813aa0395c7baf49c02dd6bf1a2bc4acbbf794b818"
+        }
+      }
+    },
+    "generated/pages/target/app/services/comments.md": {
+      "fact_ids": [
+        "target/app/services/comments.py",
+        "target/app/services/comments.py::check_user_can_modify_comment"
+      ],
+      "hashes": {
+        "target/app/services/comments.py": {
+          "hash_source": "edb132adcd2da6286022cdea176fe67dd5acc13d095df581002ea4757e156133",
+          "hash_struct": "2b7962caaf09834ed744299443674207344f0cebe09a1fb78cbd07d1f33d108d"
+        },
+        "target/app/services/comments.py::check_user_can_modify_comment": {
+          "hash_source": "83c291d5c75cdc1f17cc0badfc6a69ee99582265f96866fa731d543ce4cd03d2",
+          "hash_struct": "507c4e1ab2412d50737826c14221860eb5c3ab59f8d3906487a02a23fe4a16db"
+        }
+      }
+    },
+    "generated/pages/target/app/services/jwt.md": {
+      "fact_ids": [
+        "target/app/services/jwt.py",
+        "target/app/services/jwt.py::create_access_token_for_user",
+        "target/app/services/jwt.py::create_jwt_token",
+        "target/app/services/jwt.py::get_username_from_token"
+      ],
+      "hashes": {
+        "target/app/services/jwt.py": {
+          "hash_source": "97e498395564857f545d7c41f258401db7029987c5332565f3e5d1f261febd49",
+          "hash_struct": "e2ab8518972e2e43e335c72e3fe7867581a0f060f30547647f8b97cfd7355b43"
+        },
+        "target/app/services/jwt.py::create_access_token_for_user": {
+          "hash_source": "015bcec0fc07dd49e8dd7d1acacfc57e89ae8fa7e14aba82166577f8ceb6e5fb",
+          "hash_struct": "4fb7f645f06ca5fe04211c3d80c8561894a931af62cd1e12d78ec31edc491201"
+        },
+        "target/app/services/jwt.py::create_jwt_token": {
+          "hash_source": "2ec450d468d11d1d35d9c9b8012797356363e325d5054fda652288fe22c145f4",
+          "hash_struct": "4b6a2865f6cb5631a7fd9d966d3ee52f3533325e856a68d50d8030781590ece3"
+        },
+        "target/app/services/jwt.py::get_username_from_token": {
+          "hash_source": "8f51ef50d45635748c4ea5504d23030d376f823ff37e76a0a9b2e0b3157be977",
+          "hash_struct": "ced0ca8d34c01db1a1018a1869e921e128314a02d051bdfb34fbd96514118b23"
+        }
+      }
+    },
+    "generated/pages/target/app/services/security.md": {
+      "fact_ids": [
+        "target/app/services/security.py",
+        "target/app/services/security.py::generate_salt",
+        "target/app/services/security.py::get_password_hash",
+        "target/app/services/security.py::verify_password"
+      ],
+      "hashes": {
+        "target/app/services/security.py": {
+          "hash_source": "661741ca7dc0374b51979b58fcf843ae0c319e7358e9c69e4d164092ff03972d",
+          "hash_struct": "9eb437bec7ab492d3c0610d2e89dc258a450353b54f2547f901168516b2eda62"
+        },
+        "target/app/services/security.py::generate_salt": {
+          "hash_source": "f0ebee240603cb2364493dbd67f3308c8849773c2eb5097232d32ba05cfd97a6",
+          "hash_struct": "97f66d3119da60ca1d3b19de000a4ac6b2d6ff6c90c87fe08ea258db90602f3a"
+        },
+        "target/app/services/security.py::get_password_hash": {
+          "hash_source": "06df1481909e7f868ff75b244e92ff835137af219763f9d5423f1791497c347c",
+          "hash_struct": "704989f08de3d437d2ec6728438b10a54fa6474fe9bb0e9f0a0f76f97e4c645f"
+        },
+        "target/app/services/security.py::verify_password": {
+          "hash_source": "24290886ee42f2c338e900d3084cbe72ddbfe7ecb41cb9d929ad5aabea563aca",
+          "hash_struct": "9a1b6f97290f241e4d4da7f93667c66f5705a0e18958fdc793754b89016943e7"
+        }
+      }
+    }
+  }
+}

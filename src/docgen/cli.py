@@ -335,6 +335,244 @@ def _run_validate(args: argparse.Namespace) -> None:
         raise SystemExit(1)
 
 
+def _run_render(args: argparse.Namespace) -> None:
+    """Render all doc pages from facts.json + summaries.json and write manifest.json.
+
+    Pipeline:
+        load_config → read facts.json → read summaries.json →
+        render_all (index + module pages + api table) →
+        write_pages → build_manifest → write_manifest
+    """
+    from docgen.check.manifest import build_manifest, write_manifest
+    from docgen.config import load_config
+    from docgen.facts.store import read_facts
+    from docgen.render.markdown import render_all, write_pages
+    from docgen.summarize.store import read_summaries
+
+    config_path = Path(args.config)
+    config = load_config(config_path)
+    repo_root = config_path.parent.resolve()
+    output_dir = repo_root / config.output_dir
+
+    facts_path = output_dir / "facts.json"
+    if not facts_path.exists():
+        raise SystemExit(
+            f"facts.json not found at {facts_path}; run `docgen extract` first."
+        )
+    summaries_path = output_dir / "summaries.json"
+    if not summaries_path.exists():
+        raise SystemExit(
+            f"summaries.json not found at {summaries_path}; run `docgen summarize` first."
+        )
+
+    graph = read_facts(facts_path)
+    summaries_map: dict[str, str] = {
+        r.node_id: r.text for r in read_summaries(summaries_path)
+    }
+
+    print(
+        f"docgen render: {len(graph.nodes)} nodes, {len(summaries_map)} summaries …",
+        file=sys.stderr,
+    )
+
+    records, pages_to_write = render_all(graph, summaries_map, config.output_dir)
+    write_pages(pages_to_write, repo_root)
+
+    manifest = build_manifest(records)
+    manifest_path = output_dir / "manifest.json"
+    write_manifest(manifest, manifest_path)
+
+    print(
+        f"  {len(pages_to_write)} pages written, manifest.json updated",
+        file=sys.stderr,
+    )
+
+
+def _run_check(args: argparse.Namespace) -> None:
+    """Check for doc drift by comparing manifest.json against facts.json.
+
+    Exit 0 when all pages are fresh; exit 1 when any page is stale (list printed
+    to stdout).  With ``--fresh``, re-extracts facts first.
+    """
+    from docgen.check.drift import find_stale_pages, warn_if_facts_stale
+    from docgen.check.manifest import read_manifest
+    from docgen.config import load_config
+    from docgen.facts.store import read_facts
+
+    config_path = Path(args.config)
+    config = load_config(config_path)
+    repo_root = config_path.parent.resolve()
+    output_dir = repo_root / config.output_dir
+
+    manifest_path = output_dir / "manifest.json"
+    if not manifest_path.exists():
+        raise SystemExit(
+            f"manifest.json not found at {manifest_path}; run `docgen render` first."
+        )
+
+    if getattr(args, "fresh", False):
+        # Re-extract before checking
+        import argparse as _ap
+        extract_args = _ap.Namespace(config=str(config_path))
+        _run_extract(extract_args)
+
+    facts_path = output_dir / "facts.json"
+    if not facts_path.exists():
+        raise SystemExit(
+            f"facts.json not found at {facts_path}; run `docgen extract` first."
+        )
+
+    warn_if_facts_stale(facts_path, manifest_path)
+
+    graph = read_facts(facts_path)
+    manifest = read_manifest(manifest_path)
+
+    stale = find_stale_pages(manifest, graph)
+
+    if stale:
+        for page in stale:
+            print(page)
+        raise SystemExit(1)
+
+
+def _run_update(args: argparse.Namespace) -> None:
+    """Regenerate only stale pages and rebuild manifest.json.
+
+    Pipeline:
+        load_config → read facts.json + summaries.json + manifest.json →
+        plan_update → (optional) re-summarize stale nodes →
+        re-render stale pages → write → rebuild manifest
+    """
+    from docgen.check.drift import find_stale_pages
+    from docgen.check.manifest import build_manifest, read_manifest, write_manifest
+    from docgen.check.update import plan_update
+    from docgen.config import load_config
+    from docgen.facts.store import read_facts
+    from docgen.render.markdown import render_index, render_module_page, write_pages
+    from docgen.render.api_table import render_api_table
+    from docgen.summarize.store import read_summaries
+
+    config_path = Path(args.config)
+    config = load_config(config_path)
+    repo_root = config_path.parent.resolve()
+    output_dir = repo_root / config.output_dir
+
+    manifest_path = output_dir / "manifest.json"
+    facts_path = output_dir / "facts.json"
+    summaries_path = output_dir / "summaries.json"
+
+    for p, name in [
+        (manifest_path, "manifest.json — run `docgen render` first"),
+        (facts_path, "facts.json — run `docgen extract` first"),
+        (summaries_path, "summaries.json — run `docgen summarize` first"),
+    ]:
+        if not p.exists():
+            raise SystemExit(f"{name} not found at {p}")
+
+    graph = read_facts(facts_path)
+    summaries_map: dict[str, str] = {
+        r.node_id: r.text for r in read_summaries(summaries_path)
+    }
+    manifest = read_manifest(manifest_path)
+
+    stale = find_stale_pages(manifest, graph)
+    if not stale:
+        print("docgen update: nothing to update", file=sys.stderr)
+        return
+
+    update_plan = plan_update(stale, manifest, graph, summaries_map)
+    print(
+        f"docgen update: {len(update_plan.stale_pages)} stale pages, "
+        f"{len(update_plan.stale_node_ids)} changed nodes …",
+        file=sys.stderr,
+    )
+
+    # Optional re-summarization (only when a real backend is requested)
+    backend = getattr(args, "backend", "stub")
+    if update_plan.nodes_to_resummarize and backend != "stub":
+        from docgen.summarize.base import StubSummarizer
+        from docgen.summarize.bob_shell import BobShellSummarizer
+        from docgen.summarize.hierarchy import run_hierarchy
+        from docgen.summarize.prompts import PROMPT_VERSION
+        from docgen.summarize.store import write_summaries
+
+        existing_cache = {r.node_id: r for r in read_summaries(summaries_path)}
+        if backend == "bob_shell":
+            summarizer = BobShellSummarizer()
+        else:
+            summarizer = StubSummarizer()
+
+        results = run_hierarchy(
+            graph=graph,
+            summarizer=summarizer,
+            repo_root=repo_root,
+            existing_cache=existing_cache,
+            prompt_version=PROMPT_VERSION,
+        )
+        write_summaries(results, summaries_path)
+        summaries_map = {r.node_id: r.text for r in results}
+
+    # Re-render only stale pages
+    from docgen.check.manifest import PageRecord
+    from pathlib import PurePosixPath as _PurePosixPath
+
+    node_map = {n.id: n for n in graph.nodes}
+    pages_to_write: list[tuple[str, str]] = []
+    updated_records: list = []
+
+    api_page_path = str(_PurePosixPath(config.output_dir) / "pages" / "api.md").replace("\\", "/")
+
+    for page_path in update_plan.stale_pages:
+        if page_path == str(_PurePosixPath(config.output_dir) / "pages" / "index.md").replace("\\", "/"):
+            text, record = render_index(graph, summaries_map, config.output_dir)
+            pages_to_write.append((page_path, text))
+            updated_records.append(record)
+        elif page_path == api_page_path:
+            api_text, api_fact_ids = render_api_table(graph, summaries_map, config.output_dir)
+            api_hashes = {
+                nid: {"hash_struct": node_map[nid].hash_struct, "hash_source": node_map[nid].hash_source}
+                for nid in api_fact_ids
+                if nid in node_map and (node_map[nid].hash_struct or node_map[nid].hash_source)
+            }
+            updated_records.append(PageRecord(
+                page_path=api_page_path,
+                fact_ids=api_fact_ids,
+                hashes=api_hashes,
+            ))
+            pages_to_write.append((api_page_path, api_text))
+        else:
+            # Module page: recover module_id from path
+            # e.g. "generated/pages/target/app/utils.md" → "target/app/utils.py"
+            prefix = config.output_dir + "/pages/"
+            if page_path.startswith(prefix):
+                module_id = page_path[len(prefix):].replace(".md", ".py")
+            else:
+                module_id = page_path
+            mod_node = node_map.get(module_id)
+            if mod_node is None:
+                print(f"  WARN: cannot find node for {page_path}; skipping", file=sys.stderr)
+                continue
+            text, record = render_module_page(mod_node, graph, summaries_map, config.output_dir)
+            pages_to_write.append((page_path, text))
+            updated_records.append(record)
+
+    write_pages(pages_to_write, repo_root)
+
+    # Rebuild manifest: merge updated records over the existing manifest
+    existing_pages = manifest.get("pages", {})
+    for rec in updated_records:
+        from docgen.check.manifest import build_manifest as _bm
+        single = _bm([rec])
+        existing_pages[rec.page_path] = single["pages"][rec.page_path]
+    new_manifest = {"pages": existing_pages}
+    write_manifest(new_manifest, manifest_path)
+
+    print(
+        f"  {len(pages_to_write)} pages updated, manifest.json rebuilt",
+        file=sys.stderr,
+    )
+
+
 def main() -> None:
     """Parse arguments and dispatch to the appropriate sub-command."""
     parser = argparse.ArgumentParser(
@@ -387,9 +625,40 @@ def main() -> None:
         help="Path to docgen.toml (default: docgen.toml in cwd).",
     )
 
-    subparsers.add_parser("render", help="Render documentation pages.")
-    subparsers.add_parser("check", help="Check for doc drift (exit 1 if stale).")
-    subparsers.add_parser("update", help="Regenerate stale pages.")
+    render_parser = subparsers.add_parser("render", help="Render documentation pages.")
+    render_parser.add_argument(
+        "--config",
+        default="docgen.toml",
+        help="Path to docgen.toml (default: docgen.toml in cwd).",
+    )
+
+    check_parser = subparsers.add_parser(
+        "check", help="Check for doc drift (exit 1 if stale)."
+    )
+    check_parser.add_argument(
+        "--config",
+        default="docgen.toml",
+        help="Path to docgen.toml (default: docgen.toml in cwd).",
+    )
+    check_parser.add_argument(
+        "--fresh",
+        action="store_true",
+        default=False,
+        help="Re-extract facts before checking.",
+    )
+
+    update_parser = subparsers.add_parser("update", help="Regenerate stale pages.")
+    update_parser.add_argument(
+        "--config",
+        default="docgen.toml",
+        help="Path to docgen.toml (default: docgen.toml in cwd).",
+    )
+    update_parser.add_argument(
+        "--backend",
+        default="stub",
+        help="Summarizer backend for re-summarization: 'stub' or 'bob_shell' (default: stub).",
+    )
+
     subparsers.add_parser("eval", help="Run the evaluation harness.")
 
     args = parser.parse_args()
@@ -400,6 +669,12 @@ def main() -> None:
         _run_summarize(args)
     elif args.command == "validate":
         _run_validate(args)
+    elif args.command == "render":
+        _run_render(args)
+    elif args.command == "check":
+        _run_check(args)
+    elif args.command == "update":
+        _run_update(args)
     else:
         raise NotImplementedError(f"Command '{args.command}' not yet implemented.")
 

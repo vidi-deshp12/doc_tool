@@ -185,3 +185,11 @@ Evidence that IBM Bob was a core part of the workflow (judging: tool usage and d
 - **What I verified or changed:** Design nuance discovered during implementation: HANDLES edges are stored as `{from: route_id, to: func_id}`, so `allowed_fact_ids` must add `edge["from"]` not `edge["to"]` for `handles` type. Bob caught this when writing the test and fixed `allowed_fact_ids` accordingly. All 15 new tests passed (2 core, 6 fastapi, 5 packages, 1 hierarchy, 1 prompts). Full suite: 197/197.
 - **Outcome:** Done. `docgen extract` now emits package nodes, per-span function hashes, route hashes, and real request-model edges. Handler function prompts receive route context and can cite route IDs.
 - **Screenshot:** _(none this session)_
+
+### 2026-10-17 | Tasks 3.1–3.5 | Plan + Agent
+- **Goal:** Implement the full Phase 3 Renderers + Freshness pipeline: `docgen render`, `docgen check`, and `docgen update`.
+- **Prompt (short):** Handoff document from previous chat pasted in; user confirmed plan and said "yes implement".
+- **What Bob produced:** `src/docgen/render/markdown.py` — `render_all()` now calls `render_api_table` internally (D-040) and returns `(list[PageRecord], list[tuple[str,str]])`. `src/docgen/check/drift.py` — `find_stale_pages` (hash_struct-only comparison) + `warn_if_facts_stale` (mtime check). `src/docgen/check/update.py` — `UpdatePlan` dataclass + `plan_update` (identifies stale nodes and nodes needing re-summarization). `src/docgen/cli.py` — `_run_render`, `_run_check`, `_run_update` functions + proper subparser wiring with `--config`, `--fresh`, `--backend` flags. `tests/test_render.py` (8 tests), `tests/test_manifest.py` (4 tests), `tests/test_drift.py` (6 tests), `tests/test_update.py` (4 tests), `tests/fixtures/freshness/` (3-file fixture repo + docgen.toml), `tests/test_freshness_gate.py` (4 integration tests).
+- **What I verified or changed:** All 26 new tests passed first run. Full suite: 223/223 pass. Decisions D-040–D-042 recorded.
+- **Outcome:** Done. Phase 3 complete. Next: Phase 3e (eval command + showcase repo).
+- **Screenshot:** _(none this session)_
