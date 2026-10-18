@@ -1,0 +1,8 @@
+# comments
+
+The `comments` service module is a small authorisation helper for comment ownership [[target/app/services/comments.py]]. It defines a single function, `check_user_can_modify_comment`, which accepts a `Comment` object and a `User` object and returns a `bool` indicating whether the given user is permitted to modify the specified comment [[target/app/services/comments.py::check_user_can_modify_comment]]. The logic is a straightforward ownership check: it compares the username stored on the comment's author against the username of the supplied user, returning `True` only when they match [[target/app/services/comments.py::check_user_can_modify_comment]]. The function is side-effect-free, raises no exceptions, and carries no decorators, making it a pure predicate that can be called safely from any layer that needs to gate comment modification [[target/app/services/comments.py]].
+
+## check_user_can_modify_comment
+
+The `check_user_can_modify_comment` function determines whether a given user has permission to modify a specific comment [[target/app/services/comments.py::check_user_can_modify_comment]]. It accepts two parameters: a `Comment` object and a `User` object, and returns a `bool` indicating whether the user is authorised to make changes [[target/app/services/comments.py::check_user_can_modify_comment]]. The check itself is a simple ownership comparison — it returns `True` only when the comment's author username matches the username of the provided user, and `False` otherwise [[target/app/services/comments.py::check_user_can_modify_comment]]. It has no side effects, raises no exceptions, and carries no decorators [[target/app/services/comments.py]].
+

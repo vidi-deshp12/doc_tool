@@ -1,0 +1,24 @@
+# base
+
+This module provides the foundational building block for all database repository classes in the application [[target/app/db/repositories/base.py]]. It imports `Connection` from `asyncpg` and defines a single class, `BaseRepository`, which is designed to be inherited by concrete repository implementations [[target/app/db/repositories/base.py::BaseRepository]].
+
+`BaseRepository` is a plain Python class with no base classes and carries no Pydantic behaviour [[target/app/db/repositories/base.py::BaseRepository]]. Its entire purpose is to accept a live `asyncpg` database connection at construction time and make it available to subclasses [[target/app/db/repositories/base.py::BaseRepository]]. The constructor takes a single parameter, `conn`, typed as `Connection`, and stores it in the private instance attribute `_conn` without any additional processing or validation [[target/app/db/repositories/base.py::BaseRepository]]. Subclasses that extend `BaseRepository` therefore receive a ready-to-use connection the moment they are instantiated, without needing to manage connection setup themselves [[target/app/db/repositories/base.py::BaseRepository]].
+
+The stored connection is exposed through the `connection` property, which is decorated with `@property` so callers access it as an attribute rather than a method call [[target/app/db/repositories/base.py::BaseRepository]]. The property performs no transformation and raises no exceptions — it simply returns `_conn` directly [[target/app/db/repositories/base.py::BaseRepository]]. This design keeps the connection encapsulated behind a consistent interface while still giving any subclass or external caller transparent access to the live database connection when it is needed [[target/app/db/repositories/base.py::BaseRepository]].
+
+## BaseRepository
+
+`BaseRepository` is a plain Python class with no base classes and is not a Pydantic model [[target/app/db/repositories/base.py::BaseRepository]]. Its sole responsibility is to hold and expose a database connection that concrete repository subclasses can use to perform queries [[target/app/db/repositories/base.py::BaseRepository]].
+
+The class defines a single field, `_conn`, which is a private instance attribute of type `Connection` [[target/app/db/repositories/base.py::BaseRepository::__init__]]. It is assigned in the constructor, which accepts one parameter — `conn`, typed as `Connection` — and stores it directly on the instance without any further processing or validation [[target/app/db/repositories/base.py::BaseRepository::__init__]].
+
+Access to the stored connection is provided through the `connection` property, decorated with `@property` so that callers read it as an attribute rather than invoking a method [[target/app/db/repositories/base.py::BaseRepository::connection]]. The property performs no transformation and raises no exceptions; it simply returns `_conn`, exposing the live database connection to subclasses or any caller that needs to interact with the database [[target/app/db/repositories/base.py::BaseRepository::connection]].
+
+### __init__
+
+The `__init__` method is the constructor for the `BaseRepository` class, responsible for initialising a new repository instance with a database connection [[target/app/db/repositories/base.py::BaseRepository::__init__]]. It accepts a single parameter, `conn`, typed as `Connection`, which represents an active database connection to be used by the repository [[target/app/db/repositories/base.py::BaseRepository::__init__]]. The connection is stored on the instance as the private attribute `_conn`, making it available to subclasses and other methods defined within `BaseRepository` [[target/app/db/repositories/base.py::BaseRepository::__init__]]. The method returns `None` and carries no decorators, raises no exceptions, and makes no further calls beyond the assignment [[target/app/db/repositories/base.py::BaseRepository::__init__]].
+
+### connection
+
+The `connection` property belongs to the [`BaseRepository`](target/app/db/repositories/base.py::BaseRepository) class and provides read-only access to the underlying database connection [[target/app/db/repositories/base.py::BaseRepository::connection]]. It is decorated with `@property`, meaning callers access it as an attribute rather than a method call [[target/app/db/repositories/base.py::BaseRepository::connection]]. It takes no arguments beyond `self` and returns a `Connection` object by simply returning the private `_conn` attribute stored on the instance [[target/app/db/repositories/base.py::BaseRepository::connection]]. It raises no exceptions, performs no transformation, and has no side effects — its sole role is to expose the internal connection to subclasses or callers that need to interact with the database [[target/app/db/repositories/base.py::BaseRepository]].
+

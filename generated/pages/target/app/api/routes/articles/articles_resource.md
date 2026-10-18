@@ -1,0 +1,72 @@
+# articles_resource
+
+This module defines the FastAPI router and all route handlers for the articles resource, covering the full set of CRUD operations that the articles API exposes [[target/app/api/routes/articles/articles_resource.py]].
+
+A single `APIRouter` instance named `router` is declared at module level and serves as the mounting point for all five handlers [[target/app/api/routes/articles/articles_resource.py]].
+
+[`list_articles()`](target/app/api/routes/articles/articles_resource.py::list_articles) is registered on `GET ""` and returns a paginated, filtered collection of articles [[target/app/api/routes/articles/articles_resource.py::list_articles]]. It accepts an `ArticlesFilters` object carrying `tag`, `author`, `favorited`, `limit`, and `offset` query parameters, an optional authenticated `User` (the endpoint is accessible without credentials), and an `ArticlesRepository` instance, all resolved through FastAPI dependency injection [[target/app/api/routes/articles/articles_resource.py::list_articles]]. The handler forwards every filter field plus the optional caller identity to the repository, converts each returned article via `ArticleForResponse.from_orm`, and wraps the result in a `ListOfArticlesInResponse` envelope that includes the total count [[target/app/api/routes/articles/articles_resource.py::list_articles]].
+
+[`create_new_article()`](target/app/api/routes/articles/articles_resource.py::create_new_article) is registered on `POST ""` and responds with HTTP 201 on success [[target/app/api/routes/articles/articles_resource.py::create_new_article]]. It requires a fully authenticated user and an `ArticleInCreate` payload embedded in the request body under the key `"article"` [[target/app/api/routes/articles/articles_resource.py::create_new_article]]. Before persisting anything, the handler derives a slug from the submitted title and checks whether that slug is already taken, raising an HTTP 400 exception if it is [[target/app/api/routes/articles/articles_resource.py::create_new_article]]. If the slug is available, it delegates to the repository to persist the article and returns the result wrapped in an `ArticleInResponse` [[target/app/api/routes/articles/articles_resource.py::create_new_article]].
+
+[`retrieve_article_by_slug()`](target/app/api/routes/articles/articles_resource.py::retrieve_article_by_slug) is registered on `GET /{slug}` and performs no database work of its own [[target/app/api/routes/articles/articles_resource.py::retrieve_article_by_slug]]. The slug is extracted from the URL path and the corresponding `Article` domain object is fully resolved by the `get_article_by_slug_from_path` dependency before the handler body executes, so the body consists only of wrapping the injected article in an `ArticleInResponse` envelope [[target/app/api/routes/articles/articles_resource.py::retrieve_article_by_slug]].
+
+[`update_article_by_slug()`](target/app/api/routes/articles/articles_resource.py::update_article_by_slug) is registered on `PUT /{slug}` and carries `check_article_modification_permissions` as a route-level dependency, so authorisation is enforced before the handler body runs [[target/app/api/routes/articles/articles_resource.py::update_article_by_slug]]. It receives the existing article from the path via `get_article_by_slug_from_path` and an `ArticleInUpdate` payload from the request body [[target/app/api/routes/articles/articles_resource.py::update_article_by_slug]]. When the update payload includes a new title, a fresh slug is derived; otherwise no slug change is requested [[target/app/api/routes/articles/articles_resource.py::update_article_by_slug]]. The handler passes the current article, the computed slug, and all update fields unpacked as keyword arguments to the repository, then returns the updated article inside an `ArticleInResponse` [[target/app/api/routes/articles/articles_resource.py::update_article_by_slug]].
+
+[`delete_article_by_slug()`](target/app/api/routes/articles/articles_resource.py::delete_article_by_slug) is registered on `DELETE /{slug}` and also declares `check_article_modification_permissions` as a route-level dependency, guaranteeing the caller is authorised before any deletion occurs [[target/app/api/routes/articles/articles_resource.py::delete_article_by_slug]]. It resolves the target article from the path and an `ArticlesRepository` instance via injection, then issues a single awaited call to `articles_repo.delete_article`, after which it returns `None` and the framework sends an empty HTTP 204 response [[target/app/api/routes/articles/articles_resource.py::delete_article_by_slug]].
+
+The two slug-based mutation handlers (`update_article_by_slug` and `delete_article_by_slug`) share the same authorisation guard, while the two slug-based read handlers (`retrieve_article_by_slug` and the implicit lookup inside updates) share the same `get_article_by_slug_from_path` dependency for article resolution, making the permission and lookup logic consistent across the router without duplicating it inside the handler bodies [[target/app/api/routes/articles/articles_resource.py::update_article_by_slug]] [[target/app/api/routes/articles/articles_resource.py::delete_article_by_slug]] [[target/app/api/routes/articles/articles_resource.py::retrieve_article_by_slug]].
+
+## create_new_article
+
+`create_new_article` is an asynchronous route handler registered on `POST /api/articles` that creates a new article and returns it wrapped in a response model [[target/app/api/routes/articles/articles_resource.py::create_new_article]] [[route:POST /api/articles]].
+
+The function accepts three injected parameters: `article_create`, an `ArticleInCreate` payload embedded in the request body under the key `"article"`; `user`, the currently authenticated `User` resolved via `get_current_user_authorizer`; and `articles_repo`, an `ArticlesRepository` instance provided by `get_repository` [[target/app/api/routes/articles/articles_resource.py::create_new_article]] [[target/app/api/dependencies/authentication.py::get_current_user_authorizer]] [[target/app/api/dependencies/database.py::get_repository]].
+
+It is decorated with `router.post`, configured to respond with HTTP 201 on success and to serialize the result as an `ArticleInResponse` under the route name `"articles:create-article"` [[target/app/api/routes/articles/articles_resource.py::create_new_article]].
+
+On entry, the function derives a slug from the article's title, then checks whether an article with that slug already exists in the repository [[target/app/api/routes/articles/articles_resource.py::create_new_article]]. If one does, it raises an `HTTPException` with status 400 and halts processing [[target/app/api/routes/articles/articles_resource.py::create_new_article]].
+
+If the slug is available, it delegates to `articles_repo.create_article`, passing the slug, title, description, body, the authenticated user as author, and the tag list [[target/app/api/routes/articles/articles_resource.py::create_new_article]]. The persisted article is then converted via `ArticleForResponse.from_orm` and returned inside an `ArticleInResponse` wrapper [[target/app/api/routes/articles/articles_resource.py::create_new_article]].
+
+> **Raises:** fastapi.HTTPException
+
+> **FastAPI deps:** get_current_user_authorizer, get_repository
+
+## delete_article_by_slug
+
+`delete_article_by_slug` is an asynchronous route handler registered on the `DELETE /{slug}` endpoint, returning HTTP 204 No Content on success [[route:DELETE /api/articles/{slug}]] [[target/app/api/routes/articles/articles_resource.py::delete_article_by_slug]]. Before the handler body runs, FastAPI evaluates `check_article_modification_permissions` as a route-level dependency, ensuring the current user is authorised to modify the target article [[target/app/api/dependencies/articles.py::check_article_modification_permissions]]. The function accepts two injected parameters: `article`, resolved by `get_article_by_slug_from_path` which looks up the article from the path segment, and `articles_repo`, an `ArticlesRepository` instance supplied by `get_repository` [[target/app/api/dependencies/articles.py::get_article_by_slug_from_path]] [[target/app/api/dependencies/database.py::get_repository]]. The body consists of a single awaited call to `articles_repo.delete_article`, passing the resolved article, after which the function returns `None` and the framework sends the empty 204 response [[target/app/api/routes/articles/articles_resource.py::delete_article_by_slug]].
+
+> **FastAPI deps:** check_article_modification_permissions, get_article_by_slug_from_path, get_repository
+
+## list_articles
+
+`list_articles` is an asynchronous route handler registered on `GET /api/articles` [[route:GET /api/articles]] that returns a paginated, filtered list of articles wrapped in a `ListOfArticlesInResponse` envelope [[target/app/api/routes/articles/articles_resource.py::list_articles]].
+
+It accepts three FastAPI-injected dependencies [[target/app/api/routes/articles/articles_resource.py::list_articles]]. The first is `articles_filters`, an `ArticlesFilters` object resolved by `get_articles_filters` that carries the query-string filter criteria — `tag`, `author`, `favorited`, `limit`, and `offset` [[target/app/api/dependencies/articles.py::get_articles_filters]]. The second is an optional `user`, resolved by `get_current_user_authorizer(required=False)`, meaning the endpoint is accessible to unauthenticated callers but will attach an authenticated `User` when a valid credential is present [[target/app/api/dependencies/authentication.py::get_current_user_authorizer]]. The third is `articles_repo`, an `ArticlesRepository` instance supplied by `get_repository` [[target/app/api/dependencies/database.py::get_repository]].
+
+At runtime the function delegates to `articles_repo.filter_articles`, forwarding all five filter fields plus the optional `requested_user` so that per-user state (such as whether an article is favourited by the caller) can be computed inside the repository [[target/app/api/routes/articles/articles_resource.py::list_articles]]. Each article returned from the repository is then converted to a serialisable form via `ArticleForResponse.from_orm` [[target/app/api/routes/articles/articles_resource.py::list_articles]]. Finally, the handler constructs and returns a `ListOfArticlesInResponse` containing the converted list and its length as `articles_count` [[target/app/api/routes/articles/articles_resource.py::list_articles]].
+
+The decorator registers the handler with the FastAPI router under the name `articles:list-articles` and declares `ListOfArticlesInResponse` as the response model, so FastAPI will validate and serialise the return value automatically [[target/app/api/routes/articles/articles_resource.py]].
+
+> **FastAPI deps:** get_articles_filters, get_current_user_authorizer, get_repository
+
+## retrieve_article_by_slug
+
+`retrieve_article_by_slug` is an asynchronous route handler that fetches and returns a single article by its URL slug [[target/app/api/routes/articles/articles_resource.py::retrieve_article_by_slug]]. It is registered on the router as a GET endpoint at `/{slug}`, with the response serialized as an `ArticleInResponse` model and named `articles:get-article` [[route:GET /api/articles/{slug}]].
+
+The function accepts a single parameter, `article`, which is resolved automatically by FastAPI's dependency injection system via `Depends(get_article_by_slug_from_path)` [[target/app/api/dependencies/articles.py::get_article_by_slug_from_path]]. This means the slug is extracted from the URL path and the corresponding `Article` domain object is looked up before the handler body ever executes [[target/app/api/routes/articles/articles_resource.py::retrieve_article_by_slug]].
+
+The body converts the injected `Article` into a response-safe shape by calling `ArticleForResponse.from_orm(article)`, then wraps the result in an `ArticleInResponse` envelope, which is what the endpoint returns [[target/app/api/routes/articles/articles_resource.py::retrieve_article_by_slug]]. Any failure to resolve the article — for example when the slug does not match a known record — would be handled inside the dependency rather than in this function itself [[target/app/api/dependencies/articles.py::get_article_by_slug_from_path]].
+
+> **FastAPI deps:** get_article_by_slug_from_path
+
+## update_article_by_slug
+
+`update_article_by_slug` is an asynchronous route handler registered on `PUT /{slug}` with the response model `ArticleInResponse` and the route name `articles:update-article` [[target/app/api/routes/articles/articles_resource.py::update_article_by_slug]]. Before the handler body runs, FastAPI executes `check_article_modification_permissions` as a dependency declared directly on the route decorator, ensuring the caller is authorised to modify the article [[target/app/api/dependencies/articles.py::check_article_modification_permissions]].
+
+The function accepts three parameters [[target/app/api/routes/articles/articles_resource.py::update_article_by_slug]]. `article_update` is an `ArticleInUpdate` object read from the request body, embedded under the JSON key `"article"` via FastAPI's `Body`. `current_article` is an `Article` instance resolved by `get_article_by_slug_from_path`, which looks up the existing article from the URL path segment [[target/app/api/dependencies/articles.py::get_article_by_slug_from_path]]. `articles_repo` is an `ArticlesRepository` instance injected by `get_repository` [[target/app/api/dependencies/database.py::get_repository]].
+
+Inside the body, if `article_update.title` is present a new slug is derived by calling `get_slug_for_article`; otherwise `slug` is left as `None` [[target/app/api/routes/articles/articles_resource.py::update_article_by_slug]]. The handler then awaits `articles_repo.update_article`, passing the resolved `current_article`, the computed `slug`, and every field from `article_update` unpacked as keyword arguments [[target/app/api/routes/articles/articles_resource.py::update_article_by_slug]]. Finally, the updated article is wrapped with `ArticleForResponse.from_orm` and returned inside an `ArticleInResponse` envelope, which FastAPI serialises as the HTTP response [[target/app/api/routes/articles/articles_resource.py::update_article_by_slug]] [[route:PUT /api/articles/{slug}]].
+
+> **FastAPI deps:** check_article_modification_permissions, get_article_by_slug_from_path, get_repository
+

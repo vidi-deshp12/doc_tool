@@ -1,0 +1,8 @@
+# rwschema
+
+[`rwschema.py`](target/app/models/schemas/rwschema.py) is a small module whose sole purpose is to define a base schema class for use with ORM-backed data [[target/app/models/schemas/rwschema.py]]. It imports `RWModel` from the domain layer and extends it with one targeted addition: `RWSchema` [[target/app/models/schemas/rwschema.py::RWSchema]]. `RWSchema` inherits all fields and configuration from `RWModel`, then introduces an inner `Config` class that subclasses `RWModel.Config` and sets `orm_mode = True`, which instructs Pydantic to accept data read directly from ORM objects such as database rows, rather than requiring plain dictionaries [[target/app/models/schemas/rwschema.py::RWSchema]]. This single setting makes `RWSchema` the intended base class for any schema model that needs to be populated from ORM results rather than raw input data [[target/app/models/schemas/rwschema.py::RWSchema]] [[target/app/models/schemas/rwschema.py]].
+
+## RWSchema
+
+`RWSchema` is a Pydantic model defined in [`rwschema.py`](target/app/models/schemas/rwschema.py) that extends `RWModel` [[target/app/models/schemas/rwschema.py::RWSchema]]. It inherits all fields and configuration from its base class [[target/app/models/domain/rwmodel.py::RWModel]]. The only addition it makes is an inner `Config` class that subclasses `RWModel.Config` and sets `orm_mode = True`, enabling Pydantic to read data directly from ORM objects (such as database rows) rather than only from plain dictionaries [[target/app/models/schemas/rwschema.py::RWSchema]]. This makes `RWSchema` the intended base for schema models that need to be populated from ORM results [[target/app/models/schemas/rwschema.py]] [[target/app/models/domain/rwmodel.py::RWModel]].
+

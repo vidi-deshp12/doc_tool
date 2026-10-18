@@ -1,0 +1,86 @@
+# authentication
+
+This module is the central authentication layer for the API, responsible for extracting bearer tokens from HTTP headers, validating them against application settings, and resolving them to domain `User` objects for injection into route handlers [[target/app/api/dependencies/authentication.py]].
+
+The foundation is `RWAPIKeyHeader`, a subclass of FastAPI's `APIKeyHeader` that overrides `__call__` to intercept any `StarletteHTTPException` thrown during header extraction and re-raise it as a FastAPI `HTTPException` carrying the application-defined `strings.AUTHENTICATION_REQUIRED` message [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader]]. This ensures that every authentication failure surfaces a consistent error rather than a raw Starlette default, and it is the only class defined in the module [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader]].
+
+Header extraction is handled by a pair of complementary dependency functions. `_get_authorization_header` uses `RWAPIKeyHeader` in strict mode to pull the raw header value, splits it into a prefix and token, validates the prefix against `settings.jwt_token_prefix`, and returns the bare token string, raising a `403 Forbidden` exception for any malformed or mis-prefixed input [[target/app/api/dependencies/authentication.py::_get_authorization_header]]. Its counterpart, `_get_authorization_header_optional`, uses `RWAPIKeyHeader` with `auto_error=False` so that a missing header does not trigger an automatic error; when the header is present it delegates directly to `_get_authorization_header`, and when it is absent it returns an empty string instead of raising [[target/app/api/dependencies/authentication.py::_get_authorization_header_optional]]. The factory function `_get_authorization_header_retriever` encapsulates the choice between these two: when called with `required=True` (the default) it returns `_get_authorization_header`, and when called with `required=False` it returns `_get_authorization_header_optional`, avoiding repeated selection logic at every call site [[target/app/api/dependencies/authentication.py::_get_authorization_header_retriever]].
+
+User resolution follows the same required/optional pattern one layer up. `_get_current_user` is an async dependency that takes the token produced by `_get_authorization_header_retriever`, decodes it with `jwt.get_username_from_token` against the application secret key, then fetches the matching record via `users_repo.get_user_by_username`; both a `ValueError` from the JWT decode and an `EntityDoesNotExist` from the repository lookup are caught and converted to a `403 Forbidden` response with a malformed-payload detail, deliberately obscuring which step failed [[target/app/api/dependencies/authentication.py::_get_current_user]]. `_get_current_user_optional` wraps this by wiring `_get_authorization_header_retriever(required=False)` as its token source; when a token is present it delegates to `_get_current_user` and returns the resolved `User`, and when no token is present it returns `None`, making the return type `Optional[User]` [[target/app/api/dependencies/authentication.py::_get_current_user_optional]].
+
+The public surface of the module is a single factory, `get_current_user_authorizer`, which mirrors the structure of `_get_authorization_header_retriever` at the user level: passing `required=True` (the default) returns `_get_current_user`, while `required=False` returns `_get_current_user_optional` [[target/app/api/dependencies/authentication.py::get_current_user_authorizer]]. Route handlers throughout the application call this factory to obtain the correct authentication dependency for their needs, keeping the selection logic in one place [[target/app/api/dependencies/authentication.py::get_current_user_authorizer]].
+
+## RWAPIKeyHeader
+
+`RWAPIKeyHeader` is a class defined in [`target/app/api/dependencies/authentication.py`](target/app/api/dependencies/authentication.py) that extends FastAPI's `APIKeyHeader` security utility [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader]]. It is not a Pydantic model; it is a dependency class whose single responsibility is to extract an API key from incoming request headers while enforcing an application-defined authentication error message [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader]]. The class declares no fields of its own and inherits its header-extraction configuration directly from `APIKeyHeader` [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader]].
+
+The class exposes one method, `__call__`, which makes instances of `RWAPIKeyHeader` usable as FastAPI dependency callables [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__]]. It accepts a Starlette `Request` object and returns an `Optional[str]` representing the extracted API key value when one is present [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__]]. The actual extraction logic is delegated entirely to the parent class via `super().__call__(request)` [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__]]. When the parent raises a `StarletteHTTPException` — for instance, because no API key header was found — `__call__` catches it and re-raises a FastAPI `HTTPException` using the same status code but replacing the detail with the `strings.AUTHENTICATION_REQUIRED` constant [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__]]. This translation ensures that all authentication failures surface a consistent, application-defined message rather than the raw Starlette default [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__]].
+
+### __call__
+
+`__call__` is an asynchronous method on the [`RWAPIKeyHeader`](target/app/api/dependencies/authentication.py::RWAPIKeyHeader) class that acts as the callable entry point for the API key header dependency [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__]]. It accepts a Starlette `Request` object and returns an `Optional[str]`, which will be the extracted API key value if one is present [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__]].
+
+The method delegates its core extraction logic to the parent class by awaiting `super().__call__(request)` [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__]]. If the parent raises a `StarletteHTTPException` — for example, when no API key header is found — this method catches it and re-raises a FastAPI `HTTPException` using the same status code but substituting the detail message with the application-level `strings.AUTHENTICATION_REQUIRED` constant [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__]]. This translation ensures that authentication failures surface a consistent, application-defined error message rather than the raw Starlette default [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__]]. The `# noqa: WPS610` comment suppresses a linter warning on the `__call__` definition itself, consistent with the project's pattern of suppressing specific WPS rules for FastAPI dependency injection patterns [[target/app/api/dependencies/authentication.py::RWAPIKeyHeader::__call__]].
+
+> **Raises:** starlette.exceptions.HTTPException
+
+## _get_authorization_header
+
+`_get_authorization_header` is a FastAPI dependency function that extracts and validates a Bearer-style token from an incoming API key header, returning the raw token string if it is valid [[target/app/api/dependencies/authentication.py::_get_authorization_header]].
+
+It accepts two injected parameters: `api_key`, a string pulled from the request's authorization header via `Security(RWAPIKeyHeader(name=HEADER_KEY))`, and `settings`, the application configuration object supplied by `Depends(get_app_settings)` [[target/app/api/dependencies/authentication.py::_get_authorization_header]] [[target/app/core/config.py::get_app_settings]].
+
+The function first attempts to split `api_key` on a single space, expecting exactly two parts — a prefix and a token — by calling `api_key.split(" ")` [[target/app/api/dependencies/authentication.py::_get_authorization_header]]. If the split produces any number of parts other than two (raising a `ValueError`), it immediately raises an `HTTPException` with status `403 Forbidden` [[target/app/api/dependencies/authentication.py::_get_authorization_header]]. It then checks whether the extracted prefix matches `settings.jwt_token_prefix`; if not, it raises a second `HTTPException`, also with status `403 Forbidden` and the same wrong-prefix detail message [[target/app/api/dependencies/authentication.py::_get_authorization_header]] [[target/app/core/config.py::get_app_settings]]. When both validations pass, the function returns the token portion of the header string as a plain `str` [[target/app/api/dependencies/authentication.py::_get_authorization_header]].
+
+> **Raises:** starlette.exceptions.HTTPException
+
+> **FastAPI deps:** get_app_settings
+
+## _get_authorization_header_optional
+
+`_get_authorization_header_optional` is a FastAPI dependency function that attempts to extract and validate an authorization header, but tolerates its absence rather than failing [[target/app/api/dependencies/authentication.py::_get_authorization_header_optional]].
+
+It accepts two injected parameters: an optional `authorization` string extracted from the request via `Security(RWAPIKeyHeader(..., auto_error=False))`, which suppresses automatic errors when the header is missing, and an `AppSettings` instance supplied by `Depends(get_app_settings)` [[target/app/api/dependencies/authentication.py::_get_authorization_header_optional]] [[target/app/core/config.py::get_app_settings]].
+
+When `authorization` is present, the function delegates to `_get_authorization_header`, passing both the raw header value and the application settings, and returns whatever that call produces [[target/app/api/dependencies/authentication.py::_get_authorization_header_optional]]. When the header is absent, the function returns an empty string instead of raising an error, making it safe to use on endpoints that support both authenticated and unauthenticated access [[target/app/api/dependencies/authentication.py::_get_authorization_header_optional]].
+
+The return type is `str` in both branches: either the processed header value from the delegate call, or `""` [[target/app/api/dependencies/authentication.py::_get_authorization_header_optional]]. No exceptions are raised directly by this function itself; any exception behaviour on a present-but-invalid header would be the responsibility of the inner `_get_authorization_header` call [[target/app/api/dependencies/authentication.py]].
+
+> **FastAPI deps:** get_app_settings
+
+## _get_authorization_header_retriever
+
+`_get_authorization_header_retriever` is a factory function that selects and returns one of two authorization-header retriever callables based on whether the header is required [[target/app/api/dependencies/authentication.py::_get_authorization_header_retriever]]. It accepts a single keyword-only argument, `required`, which defaults to `True` [[target/app/api/dependencies/authentication.py::_get_authorization_header_retriever]]. When `required` is `True`, the function returns `_get_authorization_header`; when `False`, it returns `_get_authorization_header_optional` [[target/app/api/dependencies/authentication.py::_get_authorization_header_retriever]]. The return type is annotated as `Callable`, with a `# type: ignore` comment suppressing the missing type-parameter warning [[target/app/api/dependencies/authentication.py::_get_authorization_header_retriever]]. This pattern allows callers to obtain the appropriate retriever for contexts where an Authorization header is either mandatory or optional, without duplicating the selection logic at each call site [[target/app/api/dependencies/authentication.py]].
+
+## _get_current_user
+
+`_get_current_user` is an async FastAPI dependency that resolves the currently authenticated user from a bearer token [[target/app/api/dependencies/authentication.py::_get_current_user]].
+
+It accepts three injected parameters: a `UsersRepository` instance sourced via `get_repository` [[target/app/api/dependencies/database.py::get_repository]], a raw JWT string sourced via `_get_authorization_header_retriever` [[target/app/api/dependencies/authentication.py::_get_authorization_header_retriever]], and an `AppSettings` instance sourced via `get_app_settings` [[target/app/core/config.py::get_app_settings]]. All three are provided through FastAPI's `Depends` mechanism, meaning the framework resolves and injects them automatically at request time [[target/app/api/dependencies/authentication.py::_get_current_user]].
+
+The function first attempts to decode the token by calling `jwt.get_username_from_token`, passing the token and the application secret key retrieved via `settings.secret_key.get_secret_value()` [[target/app/api/dependencies/authentication.py::_get_current_user]]. If that call raises a `ValueError` — indicating the token is malformed or its signature is invalid — the function raises an `HTTPException` with a `403 Forbidden` status and a malformed-payload detail message [[target/app/api/dependencies/authentication.py::_get_current_user]].
+
+If the username is successfully extracted, the function calls `users_repo.get_user_by_username` to look up the corresponding `User` record [[target/app/api/dependencies/authentication.py::_get_current_user]]. Should that lookup raise an `EntityDoesNotExist` error — meaning no user matches the token's embedded username — the function again raises an `HTTPException` with `403 Forbidden` and the same malformed-payload detail, deliberately obscuring whether the failure was a bad token or a missing user [[target/app/api/dependencies/authentication.py::_get_current_user]].
+
+On the happy path, the function returns the resolved `User` object directly, making it suitable for use as an injected dependency in route handlers that require an authenticated user [[target/app/api/dependencies/authentication.py::_get_current_user]].
+
+> **Raises:** starlette.exceptions.HTTPException
+
+> **FastAPI deps:** _get_authorization_header_retriever, get_repository, get_app_settings
+
+## _get_current_user_optional
+
+`_get_current_user_optional` is an asynchronous dependency function that attempts to resolve the currently authenticated user, but treats authentication as optional rather than mandatory [[target/app/api/dependencies/authentication.py::_get_current_user_optional]].
+
+It accepts three injected parameters: a `UsersRepository` instance provided by `get_repository` [[target/app/api/dependencies/database.py::get_repository]], a `token` string retrieved by `_get_authorization_header_retriever` called with `required=False` — meaning no error is raised if the header is absent [[target/app/api/dependencies/authentication.py::_get_authorization_header_retriever]], and an `AppSettings` instance supplied by `get_app_settings` [[target/app/core/config.py::get_app_settings]].
+
+When a token is present, the function delegates to the internal `_get_current_user` helper, passing along the repository, token, and settings, and returns whatever `User` object that call resolves [[target/app/api/dependencies/authentication.py::_get_current_user_optional]]. When no token is present, the function returns `None` without any further processing, making the return type `Optional[User]` [[target/app/api/dependencies/authentication.py::_get_current_user_optional]].
+
+All three parameters are wired through FastAPI's `Depends` mechanism, so this function is designed to be used as a FastAPI dependency in route handlers that need to support both authenticated and unauthenticated requests [[target/app/api/dependencies/authentication.py::_get_current_user_optional]].
+
+> **FastAPI deps:** _get_authorization_header_retriever, get_repository, get_app_settings
+
+## get_current_user_authorizer
+
+`get_current_user_authorizer` is a factory function that selects and returns the appropriate user-authentication dependency based on whether authentication is mandatory for a given route [[target/app/api/dependencies/authentication.py::get_current_user_authorizer]]. It accepts a single keyword-only parameter, `required`, which is a `bool` defaulting to `True` [[target/app/api/dependencies/authentication.py::get_current_user_authorizer]]. Its return type is `Callable`, annotated with `# type: ignore` to suppress a typing limitation [[target/app/api/dependencies/authentication.py::get_current_user_authorizer]]. When `required` is `True`, it returns the `_get_current_user` dependency, which enforces authentication; when `required` is `False`, it returns `_get_current_user_optional`, which allows unauthenticated access [[target/app/api/dependencies/authentication.py::get_current_user_authorizer]]. The function itself performs no I/O or validation — it simply acts as a selector, making it easy to reuse authentication logic across routes that differ only in whether a logged-in user is strictly needed [[target/app/api/dependencies/authentication.py]].
+

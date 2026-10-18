@@ -1,0 +1,12 @@
+# config
+
+[`target/app/core/config.py`](target/app/core/config.py) is the application's configuration entry point, responsible for selecting and exposing the correct settings object based on the active runtime environment [[target/app/core/config.py]]. It defines an `environments` dictionary that maps each `AppEnvTypes` variant — development, production, and test — to its corresponding concrete settings class (`DevAppSettings`, `ProdAppSettings`, or `TestAppSettings`) [[target/app/core/config.py]].
+
+The single public function, [`get_app_settings()`](target/app/core/config.py::get_app_settings), acts as a cached factory that ties these pieces together [[target/app/core/config.py::get_app_settings]]. It reads the `app_env` field from a freshly instantiated `BaseAppSettings` to determine which environment is active, uses that value as a key into the `environments` mapping to retrieve the appropriate class, and then instantiates and returns it as an `AppSettings` object [[target/app/core/config.py::get_app_settings]]. Because the function is decorated with `lru_cache`, the entire selection and construction process runs only once; every subsequent call receives the same cached instance, ensuring that settings remain consistent and that the resolution logic is not repeated unnecessarily [[target/app/core/config.py::get_app_settings]].
+
+## get_app_settings
+
+`get_app_settings` is a cached factory function that detects the current application environment and returns the matching settings object [[target/app/core/config.py::get_app_settings]]. It is decorated with `lru_cache`, so the first call constructs and caches the result, and every subsequent call returns the same instance without re-executing the body [[target/app/core/config.py::get_app_settings]]. The function takes no parameters and is declared to return `AppSettings` [[target/app/core/config.py::get_app_settings]].
+
+At runtime it instantiates `BaseAppSettings` solely to read its `app_env` field, which identifies the active environment (for example development, testing, or production) [[target/app/core/config.py::get_app_settings]]. That value is used as a key into an `environments` mapping to look up the concrete settings class for that environment, and the selected class is then called with no arguments to produce the final `AppSettings` instance that is returned to the caller [[target/app/core/config.py::get_app_settings]].
+

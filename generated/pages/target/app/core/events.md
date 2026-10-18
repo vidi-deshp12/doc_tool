@@ -1,0 +1,22 @@
+# events
+
+`target/app/core/events.py` is a small lifecycle module whose sole responsibility is to produce the startup and shutdown event handlers that govern the application's database connection [[target/app/core/events.py]]. It exports two factory functions — `create_start_app_handler` and `create_stop_app_handler` — each of which closes over the state it needs and returns a self-contained async coroutine ready to be handed directly to FastAPI's event registration machinery [[target/app/core/events.py::create_start_app_handler]] [[target/app/core/events.py::create_stop_app_handler]].
+
+`create_start_app_handler` accepts a `FastAPI` application instance and an `AppSettings` configuration object and returns a `Callable` [[target/app/core/events.py::create_start_app_handler]]. The coroutine it builds — `start_app` — captures both arguments from the enclosing scope and, when invoked, calls `connect_to_db` with them, establishing the database connection before the application begins serving requests [[target/app/core/events.py::create_start_app_handler]].
+
+`create_stop_app_handler` mirrors that pattern on the shutdown side, accepting only the `FastAPI` instance and returning a `Callable` [[target/app/core/events.py::create_stop_app_handler]]. The inner `stop_app` coroutine is decorated with `@logger.catch`, ensuring that any exception raised during teardown is captured and logged rather than silently swallowed [[target/app/core/events.py::create_stop_app_handler]]. When called, it invokes `close_db_connection` with the captured `app`, tearing down the connection that the startup handler established [[target/app/core/events.py::create_stop_app_handler]].
+
+The two functions are complementary: one wires up the database before the first request, and the other cleans it up after the last, together forming a complete and symmetrical connection lifecycle [[target/app/core/events.py::create_start_app_handler]] [[target/app/core/events.py::create_stop_app_handler]].
+
+## create_start_app_handler
+
+`create_start_app_handler` is a factory function that accepts a `FastAPI` application instance and an `AppSettings` configuration object, and returns a `Callable` [[target/app/core/events.py::create_start_app_handler]]. Its sole purpose is to build and hand back an async startup routine — the inner `start_app` coroutine — which is intended to be registered as a startup event handler on the application [[target/app/core/events.py::create_start_app_handler]]. When that returned coroutine is eventually invoked, it calls `connect_to_db`, passing both the `app` and `settings` arguments it captured from the enclosing scope, establishing the database connection before the application begins serving requests [[target/app/core/events.py::create_start_app_handler]]. The function raises no exceptions of its own and carries no decorators; its only notable design choice is the closure over `app` and `settings`, which makes the returned handler self-contained and ready to be handed directly to FastAPI's event registration machinery [[target/app/core/events.py::create_start_app_handler]].
+
+## create_stop_app_handler
+
+`create_stop_app_handler` is a factory function that accepts a single argument, `app`, typed as a `FastAPI` instance, and returns a `Callable` [[target/app/core/events.py::create_stop_app_handler]]. Its purpose is to build and return a shutdown handler that can be registered with the application's lifecycle [[target/app/core/events.py::create_stop_app_handler]].
+
+Internally, it defines a nested async function named `stop_app` decorated with `@logger.catch`, which ensures that any exceptions raised during shutdown are captured and logged rather than silently swallowed [[target/app/core/events.py::create_stop_app_handler]]. When invoked, `stop_app` calls `close_db_connection`, passing the `app` instance to it, which handles tearing down the database connection that was established when the application started [[target/app/core/events.py::create_stop_app_handler]]. The outer function then returns `stop_app` as its result, providing the caller with a ready-to-register coroutine [[target/app/core/events.py::create_stop_app_handler]].
+
+No exceptions are explicitly raised by this function itself; the `# type: ignore` comment on the signature suppresses a type-checker warning on the return type [[target/app/core/events.py::create_stop_app_handler]].
+
