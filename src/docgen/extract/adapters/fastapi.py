@@ -2,7 +2,8 @@
 
 The subprocess imports the target FastAPI app using the configured Python venv,
 calls app.openapi() to get the full OpenAPI schema, and also reads
-route.endpoint.__name__ for each route so handler names are exact.
+route.endpoint.__module__ + __qualname__ for each route so the handler function is
+resolved to an exact node ID (file path + qualname) rather than by name alone.
 
 If import fails (bad env vars, missing deps, timeout), the adapter returns an
 empty AdapterResult with one Unresolved entry describing the failure.
@@ -76,10 +77,13 @@ _INTROSPECTION_SCRIPT = textwrap.dedent("""\
 
     handlers = {{}}
     for route in routes:
+        endpoint = route.endpoint
         for method in (route.methods or []):
             key = f"{{method}} {{route.path}}"
             handlers[key] = {{
-                "handler": route.endpoint.__name__,
+                "handler": getattr(endpoint, "__name__", None),
+                "module": getattr(endpoint, "__module__", None),
+                "qualname": getattr(endpoint, "__qualname__", None),
                 "name": getattr(route, "name", "") or "",
             }}
 
@@ -197,39 +201,116 @@ def _extract_schema_name(ref_or_schema: Any) -> str | None:
     return None
 
 
-def _extract_body_schema_name(request_body: dict[str, Any]) -> str | None:
-    """Extract the request body schema name from an OpenAPI requestBody entry."""
+def _extract_body_schema_name(
+    request_body: dict[str, Any],
+    components: dict[str, Any],
+) -> str | None:
+    """Extract the request body schema name from an OpenAPI requestBody entry.
+
+    FastAPI wraps parameters declared with ``Body(embed=True)`` or
+    ``Body(alias=...)`` in a generated ``Body_<operation>`` schema whose
+    ``properties`` hold the real model as a ``$ref``.  Unwrap one level so the
+    real model name is returned instead of the generated wrapper.
+    """
     content = request_body.get("content", {})
     for media_type in content.values():
         schema = media_type.get("schema", {})
         # May be direct $ref or allOf/anyOf wrapper
         name = _extract_schema_name(schema)
-        if name:
+        if not name:
+            for key in ("allOf", "anyOf", "oneOf"):
+                for item in schema.get(key, []):
+                    name = _extract_schema_name(item)
+                    if name:
+                        break
+        if not name:
+            continue
+        if name.startswith("Body_"):
+            # Unwrap: look in components/schemas/<name>/properties for nested $ref
+            body_schema = components.get(name, {})
+            for prop in body_schema.get("properties", {}).values():
+                nested = _extract_schema_name(prop)
+                if nested:
+                    return nested
+        else:
             return name
-        # Try allOf[0]
-        for key in ("allOf", "anyOf", "oneOf"):
-            items = schema.get(key, [])
-            for item in items:
-                name = _extract_schema_name(item)
-                if name:
-                    return name
     return None
 
 
-def _find_function_node(func_name: str, all_nodes: list[Node]) -> Node | None:
-    """Find a FUNCTION node by exact name match."""
-    for node in all_nodes:
-        if node.type == NodeType.FUNCTION and node.name == func_name:
-            return node
-    return None
+def _qualname_to_node_id(file_path: str, qualname: str) -> str:
+    """Convert file path + __qualname__ to a node ID.
+
+    "func"           → "path/to/file.py::func"
+    "Class.method"   → "path/to/file.py::Class::method"
+    """
+    return file_path + "::" + qualname.replace(".", "::")
+
+
+def _resolve_handler(
+    handler_info: dict,
+    dotted_to_path: dict[str, str],
+    node_map: dict[str, Node],
+) -> tuple[Node | None, str | None]:
+    """Resolve a handler info dict to its Node using __module__ + __qualname__.
+
+    Returns (node, failure_reason).  failure_reason is None on success.
+    Never guesses — returns (None, reason) on any lookup failure.
+    """
+    module = handler_info.get("module")
+    qualname = handler_info.get("qualname")
+
+    if not module or not qualname:
+        return None, "missing __module__ or __qualname__ (unusual endpoint)"
+
+    if "<locals>" in qualname:
+        return None, f"nested function '{qualname}' is not a graph node"
+
+    file_path = dotted_to_path.get(module)
+    if not file_path:
+        return None, f"module '{module}' not found in module index"
+
+    node_id = _qualname_to_node_id(file_path, qualname)
+    node = node_map.get(node_id)
+    if node is None:
+        return None, f"node '{node_id}' not found in extracted graph"
+
+    return node, None
 
 
 def _find_class_node(class_name: str, all_nodes: list[Node]) -> Node | None:
-    """Find a CLASS node by exact name match."""
-    for node in all_nodes:
-        if node.type == NodeType.CLASS and node.name == class_name:
-            return node
-    return None
+    """Return the unique CLASS node with this name, or None.
+
+    Returns None for both zero matches (not found) and two-or-more matches
+    (ambiguous — caller must emit Unresolved rather than guessing).
+    """
+    matches = [n for n in all_nodes if n.type is NodeType.CLASS and n.name == class_name]
+    return matches[0] if len(matches) == 1 else None
+
+
+def _resolve_model_id(
+    schema_name: str,
+    all_nodes: list[Node],
+    unresolved: list[Unresolved],
+    where: str,
+) -> str | None:
+    """Resolve an OpenAPI schema name to a node ID.
+
+    Returns the in-repo CLASS node ID, ``external:<name>`` when no in-repo class
+    matches, or None when the name is ambiguous — in which case an Unresolved
+    entry is appended instead of guessing.
+    """
+    matches = [n for n in all_nodes if n.type is NodeType.CLASS and n.name == schema_name]
+    if len(matches) > 1:
+        unresolved.append(Unresolved(
+            what=f"ambiguous_class_name:{schema_name}",
+            why=f"{len(matches)} CLASS nodes named '{schema_name}': "
+                + ", ".join(n.id for n in matches),
+            where=where,
+        ))
+        return None
+
+    cls_node = _find_class_node(schema_name, all_nodes)
+    return cls_node.id if cls_node else f"external:{schema_name}"
 
 
 # ---------------------------------------------------------------------------
@@ -313,7 +394,10 @@ def _extract_request_models_from_handler(
     except (OSError, SyntaxError):
         return []
 
-    # Find the function AST node by name (top-level only; methods handled by parent_class)
+    # Find the function AST node by name (top-level only; methods handled by parent_class).
+    # NOTE: follow-up — this name-only lookup cannot disambiguate two functions with
+    # the same name in the same file; matching on parent_class would be needed there.
+    # It is safe today because the caller always passes the exact handler file.
     func_ast: ast.FunctionDef | ast.AsyncFunctionDef | None = None
     for item in ast.walk(tree):
         if (
@@ -359,23 +443,27 @@ def _openapi_to_facts(
     handler_map: dict[str, dict[str, str]],
     all_nodes: list[Node],
     repo_root: Path,
+    dotted_to_path: dict[str, str],
 ) -> tuple[list[Node], list[Edge], list[Unresolved]]:
     """Convert an OpenAPI dict + handler map into ROUTE nodes and edges.
 
     Order of operations per route (plan §sub-task 2):
-      1. Look up handler function node.
+      1. Resolve the handler function node by exact ID (__module__ → file path,
+         __qualname__ → Class::method).  Emit Unresolved on any failure.
       2. Resolve REQUEST_MODEL via handler AST (E5); fall back to OpenAPI names,
-         filtering out auto-generated Body_... wrappers.
-      3. Resolve RESPONSE_MODEL from OpenAPI (unchanged).
+         unwrapping auto-generated Body_... wrappers.
+      3. Resolve RESPONSE_MODEL from OpenAPI.
       4. Compute hash_struct / hash_source from fully-resolved data (E4).
       5. Construct the ROUTE Node.
       6. Emit HANDLES, REQUEST_MODEL, RESPONSE_MODEL edges.
 
     Args:
         openapi_dict: The full OpenAPI spec from app.openapi().
-        handler_map: {"METHOD path": {"handler": func_name, "name": route_name}}
+        handler_map: {"METHOD path": {"handler": name, "module": dotted,
+            "qualname": qualname, "name": route_name}}
         all_nodes: All currently extracted nodes (for handler/model matching).
         repo_root: Absolute path to the project root (for AST re-parsing).
+        dotted_to_path: Dotted module name → repo-relative path.
 
     Returns:
         (route_nodes, edges, unresolved)
@@ -384,6 +472,8 @@ def _openapi_to_facts(
     edges: list[Edge] = []
     unresolved: list[Unresolved] = []
 
+    node_map = {n.id: n for n in all_nodes}
+    components = openapi_dict.get("components", {}).get("schemas", {})
     paths = openapi_dict.get("paths", {})
 
     for path, path_item in paths.items():
@@ -396,15 +486,23 @@ def _openapi_to_facts(
             handler_key = f"{method} {path}"
 
             handler_info = handler_map.get(handler_key, {})
-            func_name = handler_info.get("handler", "")
-            route_name = handler_info.get("name", "")
+            func_name = handler_info.get("handler") or ""
+            route_name = handler_info.get("name") or ""
 
             # Status code
             responses = operation.get("responses", {})
             status_code = _extract_status_code(responses)
 
-            # Step 1: locate handler function node
-            func_node = _find_function_node(func_name, all_nodes) if func_name else None
+            # Step 1: resolve handler function node by exact ID
+            func_node, handler_failure = _resolve_handler(
+                handler_info, dotted_to_path, node_map
+            )
+            if func_node is None:
+                unresolved.append(Unresolved(
+                    what=f"handler function '{func_name or '(unknown)'}'",
+                    why=handler_failure or "handler could not be resolved",
+                    where=route_id,
+                ))
             handler_file = func_node.file if func_node else ""
             handler_lines = func_node.lines if func_node else (0, 0)
 
@@ -415,16 +513,19 @@ def _openapi_to_facts(
                     func_node, repo_root, all_nodes
                 )
             if not req_model_ids:
-                # Fall back: OpenAPI-derived name, but skip Body_... auto-generated names
+                # Fall back: OpenAPI-derived name (Body_... wrappers are unwrapped
+                # inside _extract_body_schema_name)
                 request_body = operation.get("requestBody", {})
                 if request_body:
-                    req_schema_name = _extract_body_schema_name(request_body)
-                    if req_schema_name and not req_schema_name.startswith("Body_"):
-                        cls_node = _find_class_node(req_schema_name, all_nodes)
-                        to_id = cls_node.id if cls_node else f"external:{req_schema_name}"
-                        req_model_ids = [to_id]
+                    req_schema_name = _extract_body_schema_name(request_body, components)
+                    if req_schema_name:
+                        req_to_id = _resolve_model_id(
+                            req_schema_name, all_nodes, unresolved, route_id
+                        )
+                        if req_to_id:
+                            req_model_ids = [req_to_id]
 
-            # Step 3: RESPONSE_MODEL — from OpenAPI (unchanged)
+            # Step 3: RESPONSE_MODEL — from OpenAPI
             resp_model_ids: list[str] = []
             for _status_key, response in responses.items():
                 resp_schema = response.get("content", {})
@@ -437,9 +538,11 @@ def _openapi_to_facts(
                             if schema_name:
                                 break
                     if schema_name:
-                        cls_node = _find_class_node(schema_name, all_nodes)
-                        to_id = cls_node.id if cls_node else f"external:{schema_name}"
-                        resp_model_ids.append(to_id)
+                        resp_to_id = _resolve_model_id(
+                            schema_name, all_nodes, unresolved, route_id
+                        )
+                        if resp_to_id:
+                            resp_model_ids.append(resp_to_id)
 
             # Step 4: compute hash_struct / hash_source from fully-resolved data (E4)
             # hash_struct = structural fields: method, path, status, handler, models
@@ -480,12 +583,6 @@ def _openapi_to_facts(
                     to_id=func_node.id,
                     meta=(),
                 ))
-            elif func_name:
-                unresolved.append(Unresolved(
-                    what=f"handler function '{func_name}'",
-                    why="function node not found in extracted fact graph",
-                    where=route_id,
-                ))
 
             # REQUEST_MODEL edges
             for rm_id in req_model_ids:
@@ -517,6 +614,7 @@ def extract(
     edges: list[Edge],
     config: Any,
     repo_root: Path,
+    dotted_to_path: dict[str, str],
 ) -> AdapterResult:
     """Extract route facts by importing the FastAPI app in a subprocess.
 
@@ -525,6 +623,8 @@ def extract(
         edges: All currently extracted edges.
         config: Config object with .app (import path) and .source_root.
         repo_root: Absolute path to the project root.
+        dotted_to_path: Dotted module name → repo-relative path (from
+            build_module_index), used to resolve handler __module__ exactly.
 
     Returns:
         AdapterResult with route nodes, edges, and any unresolved entries.
@@ -554,7 +654,7 @@ def extract(
     handler_map = data.get("handlers", {})
 
     route_nodes, new_edges, route_unresolved = _openapi_to_facts(
-        openapi_dict, handler_map, nodes, repo_root
+        openapi_dict, handler_map, nodes, repo_root, dotted_to_path
     )
 
     return AdapterResult(

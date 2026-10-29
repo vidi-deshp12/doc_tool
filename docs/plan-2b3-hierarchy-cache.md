@@ -1,3 +1,4 @@
+
 # Plan: Task 2b.3 — Hierarchy Driver + Cache
 
 ## Goal
@@ -68,16 +69,13 @@ Build a `dict[str, list[Node]]` from `EdgeType.CONTAINS` edges: parent_id → li
 Topological order follows: process a node only after all its CONTAINS children are done. A simple
 post-order walk starting from roots (nodes with no CONTAINS parent) produces the correct order.
 
-### D-C — The "system" level is synthetic but always produced
+### D-C — The "system" level is synthetic
 
 There is no `SYSTEM` NodeType in `facts.json`. After processing all packages, the driver
-always produces one final `SummaryResult` with:
-- `node_id = "system"`, `level = "system"`, `facts = {}`, `source_text = ""`
-- `child_summaries` = all package-level summaries (sorted by node_id)
-
-The cache key uses the same formula: sha256 of `"system" + "" + "" + prompt_version +
-sorted child hash_inputs`. The system summary is written to `summaries.json` alongside all
-others.
+optionally produces one final `SummaryResult` with a synthetic `node_id = "system"` using all
+package summaries as children. This is optional and off by default for 2b.3 (the acceptance test
+only requires zero re-calls, not a system-level summary). Defer the system level until it is
+needed by a renderer (Phase 3).
 
 ### D-D — Early cutoff via cache key identity
 

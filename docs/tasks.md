@@ -62,7 +62,7 @@ Status legend: `[ ]` todo, `[x]` done, `[~]` in progress. Dates are the plan fro
 - [ ] **4.1 Find the seeded bug using only the docs;** Bob fixes it; record before/after.
 - [ ] **4.2 Re-run `check`/`update`;** record which pages changed.
 - [ ] **4.3 Add one small feature** to the target using the docs as context.
-- [ ] **4.4 Streamlit viewer** over `generated/`.
+- [x] **4.4 Streamlit viewer** over `generated/`.
 - [ ] **4.5 Deploy** (Streamlit Community Cloud); verify from a clean browser.
 
 ## Phase 5: Submission (Oct 16-17; Oct 18 buffer only)

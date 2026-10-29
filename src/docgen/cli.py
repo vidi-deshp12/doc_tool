@@ -128,7 +128,10 @@ def _run_extract(args: argparse.Namespace) -> None:
     # Step 7: Framework adapter (FastAPI introspection)
     if config.adapter_name == "fastapi":
         from docgen.extract.adapters.fastapi import extract as fastapi_extract
-        adapter_result = fastapi_extract(all_nodes, all_edges, config, repo_root)
+        adapter_result = fastapi_extract(
+            all_nodes, all_edges, config, repo_root,
+            dotted_to_path=dotted_to_path,
+        )
         all_nodes.extend(adapter_result.nodes)
         all_edges.extend(adapter_result.edges)
         all_unresolved.extend(adapter_result.unresolved)

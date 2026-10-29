@@ -22,7 +22,9 @@
         "route:POST /api/users/login",
         "route:PUT /api/articles/{slug}",
         "route:PUT /api/user",
+        "target/app/api/routes/articles/articles_common.py::get_articles_for_user_feed",
         "target/app/api/routes/articles/articles_common.py::mark_article_as_favorite",
+        "target/app/api/routes/articles/articles_common.py::remove_article_from_favorites",
         "target/app/api/routes/articles/articles_resource.py::create_new_article",
         "target/app/api/routes/articles/articles_resource.py::delete_article_by_slug",
         "target/app/api/routes/articles/articles_resource.py::list_articles",
@@ -30,21 +32,20 @@
         "target/app/api/routes/articles/articles_resource.py::update_article_by_slug",
         "target/app/api/routes/authentication.py::login",
         "target/app/api/routes/authentication.py::register",
+        "target/app/api/routes/comments.py::create_comment_for_article",
         "target/app/api/routes/comments.py::delete_comment_from_article",
         "target/app/api/routes/comments.py::list_comments_for_article",
         "target/app/api/routes/profiles.py::follow_for_user",
         "target/app/api/routes/profiles.py::retrieve_profile_by_username",
         "target/app/api/routes/profiles.py::unsubscribe_from_user",
+        "target/app/api/routes/tags.py::get_all_tags",
         "target/app/api/routes/users.py::retrieve_current_user",
         "target/app/api/routes/users.py::update_current_user",
-        "target/app/db/repositories/articles.py::ArticlesRepository::get_articles_for_user_feed",
-        "target/app/db/repositories/articles.py::ArticlesRepository::remove_article_from_favorites",
-        "target/app/db/repositories/comments.py::CommentsRepository::create_comment_for_article",
-        "target/app/db/repositories/tags.py::TagsRepository::get_all_tags",
         "target/app/models/schemas/articles.py::ArticleInCreate",
         "target/app/models/schemas/articles.py::ArticleInResponse",
         "target/app/models/schemas/articles.py::ArticleInUpdate",
         "target/app/models/schemas/articles.py::ListOfArticlesInResponse",
+        "target/app/models/schemas/comments.py::CommentInCreate",
         "target/app/models/schemas/comments.py::CommentInResponse",
         "target/app/models/schemas/comments.py::ListOfCommentsInResponse",
         "target/app/models/schemas/profiles.py::ProfileInResponse",
@@ -64,8 +65,8 @@
           "hash_struct": "0fbbc1d384a108b3b66089d0cf84c430852b663684883d89ffb3413402f70a25"
         },
         "route:DELETE /api/articles/{slug}/favorite": {
-          "hash_source": "139ccb29323bab75fd13a77363ded9f647a259c61b1a79ec4a6a34ad8b0c2fcb",
-          "hash_struct": "139ccb29323bab75fd13a77363ded9f647a259c61b1a79ec4a6a34ad8b0c2fcb"
+          "hash_source": "bff2b56e2ab9289c3e32e6949c5a1f47657e650af540b0c22f7df044b6d92c8d",
+          "hash_struct": "bff2b56e2ab9289c3e32e6949c5a1f47657e650af540b0c22f7df044b6d92c8d"
         },
         "route:DELETE /api/profiles/{username}/follow": {
           "hash_source": "7cb0f641ffd571afd13a43f4cee2b619b9d5b1c95e0826146ae9c09e02ed2a71",
@@ -76,8 +77,8 @@
           "hash_struct": "cdc27f4c10a07a1ba5070f05a17d703f6854db03b95eea24ff5c77afdd6f65bf"
         },
         "route:GET /api/articles/feed": {
-          "hash_source": "d85c57c67db6df761444a5b926954eab4b0cd46f08e9b19e361c15fb84cb08a4",
-          "hash_struct": "d85c57c67db6df761444a5b926954eab4b0cd46f08e9b19e361c15fb84cb08a4"
+          "hash_source": "45fd72004e284e67a8fe2e800b41378cfcb40a345046fd16dbd15388a8260ff7",
+          "hash_struct": "45fd72004e284e67a8fe2e800b41378cfcb40a345046fd16dbd15388a8260ff7"
         },
         "route:GET /api/articles/{slug}": {
           "hash_source": "0c1792214d094ce3c5da41bd76f2323f90047074602e9f059bd29a5b65d8a9ee",
@@ -92,20 +93,20 @@
           "hash_struct": "7af70cb190c4e907906e3ca71be7b337fbab72d93e9ebffa984c451352362c71"
         },
         "route:GET /api/tags": {
-          "hash_source": "0740fd7aadc8744b6bc3fb71be180d0ae413c87b73baf977f38d70699ef06217",
-          "hash_struct": "0740fd7aadc8744b6bc3fb71be180d0ae413c87b73baf977f38d70699ef06217"
+          "hash_source": "619dbd23a3fb080ab8dbad48c30d2c5b78e4347263f402174e96604515c8fc2a",
+          "hash_struct": "619dbd23a3fb080ab8dbad48c30d2c5b78e4347263f402174e96604515c8fc2a"
         },
         "route:GET /api/user": {
           "hash_source": "6c2c4e7808dfc349aefe1a6d8552c2915304ccf9541e84cbbd25a6b1641cc035",
           "hash_struct": "6c2c4e7808dfc349aefe1a6d8552c2915304ccf9541e84cbbd25a6b1641cc035"
         },
         "route:POST /api/articles": {
-          "hash_source": "7ab51fac72ea9461aa56e0c067c9693be06da6885890d1a4c4bf67c460cf95d9",
-          "hash_struct": "7ab51fac72ea9461aa56e0c067c9693be06da6885890d1a4c4bf67c460cf95d9"
+          "hash_source": "d1d4fddd1514dc3eed69d6bc2ed3dae2ccfa7dd77109f7f1db579513c72b23cb",
+          "hash_struct": "d1d4fddd1514dc3eed69d6bc2ed3dae2ccfa7dd77109f7f1db579513c72b23cb"
         },
         "route:POST /api/articles/{slug}/comments": {
-          "hash_source": "4c96dada427dd733f58bccb15aa833840e6b93d6805230af13bba38491f7c180",
-          "hash_struct": "4c96dada427dd733f58bccb15aa833840e6b93d6805230af13bba38491f7c180"
+          "hash_source": "ff801ae6268cf75ef4bd65e21b838ede097c8ebf0e11cec12adad5e08222fcba",
+          "hash_struct": "ff801ae6268cf75ef4bd65e21b838ede097c8ebf0e11cec12adad5e08222fcba"
         },
         "route:POST /api/articles/{slug}/favorite": {
           "hash_source": "b5bea98b9bbc70fe31a1414439b2d145bc264514c125dd49faf77ce6c0dae5ed",
@@ -131,13 +132,21 @@
           "hash_source": "e1da6aae1646348a5d2a0d853c4c0d80077e9a540569cf54fbc657fae23e15f0",
           "hash_struct": "e1da6aae1646348a5d2a0d853c4c0d80077e9a540569cf54fbc657fae23e15f0"
         },
+        "target/app/api/routes/articles/articles_common.py::get_articles_for_user_feed": {
+          "hash_source": "8b584b86f06127dfa97c6951dbcb44fdb0d5e3ff492d1595a5ee18b57ddab196",
+          "hash_struct": "b0d2601783c130ee5aae3d1d5fb8920bacd740f49dde08b76dafd4ebdcda7297"
+        },
         "target/app/api/routes/articles/articles_common.py::mark_article_as_favorite": {
           "hash_source": "22506b2ccea025b2aae9af52594e7a81cead7aa1e662cc70beb91625f0e5727b",
           "hash_struct": "de96e5fa7ee53c563eee54eac79cf0ad66ebf38a9c722abd0e026651cc38fedc"
         },
+        "target/app/api/routes/articles/articles_common.py::remove_article_from_favorites": {
+          "hash_source": "19cd4bf5336e3cf6e468097c7def6190d6cd0601e0ef5ece16156af87345b500",
+          "hash_struct": "a2235e3f813e128c07143b321edbcc8a1061a9577fcec5141f96eb599241cf1e"
+        },
         "target/app/api/routes/articles/articles_resource.py::create_new_article": {
-          "hash_source": "46ef832712dd12621f3efc6fc998438fc4e1715f2862e230ea0417db219f4c90",
-          "hash_struct": "2147e938f115ea187212e1e0f344853d442bdf883f71567ee0bf6411225b3c65"
+          "hash_source": "32273f8cc0b85eacd4142eaea35c7c6820c37576a532634a767a43ea15cd694a",
+          "hash_struct": "91ffc41ebeeff2d5b5b8c14388679a201d324b4c4f9f51d272f232ea8ecd77ba"
         },
         "target/app/api/routes/articles/articles_resource.py::delete_article_by_slug": {
           "hash_source": "77f052f110bbb1b01c33b1d911715d4fcb372445b7c84fe2d05e6ae6249cfc26",
@@ -163,6 +172,10 @@
           "hash_source": "e47c9395fcc5ca52094d4c1344d54e8feb8dec787da8fa70ee469c8acb43557c",
           "hash_struct": "cf9b9070754b249c89c8e200415a759e818afd35bda2dd4dfee356c83d3004d3"
         },
+        "target/app/api/routes/comments.py::create_comment_for_article": {
+          "hash_source": "d6db5ffefac227d2a607ed24a34f456c27de3e705b2be773494c55939cc72bce",
+          "hash_struct": "e736026a672da6ddf962651f4ac195f18652ca5fca2a882fba94b3a3670806a9"
+        },
         "target/app/api/routes/comments.py::delete_comment_from_article": {
           "hash_source": "16c073da8101a6898c2a201ed2b833e14e274f409caab07d83067c7af4721af3",
           "hash_struct": "ff39379dea1d9088ac464d337aa06c34994bf6f2b4bd0855529fd26af3f9ccd5"
@@ -183,6 +196,10 @@
           "hash_source": "15deb2915a5c43816a0d1caa53f12d0ac010edb503e1eb97274fda06481a0589",
           "hash_struct": "af0d9a46c6e3960d1e2e11f9c9b03bb96c895fe3709b40c38ce6a3fbb0627e67"
         },
+        "target/app/api/routes/tags.py::get_all_tags": {
+          "hash_source": "929d4bda9e6991ae473d895abfdcb185c61e6476cd0da508f12dc2abae235852",
+          "hash_struct": "641dabc7b3d0e74c7dc68ef22a5c52f07d6426847a86cc162e4c53efd70a7d8c"
+        },
         "target/app/api/routes/users.py::retrieve_current_user": {
           "hash_source": "7c5f6609618e7e297e26a18906f36ed9b1c1d42746d954917b3363ebf364ca50",
           "hash_struct": "e1f6bfead98a68c6a039b4140c8a5b5c378c50f2fcdeba0d2a1776e42e51db98"
@@ -190,22 +207,6 @@
         "target/app/api/routes/users.py::update_current_user": {
           "hash_source": "608bf150cd67c3df630d6f5915bd97389d0a25f306605232a2a114ceb62b502f",
           "hash_struct": "4c92b21b42936a0f5e3f7330b83cf54eaa9721fd043e658e98d565c5213cf1dd"
-        },
-        "target/app/db/repositories/articles.py::ArticlesRepository::get_articles_for_user_feed": {
-          "hash_source": "e3abae5af42eba5388b1fd3facb016504ba565a25f31ce8819cd1a63bb15b9e3",
-          "hash_struct": "3403a2cda7c626fd62f94ee15b1155e3a2979a51031ed4fbfbaa7770e3d8876b"
-        },
-        "target/app/db/repositories/articles.py::ArticlesRepository::remove_article_from_favorites": {
-          "hash_source": "785d2f453bacea0a7f10433b83809d04a1e90f5a63e79f33544e6f751272af06",
-          "hash_struct": "1d8dd05d75a3f52a2ae3cf14d730cd13634c0ddfc0aee9bd3f99620cc975b2c0"
-        },
-        "target/app/db/repositories/comments.py::CommentsRepository::create_comment_for_article": {
-          "hash_source": "7023563e9ca733d6e0decde56ddd040902fe5925a21421b9f3ca055fb1976deb",
-          "hash_struct": "3d572f9e719057524f82bf1cf14a0b26c9307072d6b0c079d9c600042c022124"
-        },
-        "target/app/db/repositories/tags.py::TagsRepository::get_all_tags": {
-          "hash_source": "715901fc29c8844381bc84525a4d402517651da56562796667f32a9ea91c930b",
-          "hash_struct": "6f219de2b8ab0e582ce2525419649c223d9b2dc715b02efa11c814a853c5f7f9"
         },
         "target/app/models/schemas/articles.py::ArticleInCreate": {
           "hash_source": "703616f8ef112baed2e63c65c1d9967eaf965b7c748dbbb01c8d654df3cd386f",
@@ -222,6 +223,10 @@
         "target/app/models/schemas/articles.py::ListOfArticlesInResponse": {
           "hash_source": "70c5a842c8797a1bd42a1263e9a5842af6bd80f090de66b9a73d8f472da0fae3",
           "hash_struct": "4cd1e9550bf3afc9bfb5edbdaa844407037f8fc896155c1e3ef2612477bf7920"
+        },
+        "target/app/models/schemas/comments.py::CommentInCreate": {
+          "hash_source": "a9869cc9f6a61cc2dea9411eb5b2a8bbf0f1ef0525523df4932740b49aab28a4",
+          "hash_struct": "16c1da2b4184c8b02bf96814c1f5c46292336a95776d29c9e0771b0b3055098b"
         },
         "target/app/models/schemas/comments.py::CommentInResponse": {
           "hash_source": "c1be75aebde706727b48125ff4b88b3d978936e7510a55c284882f37145e68b1",
@@ -641,12 +646,12 @@
       ],
       "hashes": {
         "target/app/api/routes/articles/articles_resource.py": {
-          "hash_source": "b4865e07ec36608373e41b54d5b7b4bbc0696da19d79c7492f6f0162f33158b4",
+          "hash_source": "be406c918757a7bebf42e7dcaa78ea0cffcd233dff3e875eeecf14324a9293bc",
           "hash_struct": "362ec7c896eb719d2beac8c7155080e5bbb48ab7aff5ecd2d891d05ff7a4e64f"
         },
         "target/app/api/routes/articles/articles_resource.py::create_new_article": {
-          "hash_source": "46ef832712dd12621f3efc6fc998438fc4e1715f2862e230ea0417db219f4c90",
-          "hash_struct": "2147e938f115ea187212e1e0f344853d442bdf883f71567ee0bf6411225b3c65"
+          "hash_source": "32273f8cc0b85eacd4142eaea35c7c6820c37576a532634a767a43ea15cd694a",
+          "hash_struct": "91ffc41ebeeff2d5b5b8c14388679a201d324b4c4f9f51d272f232ea8ecd77ba"
         },
         "target/app/api/routes/articles/articles_resource.py::delete_article_by_slug": {
           "hash_source": "77f052f110bbb1b01c33b1d911715d4fcb372445b7c84fe2d05e6ae6249cfc26",
