@@ -5,6 +5,10 @@ import argparse
 import sys
 from collections import Counter
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from docgen.summarize.base import Summarizer
 
 
 def _print_unresolved_summary(unresolved: list) -> None:
@@ -208,6 +212,41 @@ def _run_extract(args: argparse.Namespace) -> None:
     _print_unresolved_summary(list(graph.unresolved))
 
 
+def _build_summarizer(
+    args: argparse.Namespace, output_dir: Path
+) -> tuple[str, "Summarizer"]:
+    """Construct the summarizer backend selected by *args*.
+
+    Single construction point for both ``docgen summarize`` and ``docgen update``.
+    Backend imports stay local so stub/manual runs never import the Bob Shell
+    module.
+
+    Returns:
+        ``(backend_name, summarizer)``. The name is returned separately so
+        ``_run_update`` can keep its "only re-summarize with a real backend" gate.
+    """
+    backend = getattr(args, "backend", "stub")
+    max_cost = float(getattr(args, "max_cost", 2.0))
+    max_turns = int(getattr(args, "max_turns", 10))
+
+    if backend == "stub":
+        from docgen.summarize.base import StubSummarizer
+
+        return backend, StubSummarizer()
+    if backend == "manual":
+        from docgen.summarize.manual import ManualSummarizer
+
+        return backend, ManualSummarizer(output_dir / "manual_summaries")
+    if backend == "bob_shell":
+        from docgen.summarize.bob_shell import BobShellSummarizer
+
+        return backend, BobShellSummarizer(max_cost=max_cost, max_turns=max_turns)
+
+    raise SystemExit(
+        f"Unknown backend: {backend!r} (expected 'stub', 'manual', or 'bob_shell')."
+    )
+
+
 def _run_summarize(args: argparse.Namespace) -> None:
     """Run the bottom-up hierarchy summarization pass and write summaries.json.
 
@@ -221,10 +260,7 @@ def _run_summarize(args: argparse.Namespace) -> None:
     """
     from docgen.config import load_config
     from docgen.facts.store import read_facts
-    from docgen.summarize.base import StubSummarizer
-    from docgen.summarize.bob_shell import BobShellSummarizer
     from docgen.summarize.hierarchy import run_hierarchy
-    from docgen.summarize.manual import ManualSummarizer
     from docgen.summarize.prompts import PROMPT_VERSION
     from docgen.summarize.store import read_summaries, write_summaries
 
@@ -240,20 +276,7 @@ def _run_summarize(args: argparse.Namespace) -> None:
         )
     graph = read_facts(facts_path)
 
-    backend = getattr(args, "backend", "stub")
-    max_cost = float(getattr(args, "max_cost", 2.0))
-    max_turns = int(getattr(args, "max_turns", 10))
-
-    if backend == "stub":
-        summarizer = StubSummarizer()
-    elif backend == "manual":
-        summarizer = ManualSummarizer(output_dir / "manual_summaries")
-    elif backend == "bob_shell":
-        summarizer = BobShellSummarizer(max_cost=max_cost, max_turns=max_turns)
-    else:
-        raise SystemExit(
-            f"Unknown backend: {backend!r} (expected 'stub', 'manual', or 'bob_shell')."
-        )
+    backend, summarizer = _build_summarizer(args, output_dir)
 
     print(
         f"docgen summarize: {len(graph.nodes)} nodes from {facts_path} (backend={backend}) …",
@@ -273,6 +296,7 @@ def _run_summarize(args: argparse.Namespace) -> None:
         repo_root=repo_root,
         existing_cache=existing_cache,
         prompt_version=PROMPT_VERSION,
+        max_workers=getattr(args, "workers", 1),
     )
 
     write_summaries(results, summaries_path)
@@ -493,17 +517,12 @@ def _run_update(args: argparse.Namespace) -> None:
     # Optional re-summarization (only when a real backend is requested)
     backend = getattr(args, "backend", "stub")
     if update_plan.nodes_to_resummarize and backend != "stub":
-        from docgen.summarize.base import StubSummarizer
-        from docgen.summarize.bob_shell import BobShellSummarizer
         from docgen.summarize.hierarchy import run_hierarchy
         from docgen.summarize.prompts import PROMPT_VERSION
         from docgen.summarize.store import write_summaries
 
+        _, summarizer = _build_summarizer(args, output_dir)
         existing_cache = {r.node_id: r for r in read_summaries(summaries_path)}
-        if backend == "bob_shell":
-            summarizer = BobShellSummarizer()
-        else:
-            summarizer = StubSummarizer()
 
         results = run_hierarchy(
             graph=graph,
@@ -511,6 +530,7 @@ def _run_update(args: argparse.Namespace) -> None:
             repo_root=repo_root,
             existing_cache=existing_cache,
             prompt_version=PROMPT_VERSION,
+            max_workers=getattr(args, "workers", 1),
         )
         write_summaries(results, summaries_path)
         summaries_map = {r.node_id: r.text for r in results}
@@ -618,6 +638,16 @@ def main() -> None:
         dest="max_turns",
         help="Maximum conversation turns per bob_shell call (default: 10).",
     )
+    summarize_parser.add_argument(
+        "--workers",
+        type=int,
+        default=1,
+        help=(
+            "Number of parallel summarizer calls per batch "
+            "(default: 1 = sequential). Values above 6 risk "
+            "rate-limiting from hosted LLM APIs."
+        ),
+    )
 
     validate_parser = subparsers.add_parser(
         "validate", help="Validate citations in summaries.json (exit 1 if broken)."
@@ -659,7 +689,20 @@ def main() -> None:
     update_parser.add_argument(
         "--backend",
         default="stub",
-        help="Summarizer backend for re-summarization: 'stub' or 'bob_shell' (default: stub).",
+        help=(
+            "Summarizer backend for re-summarization: 'stub', "
+            "'manual', or 'bob_shell' (default: stub)."
+        ),
+    )
+    update_parser.add_argument(
+        "--workers",
+        type=int,
+        default=1,
+        help=(
+            "Number of parallel summarizer calls per batch "
+            "(default: 1 = sequential). Values above 6 risk "
+            "rate-limiting from hosted LLM APIs."
+        ),
     )
 
     subparsers.add_parser("eval", help="Run the evaluation harness.")

@@ -1,4 +1,4 @@
 # __init__
 
-This module is an empty initializer file for the `app` package [[target/app/__init__.py]]. It contains no code, definitions, or imports, serving solely to mark the `app` directory as a Python package that can be imported by other modules [[target/app/__init__.py]].
+The [`target/app/__init__.py`](target/app/__init__.py) file is an empty package initializer that marks the `app` directory as a Python package [[target/app/__init__.py]]. It contains no definitions, imports, or logic of its own, serving solely to make `app` importable as a namespace for the modules within it [[target/app/__init__.py]].
 

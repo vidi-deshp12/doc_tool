@@ -324,3 +324,75 @@ def test_summary_request_edges_field() -> None:
         edges=[{"type": "raises", "from": "x", "to": "external:ValueError"}],
     )
     assert with_edges.edges == [{"type": "raises", "from": "x", "to": "external:ValueError"}]
+
+
+# ---------------------------------------------------------------------------
+# Test 11: _build_summarizer is the single backend construction point
+# ---------------------------------------------------------------------------
+
+def test_build_summarizer_selects_backends(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from docgen.cli import _build_summarizer
+
+    backend, summarizer = _build_summarizer(
+        argparse.Namespace(backend="stub"), tmp_path / "out"
+    )
+    assert backend == "stub"
+    assert isinstance(summarizer, StubSummarizer)
+
+    backend, summarizer = _build_summarizer(
+        argparse.Namespace(backend="manual"), tmp_path / "out"
+    )
+    assert backend == "manual"
+    assert isinstance(summarizer, ManualSummarizer)
+    assert summarizer.folder == tmp_path / "out" / "manual_summaries"
+
+    import docgen.summarize.bob_shell as bob_shell
+
+    class FakeBobShellSummarizer:
+        def __init__(self, **kwargs) -> None:
+            self.kwargs = kwargs
+
+    monkeypatch.setattr(bob_shell, "BobShellSummarizer", FakeBobShellSummarizer)
+
+    backend, summarizer = _build_summarizer(
+        argparse.Namespace(backend="bob_shell", max_cost=0.5, max_turns=3),
+        tmp_path / "out",
+    )
+    assert backend == "bob_shell"
+    assert isinstance(summarizer, FakeBobShellSummarizer)
+    assert summarizer.kwargs == {"max_cost": 0.5, "max_turns": 3}
+
+
+# ---------------------------------------------------------------------------
+# Test 12: unknown backend exits with the full list of valid names
+# ---------------------------------------------------------------------------
+
+def test_build_summarizer_unknown_backend(tmp_path: Path) -> None:
+    from docgen.cli import _build_summarizer
+
+    with pytest.raises(SystemExit) as excinfo:
+        _build_summarizer(argparse.Namespace(backend="nope"), tmp_path / "out")
+
+    message = str(excinfo.value)
+    assert "stub" in message
+    assert "manual" in message
+    assert "bob_shell" in message
+
+
+# ---------------------------------------------------------------------------
+# Test 13: a hand-built Namespace (no max_cost/max_turns/workers) still works
+# ---------------------------------------------------------------------------
+
+def test_build_summarizer_partial_namespace(tmp_path: Path) -> None:
+    from docgen.cli import _build_summarizer
+
+    # Mirrors test_cli_summarize_hierarchy_e2e: the Namespace has no optional
+    # attributes, so every optional value must be read with getattr defaults.
+    backend, summarizer = _build_summarizer(
+        argparse.Namespace(backend="stub"), tmp_path / "out"
+    )
+
+    assert backend == "stub"
+    assert isinstance(summarizer, StubSummarizer)

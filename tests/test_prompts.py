@@ -5,11 +5,18 @@ All tests are offline and deterministic: no LLM, no network, no filesystem I/O.
 
 from __future__ import annotations
 
+import hashlib
+
 from docgen.summarize.base import NodeLevel, SummaryRequest, SummaryResult
 from docgen.summarize.prompts import (
     CITATION_RE,
+    CITATION_RULES,
     LEVEL_INSTRUCTIONS,
+    OUTPUT_INSTRUCTION,
+    PROMPT_VERSION,
     SYSTEM_PREAMBLE,
+    _GROUNDING_RULE,
+    _LEVEL_FOCUS,
     allowed_fact_ids,
     build_prompt,
     extract_citations,
@@ -220,4 +227,78 @@ def test_allowed_fact_ids_includes_handles_target() -> None:
     assert "route:POST /api/articles" in ids, (
         f"Route id must be in allowed_fact_ids when a handles edge is present; got {ids}"
     )
+
+    # The rendered line must show the route ("from"), not the function's own id
+    # ("to"), which the handler already knows.
+    rendered = render_edges(req.edges)
+    assert "- handles: route:POST /api/articles" in rendered
+    assert "mod.py::create" not in rendered
+
+
+# ---------------------------------------------------------------------------
+# Test 11: request/response model edges are rendered and citeable (fix 6)
+# ---------------------------------------------------------------------------
+
+def test_build_prompt_renders_model_edges_and_allows_them() -> None:
+    req = _make_request(
+        node_id="mod.py::create",
+        edges=[
+            {
+                "type": "request_model",
+                "from": "route:POST /api/comments",
+                "to": "mod.py::CommentInCreate",
+            },
+            {
+                "type": "response_model",
+                "from": "route:POST /api/comments",
+                "to": "mod.py::CommentInResponse",
+            },
+        ],
+    )
+    prompt = build_prompt(req)
+
+    assert "## Relational facts" in prompt
+    assert "- request_model: mod.py::CommentInCreate" in prompt
+    assert "- response_model: mod.py::CommentInResponse" in prompt
+
+    # Predictable order: request_model before response_model.
+    assert prompt.index("- request_model:") < prompt.index("- response_model:")
+
+    ids = allowed_fact_ids(req)
+    assert "mod.py::CommentInCreate" in ids
+    assert "mod.py::CommentInResponse" in ids
+
+
+# ---------------------------------------------------------------------------
+# Test 12: the citation example never shows a forbidden (external) id (fix 2)
+# ---------------------------------------------------------------------------
+
+def test_citation_rules_do_not_offer_external_ids() -> None:
+    """The rules say "cite only allowed ids", so the example must not be external."""
+    assert "external:" not in CITATION_RULES
+    assert "[[target/app/db/errors.py::EntityDoesNotExist]]" in CITATION_RULES
+
+    prompt = build_prompt(_make_request())
+    rules_section = prompt.split("## Citation rules")[1].split("## Allowed fact IDs")[0]
+    assert "external:" not in rules_section
+
+
+# ---------------------------------------------------------------------------
+# Test 13: PROMPT_VERSION is derived from the template text (fix: auto-version)
+# ---------------------------------------------------------------------------
+
+def test_prompt_version_derived_from_template_content() -> None:
+    assert len(PROMPT_VERSION) == 16
+    assert PROMPT_VERSION.isalnum()
+
+    expected = hashlib.sha256(
+        (
+            SYSTEM_PREAMBLE
+            + CITATION_RULES
+            + OUTPUT_INSTRUCTION
+            + _GROUNDING_RULE
+            + "".join(_LEVEL_FOCUS.values())
+        ).encode("utf-8")
+    ).hexdigest()[:16]
+    assert PROMPT_VERSION == expected
 

@@ -14,16 +14,12 @@ and cheap to test.
 
 from __future__ import annotations
 
+import hashlib as _hashlib
 import json
 import re
 from typing import Any
 
 from .base import NodeLevel, SummaryRequest
-
-# Bump when the wording of the prompt changes. The cache key in base.hash_input()
-# does not include this yet (see plan-2b2-prompts.md, decision D-E); 2b.3 should
-# fold it in so a prompt edit invalidates cached summaries.
-PROMPT_VERSION = "2b4.1"
 
 # The one true citation matcher, reused by the prompt tests and (in 2b.4) the validator.
 CITATION_RE = re.compile(r"\[\[([^\[\]]+)\]\]")
@@ -39,8 +35,8 @@ CITATION_RULES = (
     "- Place all citations for a sentence immediately before the closing punctuation mark "
     "(., !, or ?), not after it.\n"
     "  Format: \"prose text [[id1]] [[id2]].\" — citations grouped before the period.\n"
-    "  Example: \"This function raises HTTPException when the slug already exists "
-    "[[external:fastapi.HTTPException]].\"\n"
+    "  Example: \"This function raises DBError when the record is not found "
+    "[[target/app/db/errors.py::EntityDoesNotExist]].\"\n"
     "  Example (multiple): \"It validates the token and fetches the user "
     "[[pkg/auth.py::verify_token]] [[pkg/auth.py::get_user]].\"\n"
     "- Cite ONLY IDs from the \"Allowed fact IDs\" list below. Never invent an ID.\n"
@@ -91,6 +87,20 @@ _LEVEL_FOCUS: dict[str, str] = {
     ),
 }
 
+# Derived from the template text itself: editing any instruction string above changes
+# the hash automatically, so a template edit can never silently reuse cached summaries
+# produced by the old template (the value is folded into the cache key by
+# ``hierarchy.hash_input_with_children``). 16 hex chars keep it short in a log line.
+PROMPT_VERSION: str = _hashlib.sha256(
+    (
+        SYSTEM_PREAMBLE
+        + CITATION_RULES
+        + OUTPUT_INSTRUCTION
+        + _GROUNDING_RULE
+        + "".join(_LEVEL_FOCUS.values())
+    ).encode("utf-8")
+).hexdigest()[:16]
+
 LEVEL_INSTRUCTIONS: dict[NodeLevel, str] = {
     level: f"{focus}\n\n{_GROUNDING_RULE}" for level, focus in _LEVEL_FOCUS.items()
 }
@@ -98,11 +108,27 @@ LEVEL_INSTRUCTIONS: dict[NodeLevel, str] = {
 # Edge types whose `to` value is a node id and may therefore be cited.
 # "handles" is included so a handler function can cite its own route node
 # (e.g. [[route:POST /api/articles]]) — route nodes are in facts.json and
-# therefore already in the validator's known_ids set.
-_CITEABLE_EDGE_TYPES = frozenset({"raises", "depends_on", "inherits", "handles"})
+# therefore already in the validator's known_ids set. "request_model" and
+# "response_model" point at in-repo CLASS nodes, so a handler can cite them too.
+_CITEABLE_EDGE_TYPES = frozenset({
+    "raises",
+    "depends_on",
+    "inherits",
+    "handles",
+    "request_model",
+    "response_model",
+})
 
 # Order in which relational facts are rendered.
-_RENDERED_EDGE_TYPES = ("handles", "raises", "depends_on", "calls", "inherits")
+_RENDERED_EDGE_TYPES = (
+    "handles",
+    "request_model",
+    "response_model",
+    "raises",
+    "depends_on",
+    "calls",
+    "inherits",
+)
 
 
 def format_citation(fact_id: str) -> str:
@@ -128,7 +154,8 @@ def allowed_fact_ids(req: SummaryRequest) -> list[str]:
 
     Includes the node's own id, its module and enclosing class (when present), its
     child summaries' ids, and the in-repo targets of its `raises` / `depends_on` /
-    `inherits` edges. `external:...` targets and `calls` targets are excluded: they
+    `inherits` / `request_model` / `response_model` edges (plus the route id of a
+    `handles` edge). `external:...` targets and `calls` targets are excluded: they
     are not node ids in `facts.json`.
     """
     ids: set[str] = {req.node_id}
@@ -172,7 +199,14 @@ def render_edges(edges: list[dict[str, Any]]) -> str:
 
     by_type: dict[str, list[str]] = {}
     for edge in edges:
-        by_type.setdefault(str(edge.get("type", "")), []).append(str(edge.get("to", "")))
+        edge_type = str(edge.get("type", ""))
+        if edge_type == "handles":
+            # HANDLES is stored as {from: route_id, to: function_id}. The function
+            # already knows its own id; the route is the useful side.
+            target = str(edge.get("from", ""))
+        else:
+            target = str(edge.get("to", ""))
+        by_type.setdefault(edge_type, []).append(target)
 
     lines: list[str] = []
     for edge_type in _RENDERED_EDGE_TYPES:

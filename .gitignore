@@ -33,3 +33,11 @@ Thumbs.db
 # Secrets
 *.env
 .env
+
+# Superseded generated artifacts (already tracked; see note below)
+generated/facts_old.json
+generated/facts_old2.json
+generated/summaries_old.json
+
+# Local AI chat transcripts
+freebuff-chat-*.md

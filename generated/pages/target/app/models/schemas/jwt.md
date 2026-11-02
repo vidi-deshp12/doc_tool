@@ -1,14 +1,12 @@
 # jwt
 
-This module defines the Pydantic schema classes used to represent the structured payload of a JWT token [[target/app/models/schemas/jwt.py]]. It imports `datetime` from the standard library and `BaseModel` from Pydantic, which both defined classes inherit from [[target/app/models/schemas/jwt.py]].
+This module defines the Pydantic schemas used to represent the structured data carried inside a JSON Web Token [[target/app/models/schemas/jwt.py]]. It contains two models that together cover the two concerns of a JWT payload: token metadata and user identity [[target/app/models/schemas/jwt.py::JWTMeta]] [[target/app/models/schemas/jwt.py::JWTUser]].
 
-`JWTMeta` captures the standard claims portion of a token, carrying two required fields: `exp`, typed as `datetime`, which records when the token expires, and `sub`, typed as `str`, which identifies the token's subject [[target/app/models/schemas/jwt.py::JWTMeta]]. Because neither field has a default value, both must be supplied when constructing an instance [[target/app/models/schemas/jwt.py::JWTMeta]].
-
-`JWTUser` represents the identity payload embedded in the token, holding a single required `username` field typed as `str` [[target/app/models/schemas/jwt.py::JWTUser]]. Together, the two classes separate the generic token metadata (`JWTMeta`) from the application-specific user identity (`JWTUser`), giving each concern its own validated structure [[target/app/models/schemas/jwt.py::JWTMeta]] [[target/app/models/schemas/jwt.py::JWTUser]].
+`JWTMeta` is a Pydantic `BaseModel` that captures the standard metadata fields of a JWT, namely `exp` (a `datetime` representing the token's expiration time) and `sub` (a `str` representing the token's subject, typically a user identifier) [[target/app/models/schemas/jwt.py::JWTMeta]]. `JWTUser` is a second Pydantic `BaseModel` that holds only a single `username` string, representing the authenticated user's identity as extracted from the token payload [[target/app/models/schemas/jwt.py::JWTUser]]. The two models are complementary: `JWTMeta` carries the validity and ownership claims of the token itself, while `JWTUser` carries just enough information to identify who the token belongs to [[target/app/models/schemas/jwt.py::JWTMeta]] [[target/app/models/schemas/jwt.py::JWTUser]].
 
 ## JWTMeta
 
-`JWTMeta` is a Pydantic model class defined in the JWT schemas module [[target/app/models/schemas/jwt.py::JWTMeta]]. It inherits directly from `BaseModel`, making it a Pydantic-validated data structure [[target/app/models/schemas/jwt.py::JWTMeta]]. The class carries two fields: `exp`, typed as `datetime`, which represents the token expiry, and `sub`, typed as `str`, which represents the subject of the token [[target/app/models/schemas/jwt.py::JWTMeta]]. No default values are defined for either field, so both are required when constructing an instance [[target/app/models/schemas/jwt.py::JWTMeta]].
+`JWTMeta` is a Pydantic model that serves as a schema for JWT (JSON Web Token) metadata [[target/app/models/schemas/jwt.py::JWTMeta]]. It inherits from `BaseModel`, making it a Pydantic-validated data class [[target/app/models/schemas/jwt.py::JWTMeta]]. The model declares two fields: `exp`, typed as `datetime`, which represents the token's expiration time, and `sub`, typed as `str`, which represents the token's subject (typically a user identifier) [[target/app/models/schemas/jwt.py::JWTMeta]].
 
 | Field | Type | Default |
 |-------|------|---------|
@@ -17,7 +15,7 @@ This module defines the Pydantic schema classes used to represent the structured
 
 ## JWTUser
 
-`JWTUser` is a Pydantic model class defined in the JWT schemas module [[target/app/models/schemas/jwt.py::JWTUser]]. It inherits from `BaseModel`, making it a Pydantic-validated data structure [[target/app/models/schemas/jwt.py::JWTUser]]. The class declares a single field, `username`, typed as `str`, with no default value [[target/app/models/schemas/jwt.py::JWTUser]]. Its purpose is to represent the identity payload carried inside a JWT token, holding just enough information to identify the authenticated user [[target/app/models/schemas/jwt.py]].
+`JWTUser` is a Pydantic model that extends `BaseModel` [[target/app/models/schemas/jwt.py::JWTUser]]. It is defined in [`target/app/models/schemas/jwt.py`](target/app/models/schemas/jwt.py) and contains a single field, `username`, typed as `str` [[target/app/models/schemas/jwt.py::JWTUser]]. Its purpose is to represent the user identity payload carried inside a JWT token, holding just enough information — a username string — to identify the authenticated subject [[target/app/models/schemas/jwt.py::JWTUser]].
 
 | Field | Type | Default |
 |-------|------|---------|

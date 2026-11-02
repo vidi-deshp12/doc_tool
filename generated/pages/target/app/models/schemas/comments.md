@@ -1,12 +1,12 @@
 # comments
 
-This module defines the Pydantic schemas used for serialising and deserialising comment data at the API boundary [[target/app/models/schemas/comments.py]]. All three classes inherit from `RWSchema`, which supplies the shared configuration and field-aliasing behaviour common across the application's request and response schemas [[target/app/models/schemas/comments.py::CommentInCreate]] [[target/app/models/schemas/comments.py::CommentInResponse]] [[target/app/models/schemas/comments.py::ListOfCommentsInResponse]].
+This module defines the Pydantic schemas used to validate and serialise comment data at the API boundary [[target/app/models/schemas/comments.py]]. All three classes inherit from `RWSchema`, which provides the shared base configuration and camelCase aliasing behaviour common to all schemas in the project [[target/app/models/schemas/comments.py::CommentInCreate]] [[target/app/models/schemas/comments.py::CommentInResponse]] [[target/app/models/schemas/comments.py::ListOfCommentsInResponse]].
 
-`CommentInCreate` represents the payload sent when creating a comment, exposing a single `body` field typed as `str` to carry the comment's text content [[target/app/models/schemas/comments.py::CommentInCreate]]. On the response side, `CommentInResponse` wraps a single `Comment` domain object in a `comment` field, forming the envelope returned when the API responds with one comment [[target/app/models/schemas/comments.py::CommentInResponse]]. When the API needs to return multiple comments at once, `ListOfCommentsInResponse` serves as the corresponding envelope, holding a `comments` field typed as `List[Comment]` [[target/app/models/schemas/comments.py::ListOfCommentsInResponse]]. Together, the three schemas cover the full set of comment-related data shapes — creation input, single-item response, and multi-item response — that the API layer requires [[target/app/models/schemas/comments.py]].
+`CommentInCreate` represents the inbound payload for creating a new comment, exposing a single `body` field of type `str` that carries the comment's text content [[target/app/models/schemas/comments.py::CommentInCreate]]. On the response side, `CommentInResponse` wraps a single `Comment` domain object in a `comment` field, providing the schema for an API response that returns one comment [[target/app/models/schemas/comments.py::CommentInResponse]]. When multiple comments need to be returned, `ListOfCommentsInResponse` is used instead; it holds a `comments` field typed as `List[Comment]`, serialising the full collection to the caller [[target/app/models/schemas/comments.py::ListOfCommentsInResponse]]. Together, the three schemas cover the complete lifecycle of comment data flowing in and out of the API [[target/app/models/schemas/comments.py]].
 
 ## CommentInCreate
 
-`CommentInCreate` is a Pydantic model defined in the comments schema module [[target/app/models/schemas/comments.py]]. It inherits from `RWSchema` [[target/app/models/schemas/rwschema.py::RWSchema]], which provides the shared configuration and aliasing behaviour common to all request/response schemas in this codebase. The class itself declares a single field, `body`, typed as a plain `str`, representing the text content of a comment being created [[target/app/models/schemas/comments.py::CommentInCreate]].
+`CommentInCreate` is a Pydantic model used to represent the data required when creating a new comment [[target/app/models/schemas/comments.py::CommentInCreate]]. It inherits from `RWSchema` [[target/app/models/schemas/rwschema.py::RWSchema]], which serves as its base class. The model defines a single field, `body`, typed as `str`, which holds the text content of the comment being created [[target/app/models/schemas/comments.py::CommentInCreate]].
 
 | Field | Type | Default |
 |-------|------|---------|
@@ -14,7 +14,7 @@ This module defines the Pydantic schemas used for serialising and deserialising 
 
 ## CommentInResponse
 
-`CommentInResponse` is a Pydantic model defined in the comments schema module [[target/app/models/schemas/comments.py]]. It inherits from `RWSchema` [[target/app/models/schemas/rwschema.py::RWSchema]], which provides shared schema behaviour across the application. The class declares a single field, `comment`, typed as `Comment`, representing a comment object to be returned in an API response [[target/app/models/schemas/comments.py::CommentInResponse]].
+`CommentInResponse` is a Pydantic model defined in [`target/app/models/schemas/comments.py`](target/app/models/schemas/comments.py) that represents the schema for a single comment returned in an API response [[target/app/models/schemas/comments.py::CommentInResponse]]. It inherits from `RWSchema` [[target/app/models/schemas/rwschema.py::RWSchema]], which provides the shared base configuration for read/write schemas in this application [[target/app/models/schemas/comments.py::CommentInResponse]]. The model declares a single field, `comment`, typed as `Comment`, which holds the comment data to be serialised in the response body [[target/app/models/schemas/comments.py::CommentInResponse]].
 
 | Field | Type | Default |
 |-------|------|---------|
@@ -22,7 +22,7 @@ This module defines the Pydantic schemas used for serialising and deserialising 
 
 ## ListOfCommentsInResponse
 
-`ListOfCommentsInResponse` is a Pydantic model that serves as the response envelope for a collection of comments [[target/app/models/schemas/comments.py::ListOfCommentsInResponse]]. It inherits from `RWSchema` [[target/app/models/schemas/rwschema.py::RWSchema]], which provides the shared base configuration for response and request schemas in this project. The class declares a single field, `comments`, typed as `List[Comment]`, which holds the list of comment objects to be returned in the response [[target/app/models/schemas/comments.py::ListOfCommentsInResponse]]. No additional fields or overrides are defined beyond this inherited base [[target/app/models/schemas/comments.py]].
+`ListOfCommentsInResponse` is a Pydantic model that represents the schema for returning a list of comments in an API response [[target/app/models/schemas/comments.py::ListOfCommentsInResponse]]. It inherits from `RWSchema` [[target/app/models/schemas/rwschema.py::RWSchema]], which provides the shared configuration and aliasing behaviour common to all response schemas in this project [[target/app/models/schemas/comments.py::ListOfCommentsInResponse]]. The class defines a single field, `comments`, typed as `List[Comment]`, which holds the collection of comment objects to be serialised and returned to the caller [[target/app/models/schemas/comments.py::ListOfCommentsInResponse]].
 
 | Field | Type | Default |
 |-------|------|---------|
