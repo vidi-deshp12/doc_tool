@@ -1,4 +1,4 @@
 # __init__
 
-This file serves as the package initializer for the `api/dependencies` module, marking the directory as a Python package [[target/app/api/dependencies/__init__.py]]. It contains no definitions of its own, but its presence makes the dependency components defined elsewhere in the package importable as a cohesive unit [[target/app/api/dependencies/__init__.py]].
+This file is empty — it serves solely as a Python package marker, making the `dependencies` directory importable as a package [[target/app/api/dependencies/__init__.py]]. It defines no functions, classes, or other symbols of its own [[target/app/api/dependencies/__init__.py]].
 

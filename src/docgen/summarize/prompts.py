@@ -55,6 +55,23 @@ _GROUNDING_RULE = (
     "omit it rather than guess."
 )
 
+# Appended to the levels whose output every ancestor consumes as context (function,
+# method). No numbers on purpose: a word or token target makes the model pad a trivial
+# function and truncate a complex one, and a truncated summary still passes the citation
+# validator. What we want is tighter prose, never fewer facts.
+_CONCISION_RULE = (
+    "Be concise: one sentence per distinct behaviour, and stop when the behaviour is "
+    "described. Do not restate the signature, the decorators, or the return annotation "
+    "as prose — they are already visible above. Do not open with framing such as "
+    "\"This function is responsible for\" or close with a restatement. Never omit a "
+    "factual detail in order to be shorter: mention every exception raised, every "
+    "side effect, and every notable collaborator the inputs show, each with its "
+    "citation. Conciseness comes from dropping filler, not from dropping facts."
+)
+
+# Levels whose summaries become child prose in ancestor prompts.
+_CONCISE_LEVELS: frozenset[str] = frozenset({"function", "method"})
+
 # Level-specific focus; the shared grounding rule is appended to each entry below.
 _LEVEL_FOCUS: dict[str, str] = {
     "function": (
@@ -89,20 +106,27 @@ _LEVEL_FOCUS: dict[str, str] = {
 
 # Derived from the template text itself: editing any instruction string above changes
 # the hash automatically, so a template edit can never silently reuse cached summaries
-# produced by the old template (the value is folded into the cache key by
-# ``hierarchy.hash_input_with_children``). 16 hex chars keep it short in a log line.
+# produced by the old template (the value is also rendered as the first line of the
+# prompt, which is what the cache actually hashes). 16 hex chars keep it short in a
+# log line.
 PROMPT_VERSION: str = _hashlib.sha256(
     (
         SYSTEM_PREAMBLE
         + CITATION_RULES
         + OUTPUT_INSTRUCTION
         + _GROUNDING_RULE
+        + _CONCISION_RULE
         + "".join(_LEVEL_FOCUS.values())
     ).encode("utf-8")
 ).hexdigest()[:16]
 
 LEVEL_INSTRUCTIONS: dict[NodeLevel, str] = {
-    level: f"{focus}\n\n{_GROUNDING_RULE}" for level, focus in _LEVEL_FOCUS.items()
+    level: (
+        f"{focus}\n\n{_CONCISION_RULE}\n\n{_GROUNDING_RULE}"
+        if level in _CONCISE_LEVELS
+        else f"{focus}\n\n{_GROUNDING_RULE}"
+    )
+    for level, focus in _LEVEL_FOCUS.items()
 }
 
 # Edge types whose `to` value is a node id and may therefore be cited.

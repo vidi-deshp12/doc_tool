@@ -1,4 +1,4 @@
 # api
 
-This module serves as the top-level assembly point for the articles section of the API, creating a single `APIRouter` instance and mounting two sub-routers under the `/articles` URL prefix [[target/app/api/routes/articles/api.py]]. It imports `articles_common` and `articles_resource` from the same package and delegates their routes into the combined router, meaning all article-related endpoints — both shared/common logic and resource-specific operations — are unified here before being registered with the broader application [[target/app/api/routes/articles/api.py]].
+This file serves as the top-level article routing aggregator for the API, combining two sub-routers into a single unified `APIRouter` instance [[target/app/api/routes/articles/api.py]]. It imports from both `articles_common` and `articles_resource` and mounts each under the `/articles` prefix, so all article-related endpoints are grouped together and exposed through one router [[target/app/api/routes/articles/api.py]]. The resulting `router` object is what gets registered elsewhere in the application to activate all article routes [[target/app/api/routes/articles/api.py]].
 

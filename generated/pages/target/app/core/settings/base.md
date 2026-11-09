@@ -1,10 +1,14 @@
 # base
 
-This module establishes the foundational configuration layer for the application by defining two classes that work together [[target/app/core/settings/base.py]]. `AppEnvTypes` is a standard Python `Enum` that enumerates the three deployment environments the application recognises — `prod`, `dev`, and `test` — each carrying a matching string value [[target/app/core/settings/base.py::AppEnvTypes]]. `BaseAppSettings` is a Pydantic `BaseSettings` subclass that acts as the root configuration class from which environment-specific settings classes are intended to inherit [[target/app/core/settings/base.py::BaseAppSettings]]. Because it extends `BaseSettings`, it can automatically populate field values from environment variables or a `.env` file, as declared in its inner `Config` class [[target/app/core/settings/base.py::BaseAppSettings]]. The two classes are directly coupled: `BaseAppSettings` declares a single field, `app_env`, typed as `AppEnvTypes` with a default of `AppEnvTypes.prod`, meaning the application assumes a production context unless the environment explicitly overrides it [[target/app/core/settings/base.py::BaseAppSettings]] [[target/app/core/settings/base.py::AppEnvTypes]].
+This module defines the foundational settings infrastructure for the application, combining an environment enumeration with a base Pydantic configuration class [[target/app/core/settings/base.py]].
+
+`AppEnvTypes` is a plain Python `Enum` subclass that enumerates the three deployment environments the application recognises: `prod`, `dev`, and `test`, each holding a matching string value [[target/app/core/settings/base.py::AppEnvTypes]]. It carries no additional fields or methods beyond these three constants [[target/app/core/settings/base.py::AppEnvTypes]].
+
+`BaseAppSettings` inherits from Pydantic's `BaseSettings` and acts as the root configuration class that environment-specific settings classes are expected to build upon [[target/app/core/settings/base.py::BaseAppSettings]]. It declares a single field, `app_env`, typed as `AppEnvTypes` with a default of `AppEnvTypes.prod`, directly tying the two definitions in this module together [[target/app/core/settings/base.py::BaseAppSettings]]. An inner `Config` class instructs Pydantic to populate field values from a `.env` file, allowing deployment environment to be controlled without changing source code [[target/app/core/settings/base.py]].
 
 ## AppEnvTypes
 
-`AppEnvTypes` is a plain Python `Enum` subclass (not a Pydantic model) that enumerates the three deployment environments the application recognises [[target/app/core/settings/base.py::AppEnvTypes]]. It declares three `str`-typed members: `prod` with value `"prod"`, `dev` with value `"dev"`, and `test` with value `"test"` [[target/app/core/settings/base.py::AppEnvTypes]]. It carries no additional fields beyond those three members, and it inherits no extra behaviour beyond what the standard library `Enum` provides [[target/app/core/settings/base.py::AppEnvTypes]].
+`AppEnvTypes` is a plain Python `Enum` subclass, not a Pydantic model, that enumerates the three deployment environments the application recognises [[target/app/core/settings/base.py::AppEnvTypes]]. It defines three string-typed members: `prod` with value `"prod"`, `dev` with value `"dev"`, and `test` with value `"test"` [[target/app/core/settings/base.py::AppEnvTypes]]. The class carries no additional fields or methods beyond these three enumeration constants [[target/app/core/settings/base.py::AppEnvTypes]].
 
 | Field | Type | Default |
 |-------|------|---------|
@@ -14,7 +18,7 @@ This module establishes the foundational configuration layer for the application
 
 ## BaseAppSettings
 
-`BaseAppSettings` is a Pydantic model that serves as the base configuration class for the application, inheriting from `BaseSettings` [[target/app/core/settings/base.py::BaseAppSettings]]. Because it extends `BaseSettings`, it can automatically read field values from environment variables and a `.env` file, which is configured via the inner `Config` class with `env_file = ".env"` [[target/app/core/settings/base.py::BaseAppSettings]]. It declares a single field, `app_env`, typed as `AppEnvTypes` with a default value of `AppEnvTypes.prod`, making production the assumed environment unless overridden [[target/app/core/settings/base.py::BaseAppSettings]].
+`BaseAppSettings` is a Pydantic model that serves as the base configuration class for the application, inheriting from `BaseSettings` [[target/app/core/settings/base.py::BaseAppSettings]]. It declares a single field, `app_env`, of type `AppEnvTypes`, with a default value of `AppEnvTypes.prod` [[target/app/core/settings/base.py::BaseAppSettings]]. The inner `Config` class instructs Pydantic to load environment variables from a `.env` file [[target/app/core/settings/base.py]].
 
 | Field | Type | Default |
 |-------|------|---------|

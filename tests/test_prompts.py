@@ -15,6 +15,7 @@ from docgen.summarize.prompts import (
     OUTPUT_INSTRUCTION,
     PROMPT_VERSION,
     SYSTEM_PREAMBLE,
+    _CONCISION_RULE,
     _GROUNDING_RULE,
     _LEVEL_FOCUS,
     allowed_fact_ids,
@@ -297,8 +298,29 @@ def test_prompt_version_derived_from_template_content() -> None:
             + CITATION_RULES
             + OUTPUT_INSTRUCTION
             + _GROUNDING_RULE
+            + _CONCISION_RULE
             + "".join(_LEVEL_FOCUS.values())
         ).encode("utf-8")
     ).hexdigest()[:16]
     assert PROMPT_VERSION == expected
+
+
+# ---------------------------------------------------------------------------
+# Test 14: concision guidance is scoped to the levels ancestors consume
+# ---------------------------------------------------------------------------
+
+def test_concision_rule_applies_to_function_and_method_only() -> None:
+    """Leaf prose is what every ancestor pays for, so only leaves get the rule."""
+    for level in ("function", "method"):
+        assert _CONCISION_RULE in LEVEL_INSTRUCTIONS[level]
+
+    for level in ("class", "module", "package", "system"):
+        assert _CONCISION_RULE not in LEVEL_INSTRUCTIONS[level]
+
+    prompt = build_prompt(_make_request(level="function"))
+    assert _CONCISION_RULE in prompt
+    assert "Conciseness comes from dropping filler, not from dropping facts." in prompt
+
+    # No numeric caps anywhere: a target length would make the model pad or truncate.
+    assert "words" not in _CONCISION_RULE.lower()
 

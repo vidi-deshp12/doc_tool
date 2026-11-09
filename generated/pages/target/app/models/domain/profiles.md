@@ -1,14 +1,14 @@
 # profiles
 
-This module defines the domain model for user profiles in the application [[target/app/models/domain/profiles.py]]. It contains a single class, `Profile`, which is a Pydantic model that inherits from `RWModel` to gain shared base validation and serialisation behaviour used across the domain layer [[target/app/models/domain/profiles.py::Profile]].
+The module [`target/app/models/domain/profiles.py`](target/app/models/domain/profiles.py) defines the domain-layer representation of a user profile [[target/app/models/domain/profiles.py]]. It imports `Optional` from the standard library and `RWModel` from the project's shared domain model base, which together support the single class it exposes [[target/app/models/domain/profiles.py]].
 
-`Profile` declares four fields that together describe a user's public profile: `username` is a required `str` with no default, `bio` is a `str` that defaults to an empty string, `image` is an `Optional[str]` that defaults to `None`, and `following` is a `bool` that defaults to `False` [[target/app/models/domain/profiles.py::Profile]].
+That class, `Profile`, is a Pydantic model that captures the information associated with a user profile [[target/app/models/domain/profiles.py::Profile]]. It inherits from `RWModel`, picking up the shared serialisation behaviour that base class provides to all domain models [[target/app/models/domain/profiles.py::Profile]]. The class declares four fields: `username`, a required `str` that uniquely identifies the profile; `bio`, a `str` that defaults to an empty string; `image`, an `Optional[str]` that defaults to `None` to allow a profile to exist without a photo; and `following`, a `bool` that defaults to `False` to indicate whether the currently authenticated user follows this profile [[target/app/models/domain/profiles.py::Profile]].
 
 ## Profile
 
-`Profile` is a Pydantic domain model that represents a user profile in the application [[target/app/models/domain/profiles.py::Profile]]. It inherits from `RWModel`, which provides shared base configuration for read/write models across the domain layer [[target/app/models/domain/rwmodel.py::RWModel]].
+`Profile` is a Pydantic model that represents a user profile in the domain layer [[target/app/models/domain/profiles.py::Profile]]. It inherits from `RWModel` [[target/app/models/domain/rwmodel.py::RWModel]], which provides shared serialisation behaviour for domain models [[target/app/models/domain/rwmodel.py::RWModel]].
 
-The class declares four fields: `username` is a required `str` with no default, `bio` is a `str` that defaults to an empty string, `image` is an `Optional[str]` that defaults to `None`, and `following` is a `bool` that defaults to `False` [[target/app/models/domain/profiles.py::Profile]]. Because it extends `RWModel`, it is a Pydantic model and inherits any base validation and serialisation behaviour that `RWModel` provides [[target/app/models/domain/rwmodel.py::RWModel]] [[target/app/models/domain/profiles.py::Profile]].
+The class declares four fields [[target/app/models/domain/profiles.py::Profile]]. `username` is a required `str` with no default [[target/app/models/domain/profiles.py::Profile]]. `bio` is a `str` that defaults to an empty string [[target/app/models/domain/profiles.py::Profile]]. `image` is an `Optional[str]` that defaults to `None`, allowing the profile to exist without a photo [[target/app/models/domain/profiles.py::Profile]]. `following` is a `bool` that defaults to `False`, indicating whether the current user follows this profile [[target/app/models/domain/profiles.py::Profile]].
 
 | Field | Type | Default |
 |-------|------|---------|

@@ -1,16 +1,16 @@
 # users
 
-This module defines the Pydantic schemas used to validate and shape user-related request and response data throughout the application [[target/app/models/schemas/users.py]]. It imports from both the domain layer and a shared base schema, then builds a small hierarchy of models that cover the four main user operations: login, registration, update, and response [[target/app/models/schemas/users.py]].
+This module defines the complete set of request and response schemas for user-related API operations, building on Pydantic for validation and the project's shared `RWSchema` base class [[target/app/models/schemas/users.py]].
 
-The hierarchy starts with `UserInLogin`, which inherits from `RWSchema` and declares the two fields a user must supply to authenticate: a validated `email` and a plain-string `password` [[target/app/models/schemas/users.py::UserInLogin]]. `UserInCreate` extends `UserInLogin` directly, inheriting those two credential fields and adding a required `username` field, making it the complete schema for new account registration [[target/app/models/schemas/users.py::UserInCreate]].
+The login flow begins with `UserInLogin`, which captures the two credentials a user submits at sign-in: a validated `email` field typed as `EmailStr` and a plain `password` string, both inherited by schemas further up the hierarchy [[target/app/models/schemas/users.py::UserInLogin]]. Registration extends that foundation through `UserInCreate`, which inherits `email` and `password` from `UserInLogin` and adds the required `username` field, making it the complete three-field schema needed to create a new account [[target/app/models/schemas/users.py::UserInCreate]].
 
-For profile edits, `UserInUpdate` stands apart from that inheritance chain; it inherits from `BaseModel` directly and makes all five of its fields — `username`, `email`, `password`, `bio`, and `image` — optional and defaulting to `None`, so a caller can supply any subset when patching a user record [[target/app/models/schemas/users.py::UserInUpdate]]. The `email` field uses `EmailStr` for format validation and `image` uses `HttpUrl` to enforce a valid URL whenever a value is provided [[target/app/models/schemas/users.py::UserInUpdate]].
+On the response side, `UserWithToken` extends the domain `User` class, inheriting its `username`, `email`, `bio`, and `image` fields and adding a single required `token` string so that authenticated responses can carry both profile data and the session token in one object [[target/app/models/schemas/users.py::UserWithToken]]. That combined representation is then wrapped by `UserInResponse`, whose sole field is a `user` typed as `UserWithToken`; this outer envelope is what the API actually returns to callers after a successful login or registration [[target/app/models/schemas/users.py::UserInResponse]].
 
-On the response side, `UserWithToken` extends the domain `User` class, inheriting its `username`, `email`, `bio`, and `image` fields and adding a single required `token: str` field, making it suitable for any response that must carry an authentication token alongside profile data [[target/app/models/schemas/users.py::UserWithToken]]. `UserInResponse` then wraps `UserWithToken` in a single `user` field and inherits from `RWSchema`, ensuring the outgoing payload conforms to the aliasing and serialisation conventions shared across all response schemas in the application [[target/app/models/schemas/users.py::UserInResponse]].
+Account updates are handled separately by `UserInUpdate`, which inherits directly from `BaseModel` rather than `RWSchema` and declares all five editable fields — `username`, `email`, `password`, `bio`, and `image` — as optional with `None` defaults [[target/app/models/schemas/users.py::UserInUpdate]]. Because every field is optional, a caller may send any subset of changes, and an empty payload remains valid while only explicitly supplied fields carry update intent [[target/app/models/schemas/users.py::UserInUpdate]].
 
 ## UserInCreate
 
-`UserInCreate` is a Pydantic model defined in the user schemas module [[target/app/models/schemas/users.py::UserInCreate]]. It extends `UserInLogin` [[target/app/models/schemas/users.py::UserInLogin]], inheriting that base class's `email: EmailStr` and `password: str` fields [[target/app/models/schemas/users.py::UserInCreate]]. On top of those inherited fields, `UserInCreate` adds a single field of its own: `username: str`, making it the schema used when creating a new user account where all three pieces of information — username, email, and password — are required [[target/app/models/schemas/users.py::UserInCreate]].
+`UserInCreate` is a Pydantic model defined in the users schema module [[target/app/models/schemas/users.py::UserInCreate]]. It extends `UserInLogin` [[target/app/models/schemas/users.py::UserInLogin]], inheriting the `email` (`EmailStr`) and `password` (`str`) fields from that base class [[target/app/models/schemas/users.py::UserInCreate]]. It adds one field of its own, `username` (`str`), making it the schema used when registering a new user with all three credentials present [[target/app/models/schemas/users.py::UserInCreate]].
 
 | Field | Type | Default |
 |-------|------|---------|
@@ -20,7 +20,7 @@ On the response side, `UserWithToken` extends the domain `User` class, inheritin
 
 ## UserInLogin
 
-`UserInLogin` is a Pydantic model defined in the users schema module [[target/app/models/schemas/users.py]]. It inherits from `RWSchema` [[target/app/models/schemas/rwschema.py::RWSchema]], which provides the shared configuration and aliasing behaviour common to all request/response schemas in this application. The class carries two fields: `email`, typed as `EmailStr` for automatic email validation, and `password`, typed as a plain `str` [[target/app/models/schemas/users.py::UserInLogin]]. Together these two fields represent the credentials a user submits when logging in [[target/app/models/schemas/users.py::UserInLogin]].
+`UserInLogin` is a Pydantic model that represents the data a user submits when logging in [[target/app/models/schemas/users.py::UserInLogin]]. It inherits from `RWSchema` [[target/app/models/schemas/rwschema.py::RWSchema]], which provides shared serialisation behaviour for all schema classes in the project. The model declares two fields: `email`, typed as `EmailStr` for validated email input, and `password`, typed as a plain `str` [[target/app/models/schemas/users.py::UserInLogin]].
 
 | Field | Type | Default |
 |-------|------|---------|
@@ -29,7 +29,7 @@ On the response side, `UserWithToken` extends the domain `User` class, inheritin
 
 ## UserInResponse
 
-`UserInResponse` is a Pydantic model defined in the users schema module [[target/app/models/schemas/users.py]]. It inherits from `RWSchema` [[target/app/models/schemas/rwschema.py::RWSchema]], which provides the base configuration shared across response schemas. The class declares a single field, `user`, typed as `UserWithToken`, which holds the user data along with an authentication token [[target/app/models/schemas/users.py::UserInResponse]]. As a direct subclass of `RWSchema`, it participates in the same aliasing and serialization conventions established by that base class [[target/app/models/schemas/rwschema.py::RWSchema]] [[target/app/models/schemas/users.py::UserInResponse]].
+`UserInResponse` is a Pydantic model [[target/app/models/schemas/users.py::UserInResponse]] that inherits from `RWSchema` [[target/app/models/schemas/rwschema.py::RWSchema]], the project's base schema class. Its sole field is `user`, typed as `UserWithToken`, which wraps the authenticated user data along with their token for inclusion in API responses [[target/app/models/schemas/users.py::UserInResponse]]. As a subclass of `RWSchema`, it inherits any aliasing or serialisation behaviour that base class provides [[target/app/models/schemas/rwschema.py::RWSchema]] [[target/app/models/schemas/users.py]].
 
 | Field | Type | Default |
 |-------|------|---------|
@@ -37,7 +37,7 @@ On the response side, `UserWithToken` extends the domain `User` class, inheritin
 
 ## UserInUpdate
 
-`UserInUpdate` is a Pydantic model used to represent a partial update payload for a user [[target/app/models/schemas/users.py::UserInUpdate]]. It inherits directly from `BaseModel` [[target/app/models/schemas/users.py::UserInUpdate]]. All five of its fields — `username`, `email`, `password`, `bio`, and `image` — are optional and default to `None`, meaning a caller may supply any subset of them when updating a user record [[target/app/models/schemas/users.py::UserInUpdate]]. The `email` field is typed as `Optional[EmailStr]`, which delegates e-mail format validation to Pydantic, while `image` is typed as `Optional[HttpUrl]`, enforcing a valid URL when a value is provided [[target/app/models/schemas/users.py::UserInUpdate]].
+`UserInUpdate` is a Pydantic model that represents a partial update payload for a user account [[target/app/models/schemas/users.py::UserInUpdate]]. It inherits directly from `BaseModel` and all five of its fields are optional, meaning a caller may supply any combination of them without providing the rest [[target/app/models/schemas/users.py::UserInUpdate]]. The fields are `username` (`Optional[str]`, defaulting to `None`), `email` (`Optional[EmailStr]`, defaulting to `None`), `password` (`Optional[str]`, defaulting to `None`), `bio` (`Optional[str]`, defaulting to `None`), and `image` (`Optional[HttpUrl]`, defaulting to `None`) [[target/app/models/schemas/users.py::UserInUpdate]]. Because every field defaults to `None`, an empty payload is valid and only the fields explicitly provided in a request carry meaningful update intent [[target/app/models/schemas/users.py::UserInUpdate]].
 
 | Field | Type | Default |
 |-------|------|---------|
@@ -49,7 +49,7 @@ On the response side, `UserWithToken` extends the domain `User` class, inheritin
 
 ## UserWithToken
 
-`UserWithToken` is a Pydantic model defined in the users schema module that extends the domain `User` class [[target/app/models/schemas/users.py::UserWithToken]]. It inherits from `User` [[target/app/models/domain/users.py::User]], bringing in the `username` (str), `email` (str), `bio` (str, defaulting to `''`), and `image` (Optional[str], defaulting to `None`) fields [[target/app/models/schemas/users.py::UserWithToken]]. On top of those inherited fields it adds a single required `token` field of type `str` [[target/app/models/schemas/users.py::UserWithToken]], making it suitable for responses that need to carry an authentication token alongside the user's profile data [[target/app/models/schemas/users.py]].
+`UserWithToken` is a Pydantic model defined in the users schema module that extends the domain `User` class [[target/app/models/schemas/users.py::UserWithToken]]. It inherits from `User` [[target/app/models/domain/users.py::User]], gaining the fields `username` (str), `email` (str), `bio` (str, defaulting to an empty string), and `image` (Optional[str], defaulting to None) [[target/app/models/schemas/users.py::UserWithToken]]. On top of those inherited fields, it adds a single required field `token` of type `str`, making it suitable for responses that need to carry an authentication token alongside the user's profile data [[target/app/models/schemas/users.py::UserWithToken]].
 
 | Field | Type | Default |
 |-------|------|---------|

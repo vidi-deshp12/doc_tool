@@ -7,8 +7,11 @@ not refer to their children. This module adds:
 1. A CONTAINS-edge index so we know which nodes are children of which parent.
 2. A topological sort (children before parents) so every parent's children are already
    summarized when the parent's turn arrives.
-3. A cache keyed by a hash of the node's own structural data *plus* PROMPT_VERSION *plus* the
-   hashes of all child summaries. If the cache key is unchanged, the summarizer is not called.
+3. A cache key that is a hash of the exact prompt sent to the backend (plus the backend's
+   identity). If the key is unchanged, the summarizer is not called. The prompt already renders
+   the node's facts, its residual source, its relational edges, and every child summary, so the
+   key is a function of the payload rather than a hand-maintained proxy for it: a change to
+   anything the model would read invalidates exactly the nodes it affects.
 4. A synthetic "system" root that receives all package-level summaries as children.
 
 Nodes at the same depth of the CONTAINS tree are summarised concurrently when
@@ -26,13 +29,13 @@ from __future__ import annotations
 import hashlib
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
 from docgen.facts.schema import EdgeType, FactGraph, Node, NodeType
 from docgen.facts.store import _node_to_dict
 from docgen.summarize.base import NodeLevel, Summarizer, SummaryRequest, SummaryResult
+from docgen.summarize.prompts import build_prompt
 
 # Node types that participate in summarization. Routes, externals, etc. are skipped.
 _SUMMARIZABLE: frozenset[NodeType] = frozenset(
@@ -48,9 +51,20 @@ NEEDS_HUMAN_REVIEW_BACKEND = "needs_human_review"
 
 # Fact fields that are internal to the pipeline and meaningless to a doc writer.
 # They are stripped from the dict handed to the summarizer (and therefore from the
-# prompt's "Node facts" block); the cache key is still computed from the full dict.
+# prompt's "Node facts" block). Since the cache key hashes the prompt, this set is
+# payload policy: changing it changes what is sent, and only that.
+#
+# "lines" is dropped on purpose. Line numbers are not citable and the renderers read
+# them from facts.json, and leaving them in the prompt would make a blank line inserted
+# at the top of a file regenerate every node in it (the extractor's own hashes are
+# token-based and ignore such a shift).
+#
+# "file" must stay: ``prompts.allowed_fact_ids`` reads it to make the module id citeable
+# from a function prompt. If it is ever dropped here, derive the module id from the node
+# id in ``allowed_fact_ids`` instead.
 _PROMPT_FACTS_DROP: frozenset[str] = frozenset({
     "type",
+    "lines",
     "hash_struct",
     "hash_source",
     "what",
@@ -59,6 +73,11 @@ _PROMPT_FACTS_DROP: frozenset[str] = frozenset({
     "variable",
     "prefix",
 })
+
+
+def _prompt_facts(facts: dict[str, Any]) -> dict[str, Any]:
+    """The fact dict actually sent to the summarizer, and therefore hashed."""
+    return {k: v for k, v in facts.items() if k not in _PROMPT_FACTS_DROP}
 
 
 # ---------------------------------------------------------------------------
@@ -85,34 +104,100 @@ def read_source_text(repo_root: Path, node: Node) -> str:
     return "\n".join(lines[start - 1 : end])
 
 
+def read_residual_source(repo_root: Path, node: Node, children: list[Node]) -> str:
+    """Source inside *node*'s span that no direct child already covers.
+
+    A child is described by its own summary, so sending its code as well would put
+    the same information in the prompt twice (once as prose, once as source). What
+    a parent still needs from its own span is everything that has no child summary:
+    the class header and docstring, a class-level constant between methods, a
+    module's imports and constants.
+
+    Nodes with no children, children in another file, and unreadable files fall back
+    to the full span. The result is whitespace-normalised so a reformat inside a
+    child cannot change this node's cache key.
+    """
+    full = read_source_text(repo_root, node)
+    if not children or not full:
+        return full
+
+    start, end = node.lines
+    if start <= 0 or end < start:
+        return ""
+
+    # Covered ranges are node-relative 1-indexed line numbers, clamped to this
+    # node's own span. ``child.lines`` starts at the first decorator line, so
+    # decorators are covered too.
+    covered: list[tuple[int, int]] = []
+    for child in children:
+        if child.file != node.file:
+            continue
+        c_start, c_end = child.lines
+        if c_start <= 0 or c_end < c_start:
+            continue
+        c_start, c_end = max(c_start, start), min(c_end, end)
+        if c_end < c_start:
+            continue
+        covered.append((c_start, c_end))
+
+    covered.sort()
+    merged: list[tuple[int, int]] = []
+    for c_start, c_end in covered:
+        # Overlapping or adjacent ranges merge; an adjacency only yields a blank
+        # line, which normalisation would drop anyway.
+        if merged and c_start <= merged[-1][1] + 1:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], c_end))
+        else:
+            merged.append((c_start, c_end))
+
+    lines = full.splitlines()
+    kept: list[str] = []
+    cursor = 0  # 0-indexed position in ``lines``, relative to the node span
+    for c_start, c_end in merged:
+        kept.extend(lines[cursor : c_start - start])
+        cursor = c_end - start + 1
+    kept.extend(lines[cursor:])
+
+    # Normalise: strip trailing whitespace, collapse runs of blank lines, drop
+    # leading/trailing blanks.
+    out: list[str] = []
+    for line in kept:
+        stripped = line.rstrip()
+        if not stripped:
+            if not out or out[-1] == "":
+                continue
+            out.append("")
+        else:
+            out.append(stripped)
+    while out and out[-1] == "":
+        out.pop()
+
+    return "\n".join(out)
+
+
 # ---------------------------------------------------------------------------
 # Cache key
 # ---------------------------------------------------------------------------
 
-def hash_input_with_children(req: SummaryRequest, prompt_version: str) -> str:
-    """Compute a cache key that covers node identity, structure, source, prompt version,
-    and the hashes of all child summaries.
+def hash_prompt(prompt: str) -> str:
+    """Cache key for one summarizer call: SHA-256 of the exact text sent.
 
-    Extending the base ``hash_input`` with ``prompt_version`` means a wording change in
-    the prompt template invalidates all cached summaries on the next run. The child part
-    is a hash of each child's summary *text*, not of the child's cache key: a child
-    re-summarized into byte-identical prose does not change the parent's key, so the
-    propagation stops there (architecture §7's early cutoff).
+    Deterministic: an identical prompt always produces the identical digest. Because
+    the prompt is the model's entire input, the key answers "would this call produce
+    the same output?" by construction instead of by agreement between the key and the
+    prompt builder.
     """
-    child_hashes = "".join(
-        sorted(
-            hashlib.sha256(c.text.encode("utf-8")).hexdigest()
-            for c in req.child_summaries
-        )
-    )
-    payload = (
-        req.node_id
-        + str(req.facts.get("hash_struct", ""))
-        + str(req.facts.get("hash_source", ""))
-        + prompt_version
-        + child_hashes
-    )
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    return hashlib.sha256(prompt.encode("utf-8")).hexdigest()
+
+
+def _summarizer_identity(summarizer: Summarizer) -> str:
+    """Which backend would produce the prose.
+
+    ``name`` is an optional, documented protocol attribute; the class name is the
+    fallback so third-party backends (and test doubles) need no change. Including it
+    in the key means ``--backend`` switches never reuse another provider's prose.
+    """
+    return str(getattr(summarizer, "name", type(summarizer).__name__))
 
 
 # ---------------------------------------------------------------------------
@@ -332,7 +417,6 @@ def run_hierarchy(
     summarizer: Summarizer,
     repo_root: Path,
     existing_cache: dict[str, SummaryResult],
-    prompt_version: str,
     max_workers: int = 1,
 ) -> list[SummaryResult]:
     """Summarize all nodes bottom-up and return the complete list of SummaryResults.
@@ -344,9 +428,8 @@ def run_hierarchy(
             thread-safe (the shipped backends are stateless per call).
         repo_root: Absolute path to the repository root, used to read source text.
         existing_cache: Node-id → SummaryResult from a previous run. Nodes whose
-            ``hash_input_with_children`` matches the cached value are skipped.
-        prompt_version: Current ``PROMPT_VERSION`` string from ``prompts.py``. Changing
-            this string forces every cached summary to be regenerated.
+            cached ``hash_input`` matches the hash of the prompt this run would send
+            are skipped.
         max_workers: Node-level concurrency within a depth batch (default 1 =
             sequential). Values below 1 are clamped to 1.
 
@@ -366,36 +449,29 @@ def run_hierarchy(
     # the main thread only; workers return results and never touch this dict.
     results: dict[str, SummaryResult] = {}
 
-    def _process_node(node: Node) -> SummaryResult:
-        child_results = [
-            results[child.id]
-            for child in index.get(node.id, [])
-            if child.id in results
-        ]
+    # Constant for the whole run: which backend would answer. Part of every key.
+    summarizer_identity = _summarizer_identity(summarizer)
 
-        facts = _node_to_dict(node)
+    def _cache_key(prompt: str) -> str:
+        return hash_prompt(summarizer_identity + "\n" + prompt)
+
+    def _process_node(node: Node) -> SummaryResult:
+        children = index.get(node.id, [])
         req = SummaryRequest(
             node_id=node.id,
             level=_node_level(node),
-            facts=facts,
-            source_text=read_source_text(repo_root, node),
-            child_summaries=child_results,
+            facts=_prompt_facts(_node_to_dict(node)),
+            source_text=read_residual_source(repo_root, node, children),
+            child_summaries=[results[c.id] for c in children if c.id in results],
             edges=edges_by_from.get(node.id, []),
         )
 
-        # The key is computed from the full fact dict: hash_struct/hash_source are
-        # stripped for the prompt, but they must still drive cache invalidation.
-        cache_key = hash_input_with_children(req, prompt_version)
+        cache_key = _cache_key(build_prompt(req))
         cached = existing_cache.get(node.id)
         if cached is not None and cached.hash_input == cache_key:
             return cached
 
-        prompt_facts = {
-            k: v for k, v in facts.items() if k not in _PROMPT_FACTS_DROP
-        }
-        return _call_summarizer(
-            summarizer, replace(req, facts=prompt_facts), cache_key
-        )
+        return _call_summarizer(summarizer, req, cache_key)
 
     for batch in batches:
         if max_workers <= 1 or len(batch) == 1:
@@ -425,7 +501,7 @@ def run_hierarchy(
         child_summaries=package_results,
         edges=[],
     )
-    system_key = hash_input_with_children(system_req, prompt_version)
+    system_key = _cache_key(build_prompt(system_req))
     cached_system = existing_cache.get(SYSTEM_NODE_ID)
     if cached_system is not None and cached_system.hash_input == system_key:
         system_result = cached_system

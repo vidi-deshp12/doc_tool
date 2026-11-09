@@ -40,8 +40,9 @@ class SummaryResult:
         node_id: Which node this summary covers (echoed from the request).
         text: Prose with inline `[[fact_id]]` citations.
         backend: Identifier of the summarizer, e.g. "stub", "manual", "bob_shell".
-        hash_input: SHA-256 of the inputs; the cache in 2b.3 uses this to decide
-            whether a summary must be regenerated.
+        hash_input: SHA-256 of the exact prompt sent; the cache in the hierarchy
+            driver uses this to decide whether a summary must be regenerated. Backends
+            fill in a placeholder — ``run_hierarchy`` always overwrites it.
     """
 
     node_id: str
@@ -92,7 +93,17 @@ def hash_input(req: SummaryRequest) -> str:
 
 @runtime_checkable
 class Summarizer(Protocol):
-    """Produces cited prose for a single node. Implementations differ only in backend."""
+    """Produces cited prose for a single node. Implementations differ only in backend.
+
+    Contract: ``summarize`` must send ``build_prompt(req)`` — the prompt is the cache
+    key, so a backend that rewrites, annotates, or drops part of it makes the cache
+    answer "same input" for different inputs. Splitting the string across system/user
+    messages is fine; the text is what is hashed.
+
+    Optional attribute ``name``: a stable backend identifier (e.g. ``"stub"``). It
+    participates in the cache key, so switching providers never reuses another
+    provider's prose. When absent, the class name is used.
+    """
 
     def summarize(self, req: SummaryRequest) -> SummaryResult: ...
 
@@ -103,6 +114,8 @@ class StubSummarizer:
     Returns a fixed template so tests can assert on output without any network or
     Bob calls.
     """
+
+    name = "stub"
 
     def summarize(self, req: SummaryRequest) -> SummaryResult:
         return SummaryResult(

@@ -261,7 +261,6 @@ def _run_summarize(args: argparse.Namespace) -> None:
     from docgen.config import load_config
     from docgen.facts.store import read_facts
     from docgen.summarize.hierarchy import run_hierarchy
-    from docgen.summarize.prompts import PROMPT_VERSION
     from docgen.summarize.store import read_summaries, write_summaries
 
     config_path = Path(args.config)
@@ -295,7 +294,6 @@ def _run_summarize(args: argparse.Namespace) -> None:
         summarizer=summarizer,
         repo_root=repo_root,
         existing_cache=existing_cache,
-        prompt_version=PROMPT_VERSION,
         max_workers=getattr(args, "workers", 1),
     )
 
@@ -518,7 +516,6 @@ def _run_update(args: argparse.Namespace) -> None:
     backend = getattr(args, "backend", "stub")
     if update_plan.nodes_to_resummarize and backend != "stub":
         from docgen.summarize.hierarchy import run_hierarchy
-        from docgen.summarize.prompts import PROMPT_VERSION
         from docgen.summarize.store import write_summaries
 
         _, summarizer = _build_summarizer(args, output_dir)
@@ -529,7 +526,6 @@ def _run_update(args: argparse.Namespace) -> None:
             summarizer=summarizer,
             repo_root=repo_root,
             existing_cache=existing_cache,
-            prompt_version=PROMPT_VERSION,
             max_workers=getattr(args, "workers", 1),
         )
         write_summaries(results, summaries_path)

@@ -211,7 +211,6 @@ def test_run_hierarchy_continues_on_summarizer_failure(tmp_path: Path) -> None:
         summarizer=AlwaysFails(),
         repo_root=tmp_path,
         existing_cache={},
-        prompt_version="test",
     )
 
     backends = {r.backend for r in results}
@@ -241,7 +240,6 @@ def test_needs_human_review_hash_input_empty(tmp_path: Path) -> None:
         summarizer=AlwaysFails(),
         repo_root=tmp_path,
         existing_cache={},
-        prompt_version="test",
     )
 
     failed = [r for r in results if r.backend == NEEDS_HUMAN_REVIEW_BACKEND]

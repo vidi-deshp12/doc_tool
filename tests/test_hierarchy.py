@@ -6,6 +6,7 @@ tmp_path for any filesystem I/O. No LLM calls are made.
 
 from __future__ import annotations
 
+import hashlib
 import threading
 import time
 from pathlib import Path
@@ -16,18 +17,19 @@ from docgen.facts.schema import Edge, EdgeType, FactGraph, Node, NodeType
 from docgen.summarize.base import StubSummarizer, SummaryRequest, SummaryResult
 from docgen.summarize.hierarchy import (
     SYSTEM_NODE_ID,
+    _prompt_facts,
     batched_topological_order,
     build_contains_index,
-    hash_input_with_children,
+    hash_prompt,
+    read_residual_source,
     run_hierarchy,
     topological_order,
 )
+from docgen.summarize.prompts import build_prompt
 
 # ---------------------------------------------------------------------------
 # Fixtures helpers
 # ---------------------------------------------------------------------------
-
-PROMPT_V = "test-v1"
 
 
 def _node(
@@ -37,15 +39,18 @@ def _node(
     parent_class: str = "",
     hash_struct: str = "hs",
     hash_source: str = "hsrc",
+    lines: tuple[int, int] = (1, 2),
+    signature: str = "",
 ) -> Node:
     return Node(
         id=id,
         type=type,
         file=file,
-        lines=(1, 2),
+        lines=lines,
         hash_struct=hash_struct,
         hash_source=hash_source,
         parent_class=parent_class,
+        signature=signature,
     )
 
 
@@ -59,6 +64,9 @@ def _make_graph(*nodes: Node, edges: tuple[Edge, ...] = ()) -> FactGraph:
 
 class CountingSummarizer:
     """Wraps StubSummarizer but counts how many times it is called."""
+
+    # Same backend identity as the stub it delegates to: it is part of the cache key.
+    name = "stub"
 
     def __init__(self) -> None:
         self.call_count = 0
@@ -100,6 +108,8 @@ def test_topological_order_children_before_parents() -> None:
 class RecordingSummarizer:
     """Captures every SummaryRequest it receives."""
 
+    name = "stub"
+
     def __init__(self) -> None:
         self.requests: list[SummaryRequest] = []
         self._inner = StubSummarizer()
@@ -125,7 +135,7 @@ def test_run_hierarchy_passes_child_summaries(tmp_path: Path) -> None:
     )
 
     rec = RecordingSummarizer()
-    run_hierarchy(graph, rec, tmp_path, existing_cache={}, prompt_version=PROMPT_V)
+    run_hierarchy(graph, rec, tmp_path, existing_cache={})
 
     cls_req = next(r for r in rec.requests if r.node_id == "mod.py::Cls")
     child_ids = [c.node_id for c in cls_req.child_summaries]
@@ -144,7 +154,7 @@ def test_run_hierarchy_zero_calls_on_rerun(tmp_path: Path) -> None:
 
     first_summarizer = CountingSummarizer()
     first_results = run_hierarchy(
-        graph, first_summarizer, tmp_path, existing_cache={}, prompt_version=PROMPT_V
+        graph, first_summarizer, tmp_path, existing_cache={}
     )
     first_calls = first_summarizer.call_count
     assert first_calls > 0  # sanity: something was called on the first run
@@ -154,7 +164,7 @@ def test_run_hierarchy_zero_calls_on_rerun(tmp_path: Path) -> None:
 
     second_summarizer = CountingSummarizer()
     run_hierarchy(
-        graph, second_summarizer, tmp_path, existing_cache=cache, prompt_version=PROMPT_V
+        graph, second_summarizer, tmp_path, existing_cache=cache
     )
     assert second_summarizer.call_count == 0, (
         f"Expected 0 calls on re-run with unchanged cache, got {second_summarizer.call_count}"
@@ -165,30 +175,31 @@ def test_run_hierarchy_zero_calls_on_rerun(tmp_path: Path) -> None:
 # Test 4: changing a node's hash_struct forces that node + its ancestors to re-run
 # ---------------------------------------------------------------------------
 
-def test_run_hierarchy_reruns_on_hash_change(tmp_path: Path) -> None:
-    """Modifying one node's hash_struct re-summarizes that node.
+def test_run_hierarchy_reruns_only_the_node_whose_prompt_changed(tmp_path: Path) -> None:
+    """A change the prompt renders re-summarizes that node and stops there.
 
-    The parent module is *not* re-summarized: child propagation is keyed on the
-    child's summary text (early cutoff), and StubSummarizer's prose does not depend
-    on the hash.  See test_child_text_change_reruns_parent for the positive case.
+    ``hash_struct``/``hash_source`` are no longer key inputs; what the node's prompt
+    actually contains is. The parent module is *not* re-summarized because the child's
+    prose is unchanged (early cutoff) — see test_child_text_change_reruns_parent for
+    the positive case.
     """
-    mod = _node("mod.py", NodeType.MODULE, file="mod.py", hash_struct="orig-mod")
-    func = _node("mod.py::f", NodeType.FUNCTION, file="mod.py", hash_struct="orig-f")
+    mod = _node("mod.py", NodeType.MODULE, file="mod.py")
+    func = _node("mod.py::f", NodeType.FUNCTION, file="mod.py", signature="def f()")
     graph = _make_graph(mod, func, edges=(_contains("mod.py", "mod.py::f"),))
 
     # First run — populate cache.
     first = CountingSummarizer()
-    first_results = run_hierarchy(graph, first, tmp_path, existing_cache={}, prompt_version=PROMPT_V)
+    first_results = run_hierarchy(graph, first, tmp_path, existing_cache={})
     cache = {r.node_id: r for r in first_results}
 
-    # Modify the function's hash_struct to simulate a source change.
-    func_changed = _node("mod.py::f", NodeType.FUNCTION, file="mod.py", hash_struct="changed-f")
+    # Same node, changed signature: the prompt differs, so the key does.
+    func_changed = _node("mod.py::f", NodeType.FUNCTION, file="mod.py", signature="def f(x)")
     changed_graph = _make_graph(
         mod, func_changed, edges=(_contains("mod.py", "mod.py::f"),)
     )
 
     second = CountingSummarizer()
-    run_hierarchy(changed_graph, second, tmp_path, existing_cache=cache, prompt_version=PROMPT_V)
+    run_hierarchy(changed_graph, second, tmp_path, existing_cache=cache)
 
     # The function itself is re-summarized; its text is unchanged, so the module
     # (and the system node) are skipped.
@@ -216,7 +227,7 @@ def test_run_hierarchy_includes_package_nodes(tmp_path: Path) -> None:
     )
 
     rec = RecordingSummarizer()
-    results = run_hierarchy(graph, rec, tmp_path, existing_cache={}, prompt_version=PROMPT_V)
+    results = run_hierarchy(graph, rec, tmp_path, existing_cache={})
 
     result_ids = {r.node_id for r in results}
     assert "pkg" in result_ids
@@ -234,22 +245,185 @@ def test_run_hierarchy_includes_package_nodes(tmp_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Test 6: hash_input_with_children changes when prompt_version changes
+# Test 6: cache-key semantics — the key is the prompt, and the old key was blind
 # ---------------------------------------------------------------------------
 
-def test_hash_input_with_children_changes_on_prompt_version() -> None:
-    """Same SummaryRequest but different prompt_version strings → different hashes."""
-    req = SummaryRequest(
-        node_id="mod.py",
-        level="module",
-        facts={"hash_struct": "hs", "hash_source": "hsrc"},
-        source_text="",
+def _legacy_cache_key(req: SummaryRequest, prompt_version: str = "test-v1") -> str:
+    """The retired key: node id + hash_struct + hash_source + version + child text.
+
+    Reproduced here only as evidence of what it could not see; production code no
+    longer contains this formula.
+    """
+    child_hashes = "".join(
+        sorted(
+            hashlib.sha256(c.text.encode("utf-8")).hexdigest()
+            for c in req.child_summaries
+        )
+    )
+    payload = (
+        req.node_id
+        + str(req.facts.get("hash_struct", ""))
+        + str(req.facts.get("hash_source", ""))
+        + prompt_version
+        + child_hashes
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _prompt_key(req: SummaryRequest, identity: str = "stub") -> str:
+    """What the driver computes: hash of (backend identity + exact prompt)."""
+    return hash_prompt(identity + "\n" + build_prompt(req))
+
+
+def _key_request(**overrides) -> SummaryRequest:
+    fields = dict(
+        node_id="mod.py::handler",
+        level="function",
+        facts={"id": "mod.py::handler", "file": "mod.py", "signature": "def handler()"},
+        source_text="def handler():\n    return create()\n",
         child_summaries=[],
         edges=[],
     )
-    h1 = hash_input_with_children(req, "v1")
-    h2 = hash_input_with_children(req, "v2")
-    assert h1 != h2
+    fields.update(overrides)
+    return SummaryRequest(**fields)
+
+
+_MODEL_EDGE = {
+    "type": "request_model",
+    "from": "route:POST /api/items",
+    "to": "mod.py::ItemIn",
+}
+
+
+def test_legacy_key_was_blind_to_edges() -> None:
+    """The old key ignored req.edges; the prompt hash does not.
+
+    This is the regression that justifies replacing the key at all: a new model edge
+    changes the relational facts and the allowed id list, but the old key was equal
+    before and after, so cached prose could cite an id it should not (or miss one it
+    now may).
+    """
+    before = _key_request()
+    after = _key_request(edges=[_MODEL_EDGE])
+
+    # The prompt really did change...
+    assert "mod.py::ItemIn" not in build_prompt(before)
+    assert "mod.py::ItemIn" in build_prompt(after)
+
+    # ...but the old key could not see it.
+    assert _legacy_cache_key(before) == _legacy_cache_key(after)
+
+    # The prompt hash does.
+    assert _prompt_key(before) != _prompt_key(after)
+
+
+def test_prompt_hash_changes_on_child_source_and_edges() -> None:
+    """Child prose, own source, and relational facts each change the key."""
+    base = _key_request()
+    assert _prompt_key(base) == _prompt_key(_key_request())  # deterministic
+
+    child_one = SummaryResult(
+        node_id="mod.py::child",
+        text="Does a thing [[mod.py::child]].",
+        backend="stub",
+        hash_input="",
+    )
+    child_two = SummaryResult(
+        node_id="mod.py::child",
+        text="Does another thing [[mod.py::child]].",
+        backend="stub",
+        hash_input="",
+    )
+
+    assert _prompt_key(_key_request(child_summaries=[child_one])) != _prompt_key(
+        _key_request(child_summaries=[child_two])
+    )
+    assert _prompt_key(base) != _prompt_key(
+        _key_request(source_text="def handler():\n    return update()\n")
+    )
+    assert _prompt_key(base) != _prompt_key(_key_request(edges=[_MODEL_EDGE]))
+
+
+def test_prompt_hash_ignores_line_shift(tmp_path: Path) -> None:
+    """A blank line inserted at the top of a file must invalidate nothing.
+
+    The extractor's hashes are token-based, so they legitimately do not change on a
+    line shift; the prompt hash must not turn one into a full re-summarization.
+    """
+    source = "def f():\n    return 1\n\ndef g():\n    return 2\n"
+    path = tmp_path / "mod.py"
+    path.write_text(source, encoding="utf-8")
+
+    def build(
+        mod_lines: tuple[int, int],
+        f_lines: tuple[int, int],
+        g_lines: tuple[int, int],
+    ) -> FactGraph:
+        return _make_graph(
+            _node(
+                "mod.py", NodeType.MODULE, file="mod.py",
+                hash_struct="mod-hs", hash_source="mod-hsrc", lines=mod_lines,
+            ),
+            _node(
+                "mod.py::f", NodeType.FUNCTION, file="mod.py",
+                hash_struct="f-hs", hash_source="f-hsrc", lines=f_lines,
+            ),
+            _node(
+                "mod.py::g", NodeType.FUNCTION, file="mod.py",
+                hash_struct="g-hs", hash_source="g-hsrc", lines=g_lines,
+            ),
+            edges=(_contains("mod.py", "mod.py::f"), _contains("mod.py", "mod.py::g")),
+        )
+
+    first = CountingSummarizer()
+    first_results = run_hierarchy(
+        build((1, 5), (1, 2), (4, 5)), first, tmp_path, existing_cache={}
+    )
+    assert first.call_count == 4  # f, g, module, system
+    cache = {r.node_id: r for r in first_results}
+
+    # One blank line at the top: every span shifts by one, the content does not.
+    path.write_text("\n" + source, encoding="utf-8")
+
+    second = CountingSummarizer()
+    run_hierarchy(build((2, 6), (2, 3), (5, 6)), second, tmp_path, existing_cache=cache)
+    assert second.call_count == 0, (
+        f"A line shift must not regenerate anything, got {second.call_count} calls"
+    )
+
+    # Same guard without the filesystem: "lines" never reaches the prompt.
+    base_facts = {"id": "mod.py::f", "file": "mod.py", "signature": "def f()"}
+    before = _key_request(facts=_prompt_facts({**base_facts, "lines": [3, 4]}))
+    after = _key_request(facts=_prompt_facts({**base_facts, "lines": [4, 5]}))
+    assert _prompt_key(before) == _prompt_key(after)
+
+
+class _ProviderA(CountingSummarizer):
+    name = "provider_a"
+
+
+class _ProviderB(CountingSummarizer):
+    name = "provider_b"
+
+
+def test_key_includes_backend_name(tmp_path: Path) -> None:
+    """Identical prompt, different backend → the cached prose is not reused."""
+    graph = _make_graph(_node("mod.py::f"))
+
+    first = _ProviderA()
+    first_results = run_hierarchy(graph, first, tmp_path, existing_cache={})
+    assert first.call_count == 2  # the function and the system summary
+    cache = {r.node_id: r for r in first_results}
+
+    same = _ProviderA()
+    run_hierarchy(graph, same, tmp_path, existing_cache=cache)
+    assert same.call_count == 0
+
+    other = _ProviderB()
+    run_hierarchy(graph, other, tmp_path, existing_cache=cache)
+    assert other.call_count == 2, (
+        f"Switching backend must regenerate, got {other.call_count} calls"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -262,7 +436,7 @@ def test_run_hierarchy_always_produces_system_node(tmp_path: Path) -> None:
     graph = _make_graph(mod)
 
     results = run_hierarchy(
-        graph, StubSummarizer(), tmp_path, existing_cache={}, prompt_version=PROMPT_V
+        graph, StubSummarizer(), tmp_path, existing_cache={}
     )
 
     assert results[-1].node_id == SYSTEM_NODE_ID
@@ -354,7 +528,7 @@ def test_handles_edge_reaches_function(tmp_path: Path) -> None:
     )
 
     rec = RecordingSummarizer()
-    run_hierarchy(graph, rec, tmp_path, existing_cache={}, prompt_version=PROMPT_V)
+    run_hierarchy(graph, rec, tmp_path, existing_cache={})
 
     handler_req = next(r for r in rec.requests if r.node_id == "mod.py::handler")
     handles_edges = [e for e in handler_req.edges if e.get("type") == "handles"]
@@ -370,27 +544,25 @@ def test_handles_edge_reaches_function(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 def test_child_text_unchanged_does_not_rerun_parent(tmp_path: Path) -> None:
-    """Child input changes but its prose does not → the parent's key is unchanged."""
-    mod = _node("mod.py", NodeType.MODULE, file="mod.py")
-    func = _node("mod.py::f", NodeType.FUNCTION, file="mod.py", hash_source="orig-hsrc")
+    """The child's prompt changes but its prose does not → the parent is not re-run."""
+    path = tmp_path / "mod.py"
+    path.write_text("def f():\n    return 1\n", encoding="utf-8")
+
+    mod = _node("mod.py", NodeType.MODULE, file="mod.py", lines=(1, 2))
+    func = _node("mod.py::f", NodeType.FUNCTION, file="mod.py", lines=(1, 2))
     edges = (_contains("mod.py", "mod.py::f"),)
     graph = _make_graph(mod, func, edges=edges)
 
-    first_results = run_hierarchy(
-        graph, StubSummarizer(), tmp_path, existing_cache={}, prompt_version=PROMPT_V
-    )
+    first_results = run_hierarchy(graph, StubSummarizer(), tmp_path, existing_cache={})
     cache = {r.node_id: r for r in first_results}
 
-    # Simulate a comment-only edit: hash_source changes, StubSummarizer's text does not.
-    func_edited = _node(
-        "mod.py::f", NodeType.FUNCTION, file="mod.py", hash_source="edited-hsrc"
-    )
+    # A comment-only edit: the child's source, and therefore its prompt, changes.
+    path.write_text("def f():\n    # note\n    return 1\n", encoding="utf-8")
+    func_edited = _node("mod.py::f", NodeType.FUNCTION, file="mod.py", lines=(1, 3))
     edited_graph = _make_graph(mod, func_edited, edges=edges)
 
     second = RecordingSummarizer()
-    run_hierarchy(
-        edited_graph, second, tmp_path, existing_cache=cache, prompt_version=PROMPT_V
-    )
+    run_hierarchy(edited_graph, second, tmp_path, existing_cache=cache)
 
     called = [r.node_id for r in second.requests]
     assert called == ["mod.py::f"], (
@@ -438,7 +610,6 @@ def test_child_text_change_reruns_parent(tmp_path: Path) -> None:
         SignatureEchoSummarizer(),
         tmp_path,
         existing_cache={},
-        prompt_version=PROMPT_V,
     )
     cache = {r.node_id: r for r in first_results}
 
@@ -457,7 +628,6 @@ def test_child_text_change_reruns_parent(tmp_path: Path) -> None:
         second,
         tmp_path,
         existing_cache=cache,
-        prompt_version=PROMPT_V,
     )
 
     called = [r.node_id for r in second.requests]
@@ -488,11 +658,11 @@ def test_prompt_facts_exclude_internal_fields(tmp_path: Path) -> None:
     graph = _make_graph(mod, func, edges=(_contains("mod.py", "mod.py::f"),))
 
     rec = RecordingSummarizer()
-    run_hierarchy(graph, rec, tmp_path, existing_cache={}, prompt_version=PROMPT_V)
+    run_hierarchy(graph, rec, tmp_path, existing_cache={})
 
     req = next(r for r in rec.requests if r.node_id == "mod.py::f")
     dropped = {
-        "type", "hash_struct", "hash_source",
+        "type", "lines", "hash_struct", "hash_source",
         "what", "why", "where", "variable", "prefix",
     }
     assert dropped.isdisjoint(req.facts), (
@@ -502,7 +672,6 @@ def test_prompt_facts_exclude_internal_fields(tmp_path: Path) -> None:
     # Doc-useful fields survive.
     assert req.facts["id"] == "mod.py::f"
     assert req.facts["file"] == "mod.py"
-    assert req.facts["lines"] == [3, 4]
     assert req.facts["signature"] == "def f()"
 
     mod_req = next(r for r in rec.requests if r.node_id == "mod.py")
@@ -550,7 +719,7 @@ def test_request_model_edges_reach_handler(tmp_path: Path) -> None:
     )
 
     rec = RecordingSummarizer()
-    run_hierarchy(graph, rec, tmp_path, existing_cache={}, prompt_version=PROMPT_V)
+    run_hierarchy(graph, rec, tmp_path, existing_cache={})
 
     handler_req = next(r for r in rec.requests if r.node_id == "mod.py::create")
     model_edges = [e for e in handler_req.edges if e.get("type") == "request_model"]
@@ -681,10 +850,10 @@ def test_parallel_output_matches_sequential(tmp_path: Path) -> None:
     graph = _functions_graph(module_count=2, functions_per_module=4)
 
     sequential = run_hierarchy(
-        graph, StubSummarizer(), tmp_path, {}, PROMPT_V, max_workers=1
+        graph, StubSummarizer(), tmp_path, {}, max_workers=1
     )
     parallel = run_hierarchy(
-        graph, StubSummarizer(), tmp_path, {}, PROMPT_V, max_workers=4
+        graph, StubSummarizer(), tmp_path, {}, max_workers=4
     )
 
     assert parallel == sequential
@@ -697,13 +866,13 @@ def test_parallel_batch_is_faster(tmp_path: Path) -> None:
 
     start = time.perf_counter()
     run_hierarchy(
-        graph, SlowStubSummarizer(), tmp_path, {}, PROMPT_V, max_workers=1
+        graph, SlowStubSummarizer(), tmp_path, {}, max_workers=1
     )
     sequential = time.perf_counter() - start
 
     start = time.perf_counter()
     run_hierarchy(
-        graph, SlowStubSummarizer(), tmp_path, {}, PROMPT_V, max_workers=4
+        graph, SlowStubSummarizer(), tmp_path, {}, max_workers=4
     )
     parallel = time.perf_counter() - start
 
@@ -721,7 +890,7 @@ def test_parallel_exception_handling(tmp_path: Path) -> None:
     graph = _make_graph(*functions)
 
     results = run_hierarchy(
-        graph, FailingStubSummarizer(), tmp_path, {}, PROMPT_V, max_workers=4
+        graph, FailingStubSummarizer(), tmp_path, {}, max_workers=4
     )
 
     assert {r.node_id for r in results} == {f.id for f in functions} | {SYSTEM_NODE_ID}
@@ -735,11 +904,120 @@ def test_workers_below_one_is_sequential(tmp_path: Path) -> None:
     graph = _functions_graph(module_count=1, functions_per_module=4)
 
     zero = run_hierarchy(
-        graph, StubSummarizer(), tmp_path, {}, PROMPT_V, max_workers=0
+        graph, StubSummarizer(), tmp_path, {}, max_workers=0
     )
     one = run_hierarchy(
-        graph, StubSummarizer(), tmp_path, {}, PROMPT_V, max_workers=1
+        graph, StubSummarizer(), tmp_path, {}, max_workers=1
     )
 
     assert zero == one
+
+
+# ---------------------------------------------------------------------------
+# Residual source: a parent sees only the part of its span no child covers
+# ---------------------------------------------------------------------------
+
+def _write_module(tmp_path: Path, text: str) -> None:
+    (tmp_path / "mod.py").write_text(text, encoding="utf-8")
+
+
+def test_residual_source_masks_contiguous_children(tmp_path: Path) -> None:
+    """A class body *is* its methods: only the header and docstring survive."""
+    _write_module(
+        tmp_path,
+        "class Repo(Base):\n"
+        '    """Doc."""\n'
+        "    def a(self):\n"
+        "        return 1\n"
+        "\n"
+        "    def b(self):\n"
+        "        return 2\n"
+        "\n"
+        "    def c(self):\n"
+        "        return 3\n",
+    )
+    cls = _node("mod.py::Repo", NodeType.CLASS, file="mod.py", lines=(1, 10))
+    children = [
+        _node("mod.py::Repo::a", NodeType.FUNCTION, file="mod.py", lines=(3, 4)),
+        _node("mod.py::Repo::b", NodeType.FUNCTION, file="mod.py", lines=(6, 7)),
+        _node("mod.py::Repo::c", NodeType.FUNCTION, file="mod.py", lines=(9, 10)),
+    ]
+
+    assert read_residual_source(tmp_path, cls, children) == (
+        'class Repo(Base):\n    """Doc."""'
+    )
+
+
+def test_residual_source_keeps_class_level_statements(tmp_path: Path) -> None:
+    """Statements between methods, and nested classes (no summary anywhere) stay."""
+    _write_module(
+        tmp_path,
+        "class Repo(Base):\n"
+        "    LIMIT = 10\n"
+        "\n"
+        "    class Nested:\n"
+        "        def inner(self):\n"
+        "            return 1\n"
+        "\n"
+        "    def a(self):\n"
+        "        return 2\n",
+    )
+    cls = _node("mod.py::Repo", NodeType.CLASS, file="mod.py", lines=(1, 9))
+    children = [
+        _node("mod.py::Repo::a", NodeType.FUNCTION, file="mod.py", lines=(8, 9)),
+    ]
+
+    assert read_residual_source(tmp_path, cls, children) == (
+        "class Repo(Base):\n"
+        "    LIMIT = 10\n"
+        "\n"
+        "    class Nested:\n"
+        "        def inner(self):\n"
+        "            return 1"
+    )
+
+
+def test_residual_source_full_for_childless_class(tmp_path: Path) -> None:
+    """A field-only model has no children, and its code *is* the evidence."""
+    _write_module(tmp_path, 'class Model(BaseModel):\n    text: str = "x"\n')
+    cls = _node("mod.py::Model", NodeType.CLASS, file="mod.py", lines=(1, 2))
+
+    assert read_residual_source(tmp_path, cls, []) == (
+        'class Model(BaseModel):\n    text: str = "x"'
+    )
+
+
+def test_residual_source_module_keeps_imports_and_constants(tmp_path: Path) -> None:
+    """Imports are the module's own architectural signal; child bodies are masked."""
+    _write_module(
+        tmp_path,
+        "from app.db import session\n"
+        "\n"
+        "LIMIT = 10\n"
+        "\n"
+        "\n"
+        "class Thing:\n"
+        "    def m(self):\n"
+        "        return 1\n",
+    )
+    mod = _node("mod.py", NodeType.MODULE, file="mod.py", lines=(1, 8))
+    children = [_node("mod.py::Thing", NodeType.CLASS, file="mod.py", lines=(6, 8))]
+
+    assert read_residual_source(tmp_path, mod, children) == (
+        "from app.db import session\n\nLIMIT = 10"
+    )
+
+
+def test_residual_source_empty_module_and_foreign_child(tmp_path: Path) -> None:
+    """An empty span yields ""; a child in another file covers nothing."""
+    _write_module(tmp_path, "def f():\n    return 1\n")
+
+    empty = _node("mod.py", NodeType.MODULE, file="mod.py", lines=(1, 0))
+    assert read_residual_source(tmp_path, empty, []) == ""
+
+    func = _node("mod.py::f", NodeType.FUNCTION, file="mod.py", lines=(1, 2))
+    foreign = _node(
+        "other.py::g", NodeType.FUNCTION, file="other.py", lines=(1, 1)
+    )
+    assert read_residual_source(tmp_path, func, [foreign]) == "def f():\n    return 1"
 
