@@ -35,6 +35,8 @@ class ManualSummarizer:
             caller (the CLI uses `<output_dir>/manual_summaries/`).
     """
 
+    context_limit = None
+
     def __init__(self, folder: str | Path) -> None:
         self.folder = Path(folder)
 

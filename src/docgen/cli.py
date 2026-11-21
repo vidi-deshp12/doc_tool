@@ -5,6 +5,7 @@ import argparse
 import os
 import sys
 from collections import Counter
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 
@@ -309,50 +310,163 @@ def _run_extract(args: argparse.Namespace) -> None:
     _print_unresolved_summary(list(graph.unresolved))
 
 
+_BACKENDS = ("stub", "manual", "bob_shell", "claude_shell", "openai", "anthropic")
+
+
+@dataclass(frozen=True)
+class _BackendSettings:
+    """Resolved backend settings: CLI flag > [summarize] > backend default."""
+
+    backend: str
+    model: str
+    base_url: str
+    api_key_env: str
+    timeout: int
+
+
+def _resolve_summarize_settings(
+    args: argparse.Namespace, config=None
+) -> _BackendSettings:
+    """Merge CLI flags over ``[summarize]`` over backend defaults.
+
+    ``--backend`` defaults to ``None`` on the parser; if it defaulted to ``"stub"``
+    the config value could never win. Empty CLI strings and ``timeout=0`` also defer
+    to the config.
+    """
+    from docgen.config import SummarizeConfig
+
+    configured = config.summarize if config is not None else SummarizeConfig()
+
+    backend = getattr(args, "backend", None)
+    if backend in (None, ""):
+        backend = configured.backend or "stub"
+
+    def pick(attr: str, fallback: str) -> str:
+        value = getattr(args, attr, None)
+        return fallback if value in (None, "") else str(value)
+
+    timeout = getattr(args, "timeout", None)
+    if timeout in (None, 0):
+        timeout = configured.timeout
+
+    return _BackendSettings(
+        backend=str(backend),
+        model=pick("model", configured.model),
+        base_url=pick("base_url", configured.base_url),
+        api_key_env=pick("api_key_env", configured.api_key_env),
+        timeout=int(timeout or 0),
+    )
+
+
+def _make_stub(args, settings: _BackendSettings, output_dir: Path):
+    from docgen.summarize.base import StubSummarizer
+
+    return StubSummarizer()
+
+
+def _make_manual(args, settings: _BackendSettings, output_dir: Path):
+    from docgen.summarize.manual import ManualSummarizer
+
+    return ManualSummarizer(output_dir / "manual_summaries")
+
+
+def _make_bob_shell(args, settings: _BackendSettings, output_dir: Path):
+    from docgen.summarize import bob_shell
+
+    return bob_shell.BobShellSummarizer(
+        max_cost=float(getattr(args, "max_cost", 2.0)),
+        max_turns=int(getattr(args, "max_turns", 10)),
+    )
+
+
+def _make_claude_shell(args, settings: _BackendSettings, output_dir: Path):
+    from docgen.summarize import claude_shell
+
+    return claude_shell.ClaudeShellSummarizer(
+        model=settings.model or "sonnet",
+        timeout=settings.timeout or 180,
+    )
+
+
+def _make_openai(args, settings: _BackendSettings, output_dir: Path):
+    from docgen.summarize.openai_backend import OpenAISummarizer
+
+    return OpenAISummarizer(
+        model=settings.model or "gpt-4o-mini",
+        base_url=settings.base_url or None,
+        api_key_env=settings.api_key_env or "OPENAI_API_KEY",
+        timeout=settings.timeout or 120,
+    )
+
+
+def _make_anthropic(args, settings: _BackendSettings, output_dir: Path):
+    from docgen.summarize.anthropic_backend import AnthropicSummarizer
+
+    return AnthropicSummarizer(
+        model=settings.model or "claude-sonnet-4-5",
+        api_key_env=settings.api_key_env or "ANTHROPIC_API_KEY",
+        timeout=settings.timeout or 120,
+    )
+
+
+_BACKEND_FACTORIES: dict[str, Callable] = {
+    "stub": _make_stub,
+    "manual": _make_manual,
+    "bob_shell": _make_bob_shell,
+    "claude_shell": _make_claude_shell,
+    "openai": _make_openai,
+    "anthropic": _make_anthropic,
+}
+
+
 def _build_summarizer(
-    args: argparse.Namespace, output_dir: Path
+    args: argparse.Namespace, output_dir: Path, config=None
 ) -> tuple[str, "Summarizer"]:
-    """Construct the summarizer backend selected by *args*.
+    """Construct the summarizer backend selected by the merged settings.
 
     Single construction point for both ``docgen summarize`` and ``docgen update``.
-    Backend imports stay local so stub/manual runs never import the Bob Shell
-    module.
+    Backend imports stay inside the factories so a stub run never imports a
+    provider module.
 
     Returns:
         ``(backend_name, summarizer)``. The name is returned separately so
         ``_run_update`` can keep its "only re-summarize with a real backend" gate.
     """
-    backend = getattr(args, "backend", "stub")
-    max_cost = float(getattr(args, "max_cost", 2.0))
-    max_turns = int(getattr(args, "max_turns", 10))
+    settings = _resolve_summarize_settings(args, config)
 
-    if backend == "stub":
-        from docgen.summarize.base import StubSummarizer
+    # Documented in the README, but a warning at construction time is what the
+    # user actually sees before the run burns allowance. Not an error: the driver
+    # is still deterministic at any worker count.
+    if settings.backend == "claude_shell" and int(
+        getattr(args, "workers", 1) or 1
+    ) > 1:
+        print(
+            "WARN: claude_shell uses a per-account Claude Pro/Max limit; "
+            "--workers > 1 does not increase the allowance and makes a usage "
+            "limit arrive sooner. Use --workers 1.",
+            file=sys.stderr,
+        )
 
-        return backend, StubSummarizer()
-    if backend == "manual":
-        from docgen.summarize.manual import ManualSummarizer
+    factory = _BACKEND_FACTORIES.get(settings.backend)
+    if factory is None:
+        raise SystemExit(
+            f"Unknown backend {settings.backend!r} "
+            f"(expected one of: {', '.join(_BACKENDS)})."
+        )
 
-        return backend, ManualSummarizer(output_dir / "manual_summaries")
-    if backend == "bob_shell":
-        from docgen.summarize.base import BackendError, FatalBackendError
-        from docgen.summarize.bob_shell import BobShellSummarizer
+    from docgen.summarize.base import BackendError, FatalBackendError
 
-        # Construction failures (missing key, missing executable) are fatal, but
-        # they happen here rather than in the retry loop, so classify them into
-        # the type the CLI handler catches.
-        try:
-            return backend, BobShellSummarizer(
-                max_cost=max_cost, max_turns=max_turns
-            )
-        except BackendError as exc:
-            if exc.fatal:
-                raise FatalBackendError(backend, exc) from exc
-            raise
+    try:
+        summarizer = factory(args, settings, output_dir)
+    except BackendError as exc:
+        # Construction failures (missing key, missing executable, bad auth) are
+        # fatal but happen outside the retry loop; classify them into the type the
+        # CLI handler catches.
+        if exc.fatal:
+            raise FatalBackendError(settings.backend, exc) from exc
+        raise
 
-    raise SystemExit(
-        f"Unknown backend: {backend!r} (expected 'stub', 'manual', or 'bob_shell')."
-    )
+    return settings.backend, summarizer
 
 
 def _run_summarize(args: argparse.Namespace) -> None:
@@ -397,7 +511,7 @@ def _run_summarize(args: argparse.Namespace) -> None:
     try:
         # Inside the handler: backend construction can fail fatally too (missing
         # key/package), and that must not print a traceback and exit 1.
-        backend, summarizer = _build_summarizer(args, output_dir)
+        backend, summarizer = _build_summarizer(args, output_dir, config)
         print(
             f"docgen summarize: {len(graph.nodes)} nodes from {facts_path} "
             f"(backend={backend}) …",
@@ -643,8 +757,8 @@ def _run_update(args: argparse.Namespace) -> None:
     )
 
     # Optional re-summarization (only when a real backend is requested)
-    backend = getattr(args, "backend", "stub")
-    if update_plan.nodes_to_resummarize and backend != "stub":
+    settings = _resolve_summarize_settings(args, config)
+    if update_plan.nodes_to_resummarize and settings.backend != "stub":
         from docgen.summarize.base import FatalBackendError, RetryPolicy
         from docgen.summarize.hierarchy import run_hierarchy
         from docgen.summarize.store import write_summaries
@@ -653,7 +767,7 @@ def _run_update(args: argparse.Namespace) -> None:
         retry = RetryPolicy(max_attempts=getattr(args, "retries", 3) + 1)
 
         try:
-            _, summarizer = _build_summarizer(args, output_dir)
+            _, summarizer = _build_summarizer(args, output_dir, config)
             results = run_hierarchy(
                 graph=graph,
                 summarizer=summarizer,
@@ -765,8 +879,32 @@ def main() -> None:
     )
     summarize_parser.add_argument(
         "--backend",
-        default="stub",
-        help="Summarizer backend: 'stub', 'manual', or 'bob_shell' (default: stub).",
+        default=None,
+        help=(
+            "Summarizer backend: stub, manual, bob_shell, claude_shell, "
+            "openai, or anthropic (default: [summarize] in docgen.toml, else stub)."
+        ),
+    )
+    summarize_parser.add_argument(
+        "--model", default=None, help="Model name/alias (backend-specific)."
+    )
+    summarize_parser.add_argument(
+        "--base-url",
+        dest="base_url",
+        default=None,
+        help="OpenAI-compatible API root (openai backend).",
+    )
+    summarize_parser.add_argument(
+        "--api-key-env",
+        dest="api_key_env",
+        default=None,
+        help="Environment variable holding the API key.",
+    )
+    summarize_parser.add_argument(
+        "--timeout",
+        type=_non_negative_int,
+        default=None,
+        help="Per-call timeout in seconds (backend-specific default).",
     )
     summarize_parser.add_argument(
         "--max-cost",
@@ -854,11 +992,32 @@ def main() -> None:
     )
     update_parser.add_argument(
         "--backend",
-        default="stub",
+        default=None,
         help=(
-            "Summarizer backend for re-summarization: 'stub', "
-            "'manual', or 'bob_shell' (default: stub)."
+            "Summarizer backend for re-summarization: stub, manual, bob_shell, "
+            "claude_shell, openai, or anthropic (default: docgen.toml, else stub)."
         ),
+    )
+    update_parser.add_argument(
+        "--model", default=None, help="Model name/alias (backend-specific)."
+    )
+    update_parser.add_argument(
+        "--base-url",
+        dest="base_url",
+        default=None,
+        help="OpenAI-compatible API root (openai backend).",
+    )
+    update_parser.add_argument(
+        "--api-key-env",
+        dest="api_key_env",
+        default=None,
+        help="Environment variable holding the API key.",
+    )
+    update_parser.add_argument(
+        "--timeout",
+        type=_non_negative_int,
+        default=None,
+        help="Per-call timeout in seconds (backend-specific default).",
     )
     update_parser.add_argument(
         "--workers",

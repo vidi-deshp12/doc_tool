@@ -1,10 +1,10 @@
 # docgen
 
-> **Cited, drift-aware documentation for Python repositories. Built with IBM Bob**
+> **Cited, drift-aware documentation for Python repositories.**
 
-docgen reads an undocumented Python codebase, extracts a structured fact graph using static analysis, asks IBM Bob to write cited prose summaries on top of those facts, and renders the result as a navigable documentation site. It then watches for drift: when code changes, only the pages whose underlying facts changed are regenerated.
+docgen reads an undocumented Python codebase, extracts a structured fact graph using static analysis, asks an LLM to write cited prose summaries on top of those facts, and renders the result as a navigable documentation site. It then watches for drift: when code changes, only the pages whose underlying facts changed are regenerated.
 
-Built for **IBM Hackathon 2026 Theme 1** (IBM Bob-assisted development).
+Built for **IBM Hackathon 2026 Theme 1**. The project was developed with IBM Bob; summaries can now be produced by Claude Code, any OpenAI-compatible API, or the Anthropic API.
 
 ---
 
@@ -35,7 +35,7 @@ The `generated/` directory in this repo contains the full output of running docg
 | Python files analysed | 70 |
 | Fact graph nodes | 320 |
 | Fact graph edges | 1,190 |
-| Summaries generated (via Bob Shell) | 234 |
+| Summaries generated (via a pluggable backend) | 234 |
 | Documentation pages produced | 72 |
 | Route recall — AST extractor vs `app.openapi()` ground truth | 19 / 19 = 100% |
 | `DEPENDS_ON` edges resolved | 66 / 66 = 100% |
@@ -55,7 +55,7 @@ streamlit run viewer/app.py
 > **Where to find things:**
 > system design → [`docs/architecture.md`](docs/architecture.md) ·
 > requirements → [`docs/PRD.md`](docs/PRD.md) ·
-> design decisions and bugs (D-001 to D-043) → [`docs/memory.md`](docs/memory.md) ·
+> design decisions and bugs (D-001 to D-049) → [`docs/memory.md`](docs/memory.md) ·
 > IBM Bob session log → [`docs/BOB_LOG.md`](docs/BOB_LOG.md)
 
 ---
@@ -96,7 +96,7 @@ This is the overview. The full design (pipeline, fact-graph schema, hashing, err
 ```text
 repo ──► [walker] ──► [core extract] ──► [adapter extract] ──► facts.json
                                                                    │
-summaries.json ◄── [Bob Shell] ◄───────────────────────────────────┤
+summaries.json ◄── [LLM backend] ◄──────────────────────────────────┤
        │                                                           │
        ▼                                                           ▼
 [citation validate]                                            [render] ──► generated/pages/
@@ -108,7 +108,7 @@ manifest.json ◄─────────────────────
 [viewer]  (reads generated/, no LLM)
 ```
 
-**The core principle:** facts are computed deterministically. IBM Bob only writes prose on top of those facts — it never invents structure. Routes, imports, models, dependency trees, and diagrams all come from code analysis. This is what makes the citations mechanically verifiable.
+**The core principle:** facts are computed deterministically. The model only writes prose on top of those facts — it never invents structure. Routes, imports, models, dependency trees, and diagrams all come from code analysis. This is what makes the citations mechanically verifiable.
 
 ### Stage table
 
@@ -117,7 +117,7 @@ manifest.json ◄─────────────────────
 | walker | config + repo root | file paths (root-relative POSIX) | no |
 | core extract | `.py` files | nodes, edges, unresolved entries | no |
 | adapter extract | facts + running app | routes, dependency edges, models | no |
-| summarize | facts | `summaries.json` with `[[fact_id]]` citations | **yes — IBM Bob** |
+| summarize | facts | `summaries.json` with `[[fact_id]]` citations | **yes — pluggable backend** |
 | validate | summaries + facts | validation report (exits 1 on broken citations) | no |
 | render | facts + summaries | `.md` pages, Mermaid diagram, API table | no |
 | check | current facts + manifest | pass / fail + stale page list | no |
@@ -165,7 +165,10 @@ src/docgen/
 │   ├── hierarchy.py        # bottom-up driver + cache
 │   ├── prompts.py          # prompt templates, citation format
 │   ├── citations.py        # citation validator
-│   ├── bob_shell.py        # BobShellSummarizer (calls bob run --format json)
+│   ├── claude_shell.py     # Claude Code subscription backend (required here)
+│   ├── openai_backend.py   # any OpenAI-compatible Chat Completions API
+│   ├── anthropic_backend.py# Anthropic Messages API
+│   ├── bob_shell.py        # legacy BobShellSummarizer
 │   └── manual.py           # reads summaries written by hand
 ├── render/
 │   ├── markdown.py         # index page, module pages, render_all
@@ -209,7 +212,7 @@ pip install streamlit streamlit-mermaid
 pytest
 ```
 
-223 tests, ~25 seconds. No LLM calls, no network, no target repo needed.
+326 tests, ~10 seconds. No LLM calls, no network, no target repo needed. The single failure is the intentionally seeded bug in `target/` (see `docs/memory.md`).
 
 ---
 
@@ -229,7 +232,17 @@ app = "app.main:app"     # import path of the ASGI app object (fastapi adapter o
 
 [output]
 dir = "generated"        # where facts.json, summaries.json, manifest.json, and pages/ are written
+
+[summarize]
+backend = "claude_shell" # stub | manual | bob_shell | claude_shell | openai | anthropic
+model = "sonnet"         # backend-specific; empty means the backend default
+# base_url = "http://localhost:11434/v1"  # openai backend only
+# api_key_env = "OPENAI_API_KEY"          # env-var NAME, never the key itself
+timeout = 180            # seconds; 0 means the backend default
 ```
+
+CLI flags override `[summarize]`, which overrides the backend default. An absent
+`[summarize]` section keeps the old `stub` default.
 
 Nothing repo-specific ever goes in the code — only in this file.
 
@@ -243,8 +256,8 @@ Run these commands in order for a fresh repo:
 # 1. Extract the fact graph
 docgen extract
 
-# 2. Generate cited summaries (requires IBM Bob CLI)
-docgen summarize --backend bob_shell
+# 2. Generate cited summaries with the access you have (see Backends below)
+docgen summarize --backend claude_shell --model sonnet
 
 # 3. (Optional) validate citations before rendering
 docgen validate
@@ -263,7 +276,7 @@ docgen update
 streamlit run viewer/app.py
 ```
 
-For testing without IBM Bob, use the stub summarizer (produces placeholder text, real citations):
+For testing without a model provider, use the stub summarizer (produces placeholder text, real citations):
 
 ```bash
 docgen summarize --backend stub
@@ -271,7 +284,34 @@ docgen summarize --backend stub
 
 ---
 
-## IBM Bob integration
+## Backends
+
+Pick the row that matches your access. The pipeline and citation validator are identical for all of them.
+
+| Access | Command |
+|---|---|
+| **Claude Pro/Max** | Install Claude Code, run `claude auth login`, then `docgen summarize --backend claude_shell --model sonnet` |
+| **Ollama (local)** | `ollama pull qwen2.5-coder:7b`, then `docgen summarize --backend openai --base-url http://localhost:11434/v1 --model qwen2.5-coder:7b` |
+| **Groq** | `OPENAI_API_KEY=... docgen summarize --backend openai --base-url https://api.groq.com/openai/v1 --model openai/gpt-oss-120b` |
+| **Gemini** | `OPENAI_API_KEY=... docgen summarize --backend openai --base-url https://generativelanguage.googleapis.com/v1beta/openai/ --model gemini-2.5-flash` — **verify the base URL and free model name against Gemini's current docs before use; both change** |
+| **OpenRouter** | `OPENAI_API_KEY=... docgen summarize --backend openai --base-url https://openrouter.ai/api/v1 --model <model>:free` |
+| **OpenAI** | `OPENAI_API_KEY=... docgen summarize --backend openai --model gpt-4o-mini` |
+| **Anthropic API** | `ANTHROPIC_API_KEY=... docgen summarize --backend anthropic` |
+
+`--api-key-env` names a different environment variable when your provider uses one
+(for example `GROQ_API_KEY`). `docgen.toml` stores the variable **name**, never the key.
+
+### Claude Pro usage
+
+A full run of the 234-node demo costs roughly **0.3–0.4M tokens** with the lean
+Claude Code flags (`--safe-mode`, `--tools ""`, a short `--system-prompt`). Without
+them each call carries the coding-agent prompt and tool schemas, which multiplies
+the run and is the version that hits a Pro limit. The 5-hour and weekly caps are
+per account and shared with claude.ai, so start with a small repo, check `/usage`,
+and keep `--workers 1`; concurrency does not add allowance. A usage limit exits 2
+with the checkpoint kept, and a rerun skips completed nodes.
+
+## Backends and IBM Bob
 
 IBM Bob was central to this project in two ways:
 
@@ -279,7 +319,7 @@ IBM Bob was central to this project in two ways:
 
 2. **As the summarizer backend** — `BobShellSummarizer` calls `bob run --format json --max-cost 0.1` once per node to generate the 234 summaries in `generated/summaries.json`. The `bob run` non-interactive mode was confirmed working at ~0.009 Bobcoins per call. Prompts are built deterministically from the fact graph; Bob writes the prose; the citation validator checks the output before rendering.
 
-The `Summarizer` interface is pluggable — the pipeline works identically with `stub`, `manual`, or `bob_shell` backends.
+The `Summarizer` interface is pluggable. `claude_shell` runs Claude Code on a Pro/Max subscription, `openai` speaks to any OpenAI-compatible endpoint (including local Ollama and hosted gateways), and `anthropic` uses an API key. No provider SDK is imported: the HTTP backends use `urllib.request` and the shell backends use `subprocess`, so `pyproject.toml` stays dependency-free.
 
 ---
 
@@ -294,7 +334,7 @@ The `Summarizer` interface is pluggable — the pipeline works identically with 
 | `docs/BOB_LOG.md` | Bob session log — prompts, outputs, what was verified |
 | `eval/ground_truth.json` | 19 routes, 25 schemas from `app.openapi()` — the answer key |
 | `generated/facts.json` | 320 nodes, 1,190 edges extracted from the demo repo |
-| `generated/summaries.json` | 234 summaries generated by IBM Bob |
+| `generated/summaries.json` | 234 summaries (backend interchangeable) |
 | `generated/pages/` | 72 rendered documentation pages |
 
 ---
@@ -324,4 +364,4 @@ design choices or time-boxed gaps.
 | **Citations prove existence, not truth** | The validator checks that every cited ID is a real node. It does not check that the sentence is correct. A hand-graded claim-precision sample (30 claims) has not been run yet. Transitional sentences may be uncited. |
 | **Prose lags behind structure** | `docgen check` detects structural drift and `docgen update` re-renders the affected pages, so tables (route table, signatures) are correct immediately. A summary's narrative may still describe the old behavior (e.g. a changed status code) until `docgen summarize` runs again. |
 | **Some `unresolved` entries are noise** | A few base classes from builtins, the standard library, or same-file aliases (`Exception`, `logging.Handler`, `CommonParameter` → `pypika.Parameter`) appear under `unresolved` although they could be resolved. They are harmless. |
-| **Speed and platform** | Bob Shell is called once per node, sequentially (234 calls). Nodes at the same level are independent, so parallelization is the obvious next step. Developed and tested on Windows, where the Bob Shell backend pipes prompts through PowerShell. |
+| **Speed and platform** | Every backend is called once per node (234 calls). `claude_shell` should stay at `--workers 1` because Pro limits are per account; API backends can raise `--workers`, but the driver still owns retries and `Retry-After`. Developed and tested on Windows, where the Bob and Claude `.cmd` shims pipe prompts and stdout through PowerShell. |

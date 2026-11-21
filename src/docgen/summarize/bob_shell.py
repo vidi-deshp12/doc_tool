@@ -207,6 +207,8 @@ class BobShellSummarizer:
         timeout: Subprocess timeout in seconds (default 120).
     """
 
+    context_limit = None  # Bob's model window is provider-side and unpublished.
+
     def __init__(
         self,
         max_cost: float = 2.0,

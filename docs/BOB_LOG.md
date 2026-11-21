@@ -266,3 +266,11 @@ Evidence that IBM Bob was a core part of the workflow (judging: tool usage and d
 - **What I verified or changed:** focused `retry/hierarchy/bob_shell/summarize` → 78 passed; full suite → 284 passed, 1 failed (`test_seeded_bug`, the committed `HTTP_200_OK` seeded bug in `target/`). Replayed `run_hierarchy` over `generated/facts.json` + `generated/summaries.json` with a counting backend: 234 results, **0 calls**, **0 checkpoint writes**, 0 placeholders — the restructure changed no cache key. `_checkpoint_writer` skipped an identical second payload (bytes and mtime unchanged).
 - **Outcome:** Done. One retry policy for every backend; a fatal error exits 2 with the node and provider message; a long run keeps completed slices; a repaired leaf rebuilds its module, package and system in the same run. Not run: the live `--backend bob_shell` fault-injection and Groq checks (need credentials/Bobcoins) and `render` on a partial file (roadmap item C).
 - **Screenshot:** _(none this session)_
+
+### 2026-11-21 | Task 2b.10 | Plan + Code (not a Bob session)
+- **Goal:** Make summarization work with the model access actually available: Claude Pro, plus API-compatible providers for everyone else.
+- **Prompt (short):** Claude reviewed `docs/plan-pluggable-llm-backends.md`; implement the plan with its fixes (system prompt in the cache identity, `context_limit` on the protocol, a `--workers` warning, and the missing contract tests).
+- **What was produced:** `claude_shell.py` (Claude Code print mode, lean flags, subscription-only auth, stdin prompts, fatal plan limits), `openai_backend.py` (stdlib Chat Completions for OpenAI/Groq/Gemini/OpenRouter/Ollama/etc.), `anthropic_backend.py` (stdlib Messages API); `[summarize]` config, backend registry, CLI precedence and flags; protocol `context_limit`; docs and plan updates.
+- **What I verified or changed:** 68 focused tests pass; full suite 325 passed with only the intentionally seeded `test_seeded_bug` failure. No live Claude call was possible — Claude Code is not installed on this machine, so the 234-node Claude Pro run remains unverified.
+- **Outcome:** Done except live verification. Next: install Claude Code, `claude auth login`, 5-node smoke test, check `/usage`, then the full run at `--workers 1`.
+- **Screenshot:** none — this entry records non-Bob work for project history.

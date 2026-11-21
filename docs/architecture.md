@@ -90,8 +90,16 @@ app = "app.main:app"       # import path of the app object (adapter-specific)
 
 [output]
 dir = "generated"
+
+[summarize]
+backend = "claude_shell"  # stub | manual | bob_shell | claude_shell | openai | anthropic
+model = "sonnet"          # empty -> backend default
+# base_url = "http://localhost:11434/v1"  # openai backend only
+# api_key_env = "OPENAI_API_KEY"          # variable name, never the key
+timeout = 180             # 0 -> backend default
 ```
-Anything repo-specific lives here, never in code.
+CLI flags override `[summarize]`, which overrides the backend default. Anything
+repo-specific lives here, never in code.
 
 ## 5. Fact graph
 
@@ -143,15 +151,31 @@ Anything repo-specific lives here, never in code.
 | Viewer | Streamlit; Mermaid via `components.html` with the Mermaid JS (verify before choosing a package) | |
 | Deploy | Streamlit Community Cloud from public repo | viewer needs no LLM or target code |
 
-## 7. Summarizer interface (decouples the open Bob question)
+## 7. Summarizer interface
 
 ```python
 class Summarizer(Protocol):
+    context_limit: int | None   # model window, or None when unknown
     def summarize(self, req: SummaryRequest) -> SummaryResult: ...
-# SummaryRequest: node_id, level, facts (dict), source_text, child_summaries
-# SummaryResult:  text (with [[fact_id]] citations), model/backend name
+# SummaryRequest: node_id, level, facts (dict), source_text, child_summaries, edges
+# SummaryResult:  text (with [[fact_id]] citations), backend name, cache key
 ```
-Implementations: `StubSummarizer` (tests), `ManualSummarizer` (reads files Bob wrote in the IDE, validates them), `BobShellSummarizer` (only if Bob Shell supports non-interactive use). The pipeline, validator, and checker don't care which one is used.
+Every backend makes **one** attempt and raises `BackendError`; the driver owns
+retries, backoff, `Retry-After`, and placeholders. Implementations:
+
+| Backend | Transport | Notes |
+|---|---|---|
+| `claude_shell` | `claude -p` | Claude Pro/Max subscription; required for this project. Lean flags; subscription auth only |
+| `openai` | HTTP Chat Completions | One adapter for OpenAI, Groq, Gemini compat, OpenRouter, Ollama, vLLM, gateways |
+| `anthropic` | HTTP Messages | API-key Claude |
+| `bob_shell` | `bob run` | Legacy; kept working |
+| `stub`, `manual` | none | Tests, offline, hand-written prose |
+
+The cache key is `sha256(backend name + "\n" + build_prompt(req))`. A backend's
+`name` therefore includes everything outside the prompt that changes the model's
+input: model, normalized base URL, and (for `claude_shell`) a hash of its system
+prompt. API keys are never part of it. There are no provider SDKs; HTTP uses
+`urllib.request`, so `pyproject.toml` stays dependency-free.
 
 **Citation format:** inline `[[<fact_id>]]` after each claim. Validator checks (1) ID exists in `facts.json`, (2) every sentence has ≥1 citation, (3) spot-check that the cited fact/snippet supports the sentence.
 

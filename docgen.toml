@@ -9,3 +9,11 @@ app = "app.main:app"
 
 [output]
 dir = "generated"
+
+[summarize]
+# This project has Claude Pro and no Bob subscription / API key, so the
+# subscription backend is the one that can run here. Override per run with
+# `docgen summarize --backend openai --base-url ...`.
+backend = "claude_shell"
+model = "sonnet"
+timeout = 180

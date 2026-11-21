@@ -255,7 +255,14 @@ class Summarizer(Protocol):
     Optional attribute ``name``: a stable backend identifier (e.g. ``"stub"``). It
     participates in the cache key, so switching providers never reuses another
     provider's prose. When absent, the class name is used.
+
+    Attribute ``context_limit``: approximate model context window in tokens, or
+    ``None`` when the backend does not call a model or the window is unknown. The
+    scaling layer uses it to warn before a prompt exceeds the window; it is not
+    part of the cache key because it does not change the model's input.
     """
+
+    context_limit: int | None
 
     def summarize(self, req: SummaryRequest) -> SummaryResult: ...
 
@@ -268,6 +275,7 @@ class StubSummarizer:
     """
 
     name = "stub"
+    context_limit = None
 
     def summarize(self, req: SummaryRequest) -> SummaryResult:
         return SummaryResult(

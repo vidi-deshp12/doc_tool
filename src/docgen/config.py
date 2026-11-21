@@ -9,6 +9,22 @@ from typing import Any
 
 
 @dataclass(frozen=True)
+class SummarizeConfig:
+    """Default model backend settings from ``[summarize]``.
+
+    Empty strings and ``timeout = 0`` mean "use the backend's own default"; the CLI
+    resolves them. The backend name is validated by the CLI, not here, so its error
+    can list the registry.
+    """
+
+    backend: str = "stub"
+    model: str = ""
+    base_url: str = ""
+    api_key_env: str = ""
+    timeout: int = 0
+
+
+@dataclass(frozen=True)
 class Config:
     """Configuration for a docgen run."""
 
@@ -18,6 +34,33 @@ class Config:
     adapter_name: str
     app: str
     output_dir: str
+    summarize: SummarizeConfig = SummarizeConfig()
+
+
+def _summarize_config(data: Any) -> SummarizeConfig:
+    """Parse and validate the ``[summarize]`` table."""
+    if not isinstance(data, dict):
+        raise ValueError("[summarize] must be a table")
+
+    def get_string(key: str, default: str) -> str:
+        value = data.get(key, default)
+        if not isinstance(value, str):
+            raise ValueError(f"summarize.{key} must be a string")
+        return value
+
+    timeout = data.get("timeout", 0)
+    if isinstance(timeout, bool) or not isinstance(timeout, int):
+        raise ValueError("summarize.timeout must be an integer")
+    if timeout < 0:
+        raise ValueError(f"summarize.timeout must be >= 0, got {timeout}")
+
+    return SummarizeConfig(
+        backend=get_string("backend", "stub"),
+        model=get_string("model", ""),
+        base_url=get_string("base_url", ""),
+        api_key_env=get_string("api_key_env", ""),
+        timeout=timeout,
+    )
 
 
 def load_config(path: str | Path = "docgen.toml") -> Config:
@@ -67,4 +110,5 @@ def load_config(path: str | Path = "docgen.toml") -> Config:
         adapter_name=adapter_name,
         app=app,
         output_dir=output_dir,
+        summarize=_summarize_config(data.get("summarize", {})),
     )
