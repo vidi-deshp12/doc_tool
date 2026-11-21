@@ -41,7 +41,9 @@ other OpenAI-compatible server without a separate class.
 - A missing `OPENAI_API_KEY` (when base-url is the default OpenAI endpoint) gives a
   clear error before making any network calls.
 - The `backend` field in `SummaryResult` is `"openai:<model>"` (e.g. `"openai:gpt-4o"`).
-- Retry logic: 2 attempts with 5s backoff, same pattern as `BobShellSummarizer`.
+- No retry loop: `summarize` makes one attempt and raises `BackendError` with a `transient`
+  flag and an optional `retry_after`; the driver applies the policy
+  (see [`docs/plan-retry-and-failure-recovery.md`](plan-retry-and-failure-recovery.md)).
 
 **Todo list:**
 1. Create `src/docgen/summarize/openai_backend.py`.
@@ -58,18 +60,23 @@ other OpenAI-compatible server without a separate class.
    - Call `build_prompt(req)` for the prompt text.
    - Call `client.chat.completions.create(model=..., messages=[{"role":"user","content":prompt}])`.
    - Extract `response.choices[0].message.content`.
-   - Return `SummaryResult(node_id, text, backend=f"openai:{self.model}", hash_input=hash_input(req))`.
-   - Retry once on any exception (same 2-attempt, 5s pattern as bob_shell).
+   - Return `SummaryResult(node_id, text, backend=f"openai:{self.model}", hash_input="")` — the
+     driver always replaces `hash_input` with the prompt-hash key, so a backend must not compute one.
+   - No retry. Map failures to `BackendError`: `RateLimitError` / `APIConnectionError` /
+     `APITimeoutError` / 5xx → `transient=True` with `retry_after=parse_retry_after(...)`;
+     `AuthenticationError` / 400 context-overflow / 404 model → `transient=False`. Unknown
+     exceptions may propagate (the driver treats them as transient).
 5. Write `tests/test_openai_backend.py`:
    - Test 1: `OpenAISummarizer` raises `OpenAIError` when `openai` is not importable
      (mock `builtins.__import__` to raise `ImportError` for `"openai"`).
    - Test 2: `summarize` returns correct `SummaryResult` (mock `openai.OpenAI` client).
-   - Test 3: retry on first failure, success on second (mock client raises then succeeds).
+   - Test 3: a transient failure raises `BackendError` after **one** client call (no retry loop in
+     the backend; the driver owns retries).
    - Test 4: `backend` field is `"openai:<model>"`.
    - Test 5: `base_url` is passed through to the OpenAI client constructor.
 
 **Relevant context:**
-- [`src/docgen/summarize/bob_shell.py`](src/docgen/summarize/bob_shell.py) — reference for the retry pattern and error class
+- [`src/docgen/summarize/bob_shell.py`](src/docgen/summarize/bob_shell.py) — reference for the single-attempt + `BackendError` classification pattern
 - [`src/docgen/summarize/base.py`](src/docgen/summarize/base.py) — `SummaryRequest`, `SummaryResult`, `hash_input`
 - [`src/docgen/summarize/prompts.py`](src/docgen/summarize/prompts.py) — `build_prompt`
 
@@ -80,7 +87,7 @@ other OpenAI-compatible server without a separate class.
 **Intent:** Implement `AnthropicSummarizer` in a new file. The Anthropic SDK has a
 different shape from OpenAI: messages use `anthropic.Anthropic().messages.create(...)`,
 the response is `response.content[0].text`, and the model names are different
-(`claude-3-5-sonnet-20241022` etc.). Everything else — prompt, retry, error handling,
+(`claude-3-5-sonnet-20241022` etc.). Everything else — prompt, error handling,
 `SummaryResult` shape — is identical.
 
 **Expected outcomes:**
@@ -103,11 +110,12 @@ the response is `response.content[0].text`, and the model names are different
    - Call `client.messages.create(model=..., max_tokens=..., messages=[{"role":"user","content":prompt}])`.
    - Extract `response.content[0].text`.
    - Return `SummaryResult(..., backend=f"anthropic:{self.model}", ...)`.
-   - Same 2-attempt retry pattern.
+   - No retry. Same `BackendError` mapping as sub-task 1; `retry_after` comes from
+     `exc.response.headers`.
 5. Write `tests/test_anthropic_backend.py` (5 tests, same structure as openai tests):
    - ImportError → `AnthropicError` with install hint.
    - Successful call → correct `SummaryResult`.
-   - Retry on first failure.
+   - One attempt only: a transient error raises `BackendError` unchanged (no loop).
    - `backend` field format.
    - Missing API key → `AnthropicError` before any network call.
 
@@ -227,6 +235,14 @@ Sub-task 3 (config + CLI wiring) ← needs both backends to exist before wiring 
 
 Sub-tasks 1 and 2 are independent of each other; sub-task 3 requires both.
 
+**Predecessor:** `docs/plan-retry-and-failure-recovery.md` (sub-task 0) lands before either
+backend, because both raise its `BackendError` and rely on the driver's single-attempt contract.
+
+**Status:** the predecessor landed on 2026-11-21 — `BackendError`, `FatalBackendError`,
+`RetryPolicy`, and `RetryGate` live in `base.py`, `hierarchy._call_summarizer` owns retries, and
+`bob_shell` makes one classified attempt (no 2-attempt/5 s loop). Backends below implement the
+same single-attempt contract and must pass `max_retries=0` to their SDK clients.
+
 ---
 
 ## Key design decisions (confirmed — do not re-debate)
@@ -237,5 +253,5 @@ Sub-tasks 1 and 2 are independent of each other; sub-task 3 requires both.
 | Ollama / vLLM | Handled by `OpenAISummarizer(base_url="http://...")` — no separate class |
 | Config precedence | CLI flag > `[summarize]` config > backend default |
 | `max_tokens` | Anthropic requires it; OpenAI does not. Anthropic default: 4096 |
-| Retry pattern | 2 attempts, 5s backoff — same as `BobShellSummarizer` |
+| Retry pattern | Superseded: backends make **one** attempt and raise `BackendError`; the driver owns retries and `Retry-After` handling — `docs/plan-retry-and-failure-recovery.md` |
 | `SummarizeConfig` defaults | `backend="stub"` — no breaking change for existing users |

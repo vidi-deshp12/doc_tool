@@ -12,7 +12,12 @@ from types import SimpleNamespace
 
 import pytest
 
-from docgen.summarize.base import SummaryRequest, SummaryResult
+from docgen.summarize.base import (
+    BackendError,
+    RetryPolicy,
+    SummaryRequest,
+    SummaryResult,
+)
 from docgen.summarize.bob_shell import BobShellError, BobShellSummarizer, _call_bob
 from docgen.summarize.hierarchy import (
     NEEDS_HUMAN_REVIEW_BACKEND,
@@ -119,12 +124,13 @@ def test_bob_shell_missing_last_message(monkeypatch: pytest.MonkeyPatch) -> None
 
 
 # ---------------------------------------------------------------------------
-# Test 5: retry — first call raises, second succeeds → result returned, count=2
+# Test 5: one attempt only — the driver owns retries
 # ---------------------------------------------------------------------------
 
-def test_bob_shell_retry_succeeds_on_second_attempt(
+def test_summarize_makes_one_attempt(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """A failing call raises immediately; the backend never retries."""
     import subprocess
 
     call_count = [0]
@@ -132,42 +138,18 @@ def test_bob_shell_retry_succeeds_on_second_attempt(
     def fake_run(*args, **kwargs):
         call_count[0] += 1
         stdout_fh = kwargs.get("stdout")
-        if call_count[0] == 1:
-            # First attempt: write invalid JSON to stdout file
-            if stdout_fh is not None and hasattr(stdout_fh, "write"):
-                stdout_fh.write("not json")
-            return SimpleNamespace(stderr="", returncode=0)
-        # Second attempt: write good response to stdout file
         if stdout_fh is not None and hasattr(stdout_fh, "write"):
-            stdout_fh.write(_GOOD_RESPONSE)
+            stdout_fh.write("not json")
         return SimpleNamespace(stderr="", returncode=0)
 
     monkeypatch.setenv("BOB_API_KEY", "test-key")
     monkeypatch.setattr(subprocess, "run", fake_run)
-    # Skip the real sleep
-    monkeypatch.setattr("docgen.summarize.bob_shell.time.sleep", lambda s: None)
 
     s = BobShellSummarizer()
-    result = s.summarize(_make_request())
-
-    assert call_count[0] == 2
-    assert result.backend == "bob_shell"
-
-
-# ---------------------------------------------------------------------------
-# Test 6: both attempts fail → BobShellError raised
-# ---------------------------------------------------------------------------
-
-def test_bob_shell_retry_exhausted(monkeypatch: pytest.MonkeyPatch) -> None:
-    import subprocess
-
-    monkeypatch.setenv("BOB_API_KEY", "test-key")
-    monkeypatch.setattr(subprocess, "run", _make_proc(_ERROR_RESPONSE))
-    monkeypatch.setattr("docgen.summarize.bob_shell.time.sleep", lambda s: None)
-
-    s = BobShellSummarizer()
-    with pytest.raises(BobShellError):
+    with pytest.raises(BackendError):
         s.summarize(_make_request())
+
+    assert call_count[0] == 1
 
 
 # ---------------------------------------------------------------------------
@@ -176,8 +158,10 @@ def test_bob_shell_retry_exhausted(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_bob_shell_missing_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("BOB_API_KEY", raising=False)
-    with pytest.raises(BobShellError, match="BOB_API_KEY"):
+    with pytest.raises(BobShellError, match="BOB_API_KEY") as excinfo:
         BobShellSummarizer()
+    assert isinstance(excinfo.value, BackendError)
+    assert excinfo.value.fatal
 
 
 # ---------------------------------------------------------------------------
@@ -211,6 +195,9 @@ def test_run_hierarchy_continues_on_summarizer_failure(tmp_path: Path) -> None:
         summarizer=AlwaysFails(),
         repo_root=tmp_path,
         existing_cache={},
+        retry=RetryPolicy(max_attempts=1),
+        sleep=lambda _: None,
+        repair_passes=0,
     )
 
     backends = {r.backend for r in results}
@@ -240,6 +227,9 @@ def test_needs_human_review_hash_input_empty(tmp_path: Path) -> None:
         summarizer=AlwaysFails(),
         repo_root=tmp_path,
         existing_cache={},
+        retry=RetryPolicy(max_attempts=1),
+        sleep=lambda _: None,
+        repair_passes=0,
     )
 
     failed = [r for r in results if r.backend == NEEDS_HUMAN_REVIEW_BACKEND]

@@ -22,6 +22,9 @@ Response shape:
         "last_message": "<model response text>"
     }
 
+This backend makes exactly **one** attempt per call and raises ``BobShellError``
+(a ``BackendError``) with a classified failure; the driver owns retries.
+
 Nothing in this module reads files or writes summaries.json — that is the caller's job.
 """
 
@@ -32,21 +35,33 @@ import os
 import shutil
 import subprocess
 import tempfile
-import time
 from pathlib import Path
 
-from .base import SummaryRequest, SummaryResult, hash_input
+from .base import BackendError, SummaryRequest, SummaryResult, hash_input
 from .prompts import build_prompt
 
-_RETRY_ATTEMPTS = 2
-_RETRY_SLEEP_S = 5
+# Lowercase stderr substrings that mean "your configuration is wrong", not "the
+# provider is busy". Heuristic: it only ever decides to stop the run, never to
+# succeed. "not found" is deliberately absent on its own — a proxy can return a
+# 404 HTML page for a URL that exists, and that is transient — so it only counts
+# when "model" is present too.
+_FATAL_STDERR: tuple[str, ...] = (
+    "auth",
+    "api key",
+    "api_key",
+    "unauthorized",
+    "401",
+    "403",
+    "login",
+)
 
 
-class BobShellError(Exception):
-    """Raised when `bob run` fails or returns an unexpected response.
+class BobShellError(BackendError):
+    """A `bob run` failure, classified for the driver's retry policy.
 
-    Caught by ``run_hierarchy`` in hierarchy.py, which writes a
-    ``needs_human_review`` placeholder and continues the run.
+    A ``BackendError`` subclass so existing ``except BobShellError`` sites keep
+    working. Caught by ``hierarchy._call_summarizer``, which retries transient
+    failures and writes a ``needs_human_review`` placeholder for the rest.
     """
 
 
@@ -61,7 +76,9 @@ def _find_bob() -> str:
         return path
     raise BobShellError(
         "bob executable not found on PATH. "
-        "Install Bob Shell (https://ibm.biz/bob-shell) and ensure it is on PATH."
+        "Install Bob Shell (https://ibm.biz/bob-shell) and ensure it is on PATH.",
+        transient=False,
+        fatal=True,
     )
 
 
@@ -95,8 +112,10 @@ def _call_bob(
         The ``last_message`` string from the JSON response.
 
     Raises:
-        BobShellError: on non-zero exit code, JSON parse failure, or
-            ``status != "success"`` in the response.
+        BobShellError: on timeout, non-zero exit code, JSON parse failure, or
+            ``status != "success"`` in the response. The error is classified:
+            auth-shaped stderr (and ``model ... not found``) is fatal, every
+            other failure is transient.
     """
     # Write prompt to a temp file — keeps the PowerShell command line short.
     with tempfile.NamedTemporaryFile(
@@ -123,14 +142,19 @@ def _call_bob(
 
     try:
         with open(out_path, "w", encoding="utf-8") as out_f:
-            proc = subprocess.run(
-                cmd,
-                stdout=out_f,
-                stderr=subprocess.PIPE,
-                text=True,
-                encoding="utf-8",
-                timeout=timeout,
-            )
+            try:
+                proc = subprocess.run(
+                    cmd,
+                    stdout=out_f,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    encoding="utf-8",
+                    timeout=timeout,
+                )
+            except subprocess.TimeoutExpired as exc:
+                raise BobShellError(
+                    f"bob run timed out after {timeout}s", transient=True
+                ) from exc
         with open(out_path, encoding="utf-8") as f:
             stdout_text = f.read()
     finally:
@@ -140,8 +164,14 @@ def _call_bob(
 
     if proc.returncode != 0:
         stderr_snippet = proc.stderr.strip()[:300]
+        lowered = stderr_snippet.lower()
+        fatal = any(marker in lowered for marker in _FATAL_STDERR) or (
+            "model" in lowered and "not found" in lowered
+        )
         raise BobShellError(
-            f"bob run exited with code {proc.returncode}: {stderr_snippet}"
+            f"bob run exited with code {proc.returncode}: {stderr_snippet}",
+            transient=not fatal,
+            fatal=fatal,
         )
 
     try:
@@ -186,7 +216,9 @@ class BobShellSummarizer:
         if not os.environ.get("BOB_API_KEY"):
             raise BobShellError(
                 "BOB_API_KEY environment variable is not set. "
-                "Set it before running docgen with --backend bob_shell."
+                "Set it before running docgen with --backend bob_shell.",
+                transient=False,
+                fatal=True,
             )
         self._bob_exe = _find_bob()
         self._max_cost = max_cost
@@ -194,35 +226,22 @@ class BobShellSummarizer:
         self._timeout = timeout
 
     def summarize(self, req: SummaryRequest) -> SummaryResult:
-        """Build the prompt, call Bob Shell, and return the cited prose.
+        """Build the prompt and call Bob Shell exactly once.
 
-        Retries once after a 5-second pause on failure.  Raises ``BobShellError``
-        if both attempts fail (caught by ``run_hierarchy``).
+        Raises ``BobShellError`` (a ``BackendError``) on failure; the driver in
+        ``hierarchy.py`` decides whether to wait and retry.
         """
         prompt = build_prompt(req)
-        last_exc: Exception | None = None
-
-        for attempt in range(_RETRY_ATTEMPTS):
-            try:
-                text = _call_bob(
-                    prompt,
-                    self._bob_exe,
-                    self._max_cost,
-                    self._max_turns,
-                    self._timeout,
-                )
-                return SummaryResult(
-                    node_id=req.node_id,
-                    text=text,
-                    backend="bob_shell",
-                    hash_input=hash_input(req),
-                )
-            except BobShellError as exc:
-                last_exc = exc
-                if attempt < _RETRY_ATTEMPTS - 1:
-                    time.sleep(_RETRY_SLEEP_S)
-
-        raise BobShellError(
-            f"bob run failed after {_RETRY_ATTEMPTS} attempts for {req.node_id!r}: "
-            f"{last_exc}"
-        ) from last_exc
+        text = _call_bob(
+            prompt,
+            self._bob_exe,
+            self._max_cost,
+            self._max_turns,
+            self._timeout,
+        )
+        return SummaryResult(
+            node_id=req.node_id,
+            text=text,
+            backend="bob_shell",
+            hash_input=hash_input(req),
+        )

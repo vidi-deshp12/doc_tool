@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
     from docgen.summarize.base import Summarizer
@@ -32,6 +33,102 @@ def _print_unresolved_summary(unresolved: list) -> None:
     counts = Counter(u.what for u in sorted_entries)
     breakdown = ", ".join(f"{v} {k}" for k, v in sorted(counts.items()))
     print(f"{n} unresolved entr{'y' if n == 1 else 'ies'} ({breakdown})")
+
+
+def _non_negative_int(value: str) -> int:
+    """argparse type for flags where a negative value is meaningless."""
+    try:
+        number = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"invalid integer: {value!r}") from None
+    if number < 0:
+        raise argparse.ArgumentTypeError(f"must be >= 0, got {number}")
+    return number
+
+
+def _checkpoint_writer(path: Path) -> Callable[[list], None]:
+    """Return a checkpoint callback that atomically replaces *path*.
+
+    The write goes to ``summaries.json.tmp`` and is moved with ``os.replace``, so a
+    crash never leaves a half-written file. An identical payload (a cached replay)
+    is skipped, so the file is not rewritten once per slice.
+    """
+    from docgen.summarize.store import write_summaries
+
+    last_payload: bytes | None = None
+
+    def write(partial: list) -> None:
+        nonlocal last_payload
+        tmp = path.with_suffix(".json.tmp")
+        write_summaries(partial, tmp)
+        payload = tmp.read_bytes()
+        if payload == last_payload:
+            tmp.unlink(missing_ok=True)
+            return
+        os.replace(tmp, path)
+        last_payload = payload
+
+    return write
+
+
+def _review_state(
+    graph, results: list
+) -> tuple[list[str], list[str], int]:
+    """(needs_human_review ids, missing ids, expected node count) for a run."""
+    from docgen.summarize.hierarchy import (
+        NEEDS_HUMAN_REVIEW_BACKEND,
+        SYSTEM_NODE_ID,
+        summarizable_node_ids,
+    )
+
+    expected_ids = summarizable_node_ids(graph) | {SYSTEM_NODE_ID}
+    present_ids = {r.node_id for r in results}
+    failed = [
+        r.node_id for r in results if r.backend == NEEDS_HUMAN_REVIEW_BACKEND
+    ]
+    missing = sorted(expected_ids - present_ids)
+    return failed, missing, len(expected_ids)
+
+
+def _print_recovery_report(graph, results: list, existing_cache: dict) -> None:
+    """Print what the run achieved, including the completeness line."""
+    cached = sum(1 for r in results if existing_cache.get(r.node_id) == r)
+    print(
+        f"  summaries written: {len(results)} "
+        f"({len(results) - cached} fresh, {cached} from cache)",
+        file=sys.stderr,
+    )
+    failed, missing, expected = _review_state(graph, results)
+    if failed:
+        print(
+            f"  {len(failed)} node(s) need human review: {', '.join(failed)}",
+            file=sys.stderr,
+        )
+    else:
+        print("  0 node(s) need human review", file=sys.stderr)
+    print(
+        f"  summary complete: {expected - len(missing)}/{expected} nodes",
+        file=sys.stderr,
+    )
+
+
+def _enforce_strict(graph, results: list, *, command: str) -> None:
+    """Exit 1 under --strict when placeholders remain or a node is missing."""
+    failed, missing, _ = _review_state(graph, results)
+    if not failed and not missing:
+        return
+    parts: list[str] = []
+    if failed:
+        parts.append(f"{len(failed)} placeholder(s)")
+    if missing:
+        parts.append(
+            f"{len(missing)} missing summar{'y' if len(missing) == 1 else 'ies'}"
+        )
+    print(
+        f"docgen {command}: --strict: {', '.join(parts)}",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
 
 
 def _run_extract(args: argparse.Namespace) -> None:
@@ -238,9 +335,20 @@ def _build_summarizer(
 
         return backend, ManualSummarizer(output_dir / "manual_summaries")
     if backend == "bob_shell":
+        from docgen.summarize.base import BackendError, FatalBackendError
         from docgen.summarize.bob_shell import BobShellSummarizer
 
-        return backend, BobShellSummarizer(max_cost=max_cost, max_turns=max_turns)
+        # Construction failures (missing key, missing executable) are fatal, but
+        # they happen here rather than in the retry loop, so classify them into
+        # the type the CLI handler catches.
+        try:
+            return backend, BobShellSummarizer(
+                max_cost=max_cost, max_turns=max_turns
+            )
+        except BackendError as exc:
+            if exc.fatal:
+                raise FatalBackendError(backend, exc) from exc
+            raise
 
     raise SystemExit(
         f"Unknown backend: {backend!r} (expected 'stub', 'manual', or 'bob_shell')."
@@ -252,14 +360,16 @@ def _run_summarize(args: argparse.Namespace) -> None:
 
     Pipeline:
         load_config → read facts.json → load existing summaries.json (cache) →
-        run_hierarchy (bottom-up, child summaries passed to parents) →
+        run_hierarchy (bottom-up, retries, sliced checkpoints, repair pass) →
         write summaries.json
 
     Re-runs with no fact changes produce zero summarizer calls because the cache
-    keys match.
+    keys match. A fatal backend error exits 2; the completed slices are already on
+    disk. ``--strict`` exits 1 when a node is missing or needs human review.
     """
     from docgen.config import load_config
     from docgen.facts.store import read_facts
+    from docgen.summarize.base import FatalBackendError, RetryPolicy
     from docgen.summarize.hierarchy import run_hierarchy
     from docgen.summarize.store import read_summaries, write_summaries
 
@@ -275,13 +385,6 @@ def _run_summarize(args: argparse.Namespace) -> None:
         )
     graph = read_facts(facts_path)
 
-    backend, summarizer = _build_summarizer(args, output_dir)
-
-    print(
-        f"docgen summarize: {len(graph.nodes)} nodes from {facts_path} (backend={backend}) …",
-        file=sys.stderr,
-    )
-
     # Load existing summaries as the cache; skip if this is the first run.
     summaries_path = output_dir / "summaries.json"
     existing_cache: dict = {}
@@ -289,18 +392,42 @@ def _run_summarize(args: argparse.Namespace) -> None:
         for result in read_summaries(summaries_path):
             existing_cache[result.node_id] = result
 
-    results = run_hierarchy(
-        graph=graph,
-        summarizer=summarizer,
-        repo_root=repo_root,
-        existing_cache=existing_cache,
-        max_workers=getattr(args, "workers", 1),
-    )
+    retry = RetryPolicy(max_attempts=getattr(args, "retries", 3) + 1)
+
+    try:
+        # Inside the handler: backend construction can fail fatally too (missing
+        # key/package), and that must not print a traceback and exit 1.
+        backend, summarizer = _build_summarizer(args, output_dir)
+        print(
+            f"docgen summarize: {len(graph.nodes)} nodes from {facts_path} "
+            f"(backend={backend}) …",
+            file=sys.stderr,
+        )
+        results = run_hierarchy(
+            graph=graph,
+            summarizer=summarizer,
+            repo_root=repo_root,
+            existing_cache=existing_cache,
+            max_workers=getattr(args, "workers", 1),
+            retry=retry,
+            checkpoint=_checkpoint_writer(summaries_path),
+            repair_passes=getattr(args, "repair_passes", 1),
+        )
+    except FatalBackendError as exc:
+        print(
+            f"docgen summarize: fatal backend error at {exc.node_id}: "
+            f"{exc.cause.message}",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
 
     write_summaries(results, summaries_path)
 
-    print(f"  summaries.json written: {len(results)} summaries", file=sys.stderr)
+    _print_recovery_report(graph, results, existing_cache)
     print(f"{len(results)} summaries written")
+
+    if getattr(args, "strict", False):
+        _enforce_strict(graph, results, command="summarize")
 
 
 def _run_validate(args: argparse.Namespace) -> None:
@@ -495,14 +622,17 @@ def _run_update(args: argparse.Namespace) -> None:
             raise SystemExit(f"{name} not found at {p}")
 
     graph = read_facts(facts_path)
+    summary_results = read_summaries(summaries_path)
     summaries_map: dict[str, str] = {
-        r.node_id: r.text for r in read_summaries(summaries_path)
+        r.node_id: r.text for r in summary_results
     }
     manifest = read_manifest(manifest_path)
 
     stale = find_stale_pages(manifest, graph)
     if not stale:
         print("docgen update: nothing to update", file=sys.stderr)
+        if getattr(args, "strict", False):
+            _enforce_strict(graph, summary_results, command="update")
         return
 
     update_plan = plan_update(stale, manifest, graph, summaries_map)
@@ -515,21 +645,36 @@ def _run_update(args: argparse.Namespace) -> None:
     # Optional re-summarization (only when a real backend is requested)
     backend = getattr(args, "backend", "stub")
     if update_plan.nodes_to_resummarize and backend != "stub":
+        from docgen.summarize.base import FatalBackendError, RetryPolicy
         from docgen.summarize.hierarchy import run_hierarchy
         from docgen.summarize.store import write_summaries
 
-        _, summarizer = _build_summarizer(args, output_dir)
-        existing_cache = {r.node_id: r for r in read_summaries(summaries_path)}
+        existing_cache = {r.node_id: r for r in summary_results}
+        retry = RetryPolicy(max_attempts=getattr(args, "retries", 3) + 1)
 
-        results = run_hierarchy(
-            graph=graph,
-            summarizer=summarizer,
-            repo_root=repo_root,
-            existing_cache=existing_cache,
-            max_workers=getattr(args, "workers", 1),
-        )
+        try:
+            _, summarizer = _build_summarizer(args, output_dir)
+            results = run_hierarchy(
+                graph=graph,
+                summarizer=summarizer,
+                repo_root=repo_root,
+                existing_cache=existing_cache,
+                max_workers=getattr(args, "workers", 1),
+                retry=retry,
+                checkpoint=_checkpoint_writer(summaries_path),
+                repair_passes=getattr(args, "repair_passes", 1),
+            )
+        except FatalBackendError as exc:
+            print(
+                f"docgen update: fatal backend error at {exc.node_id}: "
+                f"{exc.cause.message}",
+                file=sys.stderr,
+            )
+            raise SystemExit(2)
+
         write_summaries(results, summaries_path)
         summaries_map = {r.node_id: r.text for r in results}
+        summary_results = results
 
     # Re-render only stale pages
     from docgen.check.manifest import PageRecord
@@ -591,6 +736,9 @@ def _run_update(args: argparse.Namespace) -> None:
         file=sys.stderr,
     )
 
+    if getattr(args, "strict", False):
+        _enforce_strict(graph, summary_results, command="update")
+
 
 def main() -> None:
     """Parse arguments and dispatch to the appropriate sub-command."""
@@ -642,6 +790,28 @@ def main() -> None:
             "Number of parallel summarizer calls per batch "
             "(default: 1 = sequential). Values above 6 risk "
             "rate-limiting from hosted LLM APIs."
+        ),
+    )
+    summarize_parser.add_argument(
+        "--retries",
+        type=_non_negative_int,
+        default=3,
+        help="Retries per node (default: 3; 0 = one attempt).",
+    )
+    summarize_parser.add_argument(
+        "--strict",
+        action="store_true",
+        default=False,
+        help="Exit 1 if any node is missing or needs human review.",
+    )
+    summarize_parser.add_argument(
+        "--repair-passes",
+        type=_non_negative_int,
+        dest="repair_passes",
+        default=1,
+        help=(
+            "Extra bottom-up passes that retry failed nodes so their ancestors "
+            "are rebuilt in the same run (default: 1; 0 = disable)."
         ),
     )
 
@@ -698,6 +868,28 @@ def main() -> None:
             "Number of parallel summarizer calls per batch "
             "(default: 1 = sequential). Values above 6 risk "
             "rate-limiting from hosted LLM APIs."
+        ),
+    )
+    update_parser.add_argument(
+        "--retries",
+        type=_non_negative_int,
+        default=3,
+        help="Retries per node (default: 3; 0 = one attempt).",
+    )
+    update_parser.add_argument(
+        "--strict",
+        action="store_true",
+        default=False,
+        help="Exit 1 if any node is missing or needs human review.",
+    )
+    update_parser.add_argument(
+        "--repair-passes",
+        type=_non_negative_int,
+        dest="repair_passes",
+        default=1,
+        help=(
+            "Extra bottom-up passes that retry failed nodes so their ancestors "
+            "are rebuilt in the same run (default: 1; 0 = disable)."
         ),
     )
 

@@ -396,3 +396,144 @@ def test_build_summarizer_partial_namespace(tmp_path: Path) -> None:
 
     assert backend == "stub"
     assert isinstance(summarizer, StubSummarizer)
+
+
+# ---------------------------------------------------------------------------
+# Retry/abort flags on `docgen summarize`
+# ---------------------------------------------------------------------------
+
+def _summarize_namespace(toml_path: Path, **overrides) -> argparse.Namespace:
+    fields = dict(
+        config=str(toml_path),
+        backend="stub",
+        retries=3,
+        strict=False,
+        repair_passes=1,
+        workers=1,
+    )
+    fields.update(overrides)
+    return argparse.Namespace(**fields)
+
+
+def test_strict_exits_one_with_a_placeholder(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    toml_path = _make_fixture_repo(tmp_path)
+
+    import docgen.summarize.base as base
+
+    real_stub = base.StubSummarizer
+
+    class FailsOne:
+        name = "stub"
+
+        def summarize(self, req: SummaryRequest) -> SummaryResult:
+            if req.node_id == "mod.py::f":
+                raise RuntimeError("provider is unhappy")
+            return real_stub().summarize(req)
+
+    monkeypatch.setattr(base, "StubSummarizer", FailsOne)
+
+    from docgen.cli import _run_summarize
+
+    with pytest.raises(SystemExit) as excinfo:
+        _run_summarize(
+            _summarize_namespace(
+                toml_path, strict=True, retries=0, repair_passes=0
+            )
+        )
+
+    assert excinfo.value.code == 1
+
+
+def test_retries_zero_makes_one_attempt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    toml_path = _make_fixture_repo(tmp_path)
+
+    import docgen.summarize.base as base
+
+    real_stub = base.StubSummarizer
+    calls: list[str] = []
+
+    class FailsOne:
+        name = "stub"
+
+        def summarize(self, req: SummaryRequest) -> SummaryResult:
+            calls.append(req.node_id)
+            if req.node_id == "mod.py::f":
+                raise RuntimeError("provider is unhappy")
+            return real_stub().summarize(req)
+
+    monkeypatch.setattr(base, "StubSummarizer", FailsOne)
+
+    from docgen.cli import _run_summarize
+
+    _run_summarize(
+        _summarize_namespace(toml_path, retries=0, repair_passes=0)
+    )
+
+    assert calls.count("mod.py::f") == 1
+
+
+def test_missing_api_key_exits_two_without_traceback(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    toml_path = _make_fixture_repo(tmp_path)
+    monkeypatch.delenv("BOB_API_KEY", raising=False)
+
+    from docgen.cli import _run_summarize
+
+    with pytest.raises(SystemExit) as excinfo:
+        _run_summarize(_summarize_namespace(toml_path, backend="bob_shell"))
+
+    assert excinfo.value.code == 2
+    err = capsys.readouterr().err
+    assert "fatal backend error" in err
+    assert "bob_shell" in err
+    assert "Traceback" not in err
+    assert not (tmp_path / "out" / "summaries.json").exists()
+
+
+def test_negative_retries_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
+    import sys
+
+    from docgen.cli import main
+
+    monkeypatch.setattr(
+        sys, "argv", ["docgen", "summarize", "--retries", "-1"]
+    )
+
+    with pytest.raises(SystemExit) as excinfo:
+        main()
+
+    assert excinfo.value.code == 2
+
+
+def test_strict_exits_one_when_a_node_is_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    toml_path = _make_fixture_repo(tmp_path)
+
+    import docgen.summarize.hierarchy as hierarchy
+
+    def fake_run_hierarchy(**kwargs):
+        return [
+            SummaryResult(
+                node_id="system",
+                text="Only the overview. [[system]]",
+                backend="stub",
+                hash_input="k",
+            )
+        ]
+
+    monkeypatch.setattr(hierarchy, "run_hierarchy", fake_run_hierarchy)
+
+    from docgen.cli import _run_summarize
+
+    with pytest.raises(SystemExit) as excinfo:
+        _run_summarize(_summarize_namespace(toml_path, strict=True))
+
+    assert excinfo.value.code == 1

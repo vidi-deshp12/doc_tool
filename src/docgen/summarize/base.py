@@ -1,5 +1,6 @@
 """Summarizer interface: shared request/result types, the `Summarizer` protocol,
-`StubSummarizer`, and the `MissingSummaryError`.
+`StubSummarizer`, `MissingSummaryError`, and the error/retry types the driver uses
+(`BackendError`, `FatalBackendError`, `RetryPolicy`, `RetryGate`).
 
 Why this exists: the rest of the pipeline (CLI, later the hierarchy driver,
 citation validator, and checker) must never care *which* backend produced the
@@ -14,8 +15,14 @@ in, so every backend stays pure and easy to test.
 from __future__ import annotations
 
 import hashlib
+import math
+import random
+import threading
+import time
 from dataclasses import dataclass, field
-from typing import Any, Literal, Protocol, runtime_checkable
+from datetime import timezone
+from email.utils import parsedate_to_datetime
+from typing import Any, Callable, Literal, Protocol, runtime_checkable
 
 NodeLevel = Literal["function", "method", "class", "module", "package", "system"]
 
@@ -30,6 +37,147 @@ class MissingSummaryError(Exception):
     def __init__(self, node_id: str) -> None:
         super().__init__(f"No summary found for node: {node_id}")
         self.node_id = node_id
+
+
+class BackendError(Exception):
+    """A provider failure, classified for the driver's retry policy.
+
+    ``transient=True``   → the driver may wait and retry the same request.
+    ``transient=False``  → retrying this request cannot help.
+    ``fatal=True``       → configuration/auth/shape problem: stop the whole run (exit 2).
+    ``fatal=False``      → this node only: write a placeholder and continue the run.
+    ``retry_after``      → seconds the provider asked us to wait (HTTP Retry-After).
+
+    Three flags, not two, because "do not retry this request" and "abort the whole
+    run" are different decisions. The defaults stay permissive because an
+    unclassified failure in a subprocess is far more often a hiccup than a
+    misconfiguration: one wasted retry beats a hole.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        transient: bool = True,
+        fatal: bool = False,
+        retry_after: float | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.message = message
+        self.transient = transient
+        self.fatal = fatal
+        self.retry_after = retry_after
+
+
+class FatalBackendError(Exception):
+    """A ``BackendError`` that must stop the whole run.
+
+    Lives here rather than in ``hierarchy.py`` so ``cli.py`` can catch it without
+    importing the driver's internals. ``node_id`` is the affected node, or the
+    backend name when construction itself failed (missing key, missing package).
+    """
+
+    def __init__(self, node_id: str, cause: BackendError) -> None:
+        super().__init__(f"{node_id}: {cause.message}")
+        self.node_id = node_id
+        self.cause = cause
+
+
+def parse_retry_after(value: str | None, *, now: float | None = None) -> float | None:
+    """Seconds to wait from an HTTP ``Retry-After`` header value.
+
+    Accepts the delay-seconds form (``"17"``) and the HTTP-date form via
+    ``email.utils.parsedate_to_datetime``, which also covers the obsolete RFC 850
+    and asctime forms. Naive datetimes (the obsolete forms) are treated as UTC.
+
+    Returns ``None`` for ``None``, an empty string, or anything unparseable, so the
+    caller falls back to exponential backoff. Negative values become 0; non-finite
+    values (``nan``/``inf``) are rejected rather than slept on.
+    """
+    if value is None:
+        return None
+    text = value.strip()
+    if not text:
+        return None
+
+    try:
+        seconds = float(text)
+    except ValueError:
+        pass
+    else:
+        if not math.isfinite(seconds):
+            return None
+        return max(0.0, seconds)
+
+    try:
+        parsed = parsedate_to_datetime(text)
+    except (TypeError, ValueError):
+        return None
+    if parsed is None:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    current = time.time() if now is None else now
+    return max(0.0, parsed.timestamp() - current)
+
+
+@dataclass(frozen=True)
+class RetryPolicy:
+    """How many times, and how long, the driver may wait for one node.
+
+    ``max_attempts`` counts the initial call plus retries (4 = 1 + 3).
+    ``max_retry_after`` caps a provider-supplied header; ``max_delay`` caps
+    computed exponential backoff. ``max_node_sleep`` bounds the *sum* of a node's
+    waits, so a generous header cannot park a worker for an hour: a node that has
+    already waited that long stops retrying and lands as a placeholder. Jitter is
+    applied on top of both delays — waiting slightly longer is always safe, and it
+    stops four workers waking in lockstep.
+    """
+
+    max_attempts: int = 4
+    base_delay: float = 2.0
+    max_delay: float = 60.0
+    max_retry_after: float = 120.0
+    max_node_sleep: float = 300.0
+    jitter: float = 0.5
+
+    def delay_for(self, attempt: int, retry_after: float | None) -> float:
+        """Sleep before the next attempt, in seconds."""
+        if retry_after is not None:
+            delay = min(max(0.0, retry_after), self.max_retry_after)
+        else:
+            delay = min(self.base_delay * (2**attempt), self.max_delay)
+        if delay > 0:
+            delay *= 1 + random.random() * self.jitter
+        return delay
+
+
+class RetryGate:
+    """A shared "do not call before T" so parallel workers cool down together.
+
+    One worker's 429 with ``retry-after: 20`` otherwise leaves the other three
+    hammering the same window, each burning its own four attempts. The gate only
+    ever sleeps *longer*; it never shortens a backoff.
+    """
+
+    def __init__(self, clock: Callable[[], float] = time.monotonic) -> None:
+        self._clock = clock
+        self._not_before = 0.0
+        self._lock = threading.Lock()
+
+    def defer(self, seconds: float) -> None:
+        """Push the shared cooldown to at least now + *seconds*."""
+        with self._lock:
+            self._not_before = max(self._not_before, self._clock() + seconds)
+
+    def wait(self, sleep: Callable[[float], None]) -> float:
+        """Sleep until the cooldown elapses; return the seconds slept (0 if none)."""
+        with self._lock:
+            delay = self._not_before - self._clock()
+        if delay > 0:
+            sleep(delay)
+            return delay
+        return 0.0
 
 
 @dataclass(frozen=True)
@@ -94,6 +242,10 @@ def hash_input(req: SummaryRequest) -> str:
 @runtime_checkable
 class Summarizer(Protocol):
     """Produces cited prose for a single node. Implementations differ only in backend.
+
+    Every implementation makes **one** attempt per call: it must not retry, sleep,
+    or swallow provider failures. It raises ``BackendError`` instead, and the
+    driver (``hierarchy._call_summarizer``) owns retries, backoff, and sleeping.
 
     Contract: ``summarize`` must send ``build_prompt(req)`` — the prompt is the cache
     key, so a backend that rewrites, annotates, or drops part of it makes the cache

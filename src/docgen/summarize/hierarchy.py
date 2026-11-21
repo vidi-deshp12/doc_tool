@@ -20,6 +20,12 @@ is therefore called from worker threads: implementations must be safe to call
 concurrently. The returned results are always assembled by the main thread in
 batch order, so ``summaries.json`` is identical regardless of the worker count.
 
+Failure handling: every backend makes exactly one attempt. ``_call_summarizer`` owns
+the retry loop (``RetryPolicy``, plus a shared ``RetryGate`` so parallel workers
+cool down together), a checkpoint callback receives the cumulative results after
+each slice, and a bounded repair pass re-runs the traversal so a node that failed
+transiently is rebuilt together with its ancestors in the same run.
+
 Nothing here performs I/O beyond reading source lines; all I/O (facts.json, summaries.json) is
 done by the caller (``_run_summarize`` in cli.py).
 """
@@ -28,13 +34,23 @@ from __future__ import annotations
 
 import hashlib
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from docgen.facts.schema import EdgeType, FactGraph, Node, NodeType
 from docgen.facts.store import _node_to_dict
-from docgen.summarize.base import NodeLevel, Summarizer, SummaryRequest, SummaryResult
+from docgen.summarize.base import (
+    BackendError,
+    FatalBackendError,
+    NodeLevel,
+    RetryGate,
+    RetryPolicy,
+    Summarizer,
+    SummaryRequest,
+    SummaryResult,
+)
 from docgen.summarize.prompts import build_prompt
 
 # Node types that participate in summarization. Routes, externals, etc. are skipped.
@@ -376,36 +392,226 @@ def _node_level(node: Node) -> NodeLevel:
     return "module"
 
 
+def summarizable_node_ids(graph: FactGraph) -> set[str]:
+    """IDs of every node ``batched_topological_order`` summarizes (no system node).
+
+    Exported so the CLI's ``--strict`` completeness check and the driver's own
+    traversal cannot drift apart.
+    """
+    return {n.id for n in graph.nodes if n.type in _SUMMARIZABLE}
+
+
+def _placeholder(node_id: str) -> SummaryResult:
+    """A node that could not be summarized; ``hash_input=""`` so it is retried."""
+    return SummaryResult(
+        node_id=node_id,
+        text="[needs_human_review]",
+        backend=NEEDS_HUMAN_REVIEW_BACKEND,
+        hash_input="",
+    )
+
+
 def _call_summarizer(
     summarizer: Summarizer,
     req: SummaryRequest,
     cache_key: str,
-) -> SummaryResult:
-    """Call *summarizer* and return a SummaryResult with *cache_key* as hash_input.
+    policy: RetryPolicy,
+    sleep: Callable[[float], None],
+    gate: RetryGate | None = None,
+) -> tuple[SummaryResult, bool]:
+    """Call *summarizer* under *policy*; return ``(result, retryable)``.
 
-    On any exception: prints a WARN line to stderr, returns a ``needs_human_review``
-    placeholder with ``hash_input=""`` so the node is re-attempted on the next run.
-    The run continues — one failing node never aborts the whole pipeline.
+    This is the only retry loop in the pipeline. A transient failure waits
+    (``Retry-After`` when the provider supplied one, capped exponential backoff
+    otherwise) and tries again; a non-transient failure fails this node at once;
+    a fatal failure raises ``FatalBackendError`` and stops the run.
+
+    On give-up it prints a WARN line and returns a ``needs_human_review``
+    placeholder with ``hash_input=""``. The second value is ``True`` when the
+    failure was transient, i.e. when the repair pass is worth another try;
+    non-retryable failures (context overflow, truncation) are never retried again.
+    Unknown exception types are treated as transient and named by class.
     """
-    try:
-        result = summarizer.summarize(req)
-        return SummaryResult(
-            node_id=result.node_id,
-            text=result.text,
-            backend=result.backend,
-            hash_input=cache_key,
+    attempts = max(1, policy.max_attempts)  # --retries 0 is one attempt
+    spent = 0.0
+    last_err: BackendError | None = None
+
+    for attempt in range(attempts):
+        if gate is not None:
+            gate.wait(sleep)
+        try:
+            result = summarizer.summarize(req)
+            return (
+                SummaryResult(
+                    node_id=result.node_id,
+                    text=result.text,
+                    backend=result.backend,
+                    hash_input=cache_key,
+                ),
+                True,
+            )
+        except Exception as exc:  # noqa: BLE001
+            last_err = (
+                exc
+                if isinstance(exc, BackendError)
+                else BackendError(f"{type(exc).__name__}: {exc}")
+            )
+            if last_err.fatal:
+                raise FatalBackendError(req.node_id, last_err) from exc
+            if not last_err.transient:
+                break  # context overflow: this node only
+            if attempt == attempts - 1:
+                break
+            delay = policy.delay_for(attempt, last_err.retry_after)
+            if spent + delay > policy.max_node_sleep:
+                print(
+                    f"  WARN: {req.node_id!r} retry budget exhausted "
+                    f"({spent:.0f}s spent)",
+                    file=sys.stderr,
+                )
+                break
+            spent += delay
+            if gate is not None and last_err.retry_after is not None:
+                gate.defer(delay)
+            print(
+                f"  RETRY {req.node_id!r} in {delay:.1f}s "
+                f"[attempt {attempt + 1}/{attempts}]: {last_err.message}",
+                file=sys.stderr,
+            )
+            sleep(delay)
+
+    print(
+        f"  WARN: {req.node_id!r} not summarized: {last_err.message}",
+        file=sys.stderr,
+    )
+    return _placeholder(req.node_id), last_err.transient
+
+
+def _run_pass(
+    graph: FactGraph,
+    summarizer: Summarizer,
+    repo_root: Path,
+    seed: dict[str, SummaryResult],
+    *,
+    max_workers: int,
+    retry: RetryPolicy,
+    sleep: Callable[[float], None],
+    gate: RetryGate,
+    checkpoint: Callable[[list[SummaryResult]], None] | None,
+    checkpoint_every: int,
+) -> tuple[dict[str, SummaryResult], set[str]]:
+    """One bottom-up traversal of the graph.
+
+    Returns the results (system node last) and the ids that failed
+    **non-retryably**, which the repair pass must not attempt again.
+
+    When *checkpoint* is given, each depth batch is split into deterministic
+    consecutive slices of at most *checkpoint_every* nodes and the callback
+    receives the cumulative results after each slice that made a call. The batch
+    barrier and submission order are unchanged, so the final output is
+    byte-identical.
+    """
+    index = build_contains_index(graph)
+    batches = batched_topological_order(graph, index)
+    edges_by_from = _build_edges_by_from(graph)
+
+    # Accumulated results, keyed by node_id for child-summary lookup. Written by
+    # the main thread only; workers return results and never touch this dict.
+    results: dict[str, SummaryResult] = {}
+    unretryable: set[str] = set()
+
+    # Constant for the whole run: which backend would answer. Part of every key.
+    summarizer_identity = _summarizer_identity(summarizer)
+
+    def _cache_key(prompt: str) -> str:
+        return hash_prompt(summarizer_identity + "\n" + prompt)
+
+    def _process_node(node: Node) -> tuple[SummaryResult, bool, bool]:
+        """Return ``(result, retryable, made_a_call)``."""
+        children = index.get(node.id, [])
+        req = SummaryRequest(
+            node_id=node.id,
+            level=_node_level(node),
+            facts=_prompt_facts(_node_to_dict(node)),
+            source_text=read_residual_source(repo_root, node, children),
+            child_summaries=[results[c.id] for c in children if c.id in results],
+            edges=edges_by_from.get(node.id, []),
         )
-    except Exception as exc:  # noqa: BLE001
-        print(
-            f"  WARN: summarizer failed for {req.node_id!r}: {exc}",
-            file=sys.stderr,
+
+        cache_key = _cache_key(build_prompt(req))
+        cached = seed.get(node.id)
+        if cached is not None and cached.hash_input == cache_key:
+            return cached, True, False
+
+        result, retryable = _call_summarizer(
+            summarizer, req, cache_key, retry, sleep, gate
         )
-        return SummaryResult(
-            node_id=req.node_id,
-            text="[needs_human_review]",
-            backend=NEEDS_HUMAN_REVIEW_BACKEND,
-            hash_input="",  # empty → always retried on next run
+        return result, retryable, True
+
+    slice_size = max(1, int(checkpoint_every))
+
+    for batch in batches:
+        if checkpoint is None:
+            chunks = [batch]
+        else:
+            chunks = [
+                batch[i : i + slice_size] for i in range(0, len(batch), slice_size)
+            ]
+
+        for chunk in chunks:
+            if max_workers <= 1 or len(chunk) == 1:
+                pairs = [(node, _process_node(node)) for node in chunk]
+            else:
+                with ThreadPoolExecutor(max_workers=max_workers) as pool:
+                    futures = [
+                        (node, pool.submit(_process_node, node)) for node in chunk
+                    ]
+                    # Collect in submission order, not completion order: this keeps
+                    # summaries.json byte-identical to the sequential run.
+                    pairs = [(node, future.result()) for node, future in futures]
+
+            called = False
+            for node, (result, retryable, was_called) in pairs:
+                results[node.id] = result
+                called = called or was_called
+                if not retryable:
+                    unretryable.add(node.id)
+
+            # A slice with no calls changed nothing, so it must not rewrite the
+            # checkpoint file (amendment 12).
+            if checkpoint is not None and called:
+                checkpoint(list(results.values()))
+
+    # Synthetic system-level summary: child_summaries = all package summaries.
+    package_results = sorted(
+        (
+            r
+            for n, r in results.items()
+            if _node_type_for_id(n, graph) is NodeType.PACKAGE
+        ),
+        key=lambda r: r.node_id,
+    )
+    system_req = SummaryRequest(
+        node_id=SYSTEM_NODE_ID,
+        level="system",
+        facts={},
+        source_text="",
+        child_summaries=package_results,
+        edges=[],
+    )
+    system_key = _cache_key(build_prompt(system_req))
+    cached_system = seed.get(SYSTEM_NODE_ID)
+    if cached_system is not None and cached_system.hash_input == system_key:
+        results[SYSTEM_NODE_ID] = cached_system
+    else:
+        system_result, retryable = _call_summarizer(
+            summarizer, system_req, system_key, retry, sleep, gate
         )
+        results[SYSTEM_NODE_ID] = system_result
+        if not retryable:
+            unretryable.add(SYSTEM_NODE_ID)
+
+    return results, unretryable
 
 
 # ---------------------------------------------------------------------------
@@ -418,6 +624,11 @@ def run_hierarchy(
     repo_root: Path,
     existing_cache: dict[str, SummaryResult],
     max_workers: int = 1,
+    retry: RetryPolicy = RetryPolicy(),
+    sleep: Callable[[float], None] = time.sleep,
+    checkpoint: Callable[[list[SummaryResult]], None] | None = None,
+    checkpoint_every: int = 25,
+    repair_passes: int = 1,
 ) -> list[SummaryResult]:
     """Summarize all nodes bottom-up and return the complete list of SummaryResults.
 
@@ -425,90 +636,83 @@ def run_hierarchy(
         graph: The fully-extracted fact graph.
         summarizer: The backend to call when a node is not in the cache. It may be
             called concurrently from worker threads; implementations must be
-            thread-safe (the shipped backends are stateless per call).
+            thread-safe and make exactly one attempt per call (they raise
+            ``BackendError``; this driver owns retries).
         repo_root: Absolute path to the repository root, used to read source text.
         existing_cache: Node-id → SummaryResult from a previous run. Nodes whose
             cached ``hash_input`` matches the hash of the prompt this run would send
             are skipped.
         max_workers: Node-level concurrency within a depth batch (default 1 =
             sequential). Values below 1 are clamped to 1.
+        retry: Attempt count, backoff, and per-node sleep budget.
+        sleep: Injected sleep, so tests can assert delays without waiting.
+        checkpoint: Called with the cumulative results after each slice that made
+            a call. The file it writes holds the completed slices and contains
+            **no** system node until the run finishes; ``read_summaries`` tolerates
+            any subset.
+        checkpoint_every: Maximum nodes per checkpoint slice.
+        repair_passes: Extra full passes that retry placeholder nodes after the
+            first pass, so their ancestors are rebuilt from repaired prose within
+            the same run. ``0`` disables the repair pass.
 
     Returns:
         One SummaryResult per summarizable node plus a synthetic system-level result.
         Results are ordered: bottom-up batch order for real nodes, system last.
         That order — and therefore ``summaries.json`` — is identical for every
-        ``max_workers`` value.
+        ``max_workers`` value and after any repair pass.
+
+    Worst case, a node is attempted ``retry.max_attempts * (1 + repair_passes)``
+    times (8 with the defaults) and waits at most ``retry.max_node_sleep`` seconds
+    per node per pass; a fatal backend error aborts the run immediately.
+
+    With ``max_workers > 1``, a fatal raised inside a worker surfaces at the batch
+    barrier through ``future.result()``. ``ThreadPoolExecutor.__exit__`` waits for
+    in-flight calls, so up to ``max_workers`` extra calls may complete and be
+    discarded; no partial slice is written.
     """
     max_workers = max(1, int(max_workers))
+    gate = RetryGate()
 
-    index = build_contains_index(graph)
-    batches = batched_topological_order(graph, index)
-    edges_by_from = _build_edges_by_from(graph)
-
-    # Accumulated results, keyed by node_id for child-summary lookup. Written by
-    # the main thread only; workers return results and never touch this dict.
-    results: dict[str, SummaryResult] = {}
-
-    # Constant for the whole run: which backend would answer. Part of every key.
-    summarizer_identity = _summarizer_identity(summarizer)
-
-    def _cache_key(prompt: str) -> str:
-        return hash_prompt(summarizer_identity + "\n" + prompt)
-
-    def _process_node(node: Node) -> SummaryResult:
-        children = index.get(node.id, [])
-        req = SummaryRequest(
-            node_id=node.id,
-            level=_node_level(node),
-            facts=_prompt_facts(_node_to_dict(node)),
-            source_text=read_residual_source(repo_root, node, children),
-            child_summaries=[results[c.id] for c in children if c.id in results],
-            edges=edges_by_from.get(node.id, []),
+    def _pass(
+        seed: dict[str, SummaryResult],
+    ) -> tuple[dict[str, SummaryResult], set[str]]:
+        return _run_pass(
+            graph,
+            summarizer,
+            repo_root,
+            seed,
+            max_workers=max_workers,
+            retry=retry,
+            sleep=sleep,
+            gate=gate,
+            checkpoint=checkpoint,
+            checkpoint_every=checkpoint_every,
         )
 
-        cache_key = _cache_key(build_prompt(req))
-        cached = existing_cache.get(node.id)
-        if cached is not None and cached.hash_input == cache_key:
-            return cached
+    results, unretryable = _pass(existing_cache)
 
-        return _call_summarizer(summarizer, req, cache_key)
+    index = build_contains_index(graph)
+    order = [
+        node for batch in batched_topological_order(graph, index) for node in batch
+    ]
 
-    for batch in batches:
-        if max_workers <= 1 or len(batch) == 1:
-            pairs = [(node, _process_node(node)) for node in batch]
-        else:
-            with ThreadPoolExecutor(max_workers=max_workers) as pool:
-                futures = [
-                    (node, pool.submit(_process_node, node)) for node in batch
-                ]
-                # Collect in submission order, not completion order: this keeps
-                # summaries.json byte-identical to the sequential run.
-                pairs = [(node, future.result()) for node, future in futures]
+    for attempt in range(max(0, int(repair_passes))):
+        failed = [
+            node.id
+            for node in order
+            if results[node.id].backend == NEEDS_HUMAN_REVIEW_BACKEND
+            and node.id not in unretryable
+        ]
+        if not failed:
+            break
+        print(
+            f"  repair pass {attempt + 1}: retrying {len(failed)} node(s) …",
+            file=sys.stderr,
+        )
+        results, more = _pass({**existing_cache, **results})
+        unretryable |= more
 
-        for node, result in pairs:
-            results[node.id] = result
-
-    # Synthetic system-level summary: child_summaries = all package summaries.
-    package_results = sorted(
-        (r for n, r in results.items() if _node_type_for_id(n, graph) is NodeType.PACKAGE),
-        key=lambda r: r.node_id,
-    )
-    system_req = SummaryRequest(
-        node_id=SYSTEM_NODE_ID,
-        level="system",
-        facts={},
-        source_text="",
-        child_summaries=package_results,
-        edges=[],
-    )
-    system_key = _cache_key(build_prompt(system_req))
-    cached_system = existing_cache.get(SYSTEM_NODE_ID)
-    if cached_system is not None and cached_system.hash_input == system_key:
-        system_result = cached_system
-    else:
-        system_result = _call_summarizer(summarizer, system_req, system_key)
-
-    return list(results.values()) + [system_result]
+    return list(results.values())
 
 
 def _node_type_for_id(node_id: str, graph: FactGraph) -> NodeType | None:

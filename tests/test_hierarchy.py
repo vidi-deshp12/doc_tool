@@ -14,9 +14,18 @@ from pathlib import Path
 import pytest
 
 from docgen.facts.schema import Edge, EdgeType, FactGraph, Node, NodeType
-from docgen.summarize.base import StubSummarizer, SummaryRequest, SummaryResult
+from docgen.summarize.base import (
+    BackendError,
+    RetryGate,
+    RetryPolicy,
+    StubSummarizer,
+    SummaryRequest,
+    SummaryResult,
+)
 from docgen.summarize.hierarchy import (
+    NEEDS_HUMAN_REVIEW_BACKEND,
     SYSTEM_NODE_ID,
+    _call_summarizer,
     _prompt_facts,
     batched_topological_order,
     build_contains_index,
@@ -890,7 +899,14 @@ def test_parallel_exception_handling(tmp_path: Path) -> None:
     graph = _make_graph(*functions)
 
     results = run_hierarchy(
-        graph, FailingStubSummarizer(), tmp_path, {}, max_workers=4
+        graph,
+        FailingStubSummarizer(),
+        tmp_path,
+        {},
+        max_workers=4,
+        retry=RetryPolicy(max_attempts=1),
+        sleep=lambda _: None,
+        repair_passes=0,
     )
 
     assert {r.node_id for r in results} == {f.id for f in functions} | {SYSTEM_NODE_ID}
@@ -1020,4 +1036,377 @@ def test_residual_source_empty_module_and_foreign_child(tmp_path: Path) -> None:
         "other.py::g", NodeType.FUNCTION, file="other.py", lines=(1, 1)
     )
     assert read_residual_source(tmp_path, func, [foreign]) == "def f():\n    return 1"
+
+
+# ---------------------------------------------------------------------------
+# Retry, checkpointing, and repair passes
+# ---------------------------------------------------------------------------
+
+class _FatalOnNode:
+    """Raises a fatal backend error when it reaches *node_id*."""
+
+    name = "stub"
+
+    def __init__(self, node_id: str) -> None:
+        self.node_id = node_id
+        self.calls: list[str] = []
+
+    def summarize(self, req: SummaryRequest) -> SummaryResult:
+        self.calls.append(req.node_id)
+        if req.node_id == self.node_id:
+            raise BackendError("bad key", transient=False, fatal=True)
+        return StubSummarizer().summarize(req)
+
+
+class ChildEchoSummarizer:
+    """Prose that embeds child summaries, so a repair propagates to ancestors."""
+
+    name = "stub"
+
+    def __init__(self, fail_node: str | None = None) -> None:
+        self.fail_node = fail_node
+        self.failed = False
+        self.calls: list[str] = []
+
+    def summarize(self, req: SummaryRequest) -> SummaryResult:
+        self.calls.append(req.node_id)
+        if req.node_id == self.fail_node and not self.failed:
+            self.failed = True
+            raise RuntimeError("one bad minute")
+        text = req.node_id
+        if req.child_summaries:
+            text += " <- " + " | ".join(c.text for c in req.child_summaries)
+        return SummaryResult(
+            node_id=req.node_id,
+            text=f"{text} [[{req.node_id}]]",
+            backend="stub",
+            hash_input="",
+        )
+
+
+class _AlwaysFailingNode:
+    """Fails permanently for one node; behaves like the stub for the rest."""
+
+    name = "stub"
+
+    def __init__(self, node_id: str) -> None:
+        self.node_id = node_id
+        self.calls: list[str] = []
+
+    def summarize(self, req: SummaryRequest) -> SummaryResult:
+        self.calls.append(req.node_id)
+        if req.node_id == self.node_id:
+            raise RuntimeError("still broken")
+        return StubSummarizer().summarize(req)
+
+
+def _repair_graph() -> FactGraph:
+    """package → module → {bad leaf, ok leaf}."""
+    return _make_graph(
+        _node("pkg", NodeType.PACKAGE),
+        _node("pkg/mod.py", NodeType.MODULE, file="pkg/mod.py"),
+        _node("pkg/mod.py::bad", NodeType.FUNCTION, file="pkg/mod.py"),
+        _node("pkg/mod.py::ok", NodeType.FUNCTION, file="pkg/mod.py"),
+        edges=(
+            _contains("pkg", "pkg/mod.py"),
+            _contains("pkg/mod.py", "pkg/mod.py::bad"),
+            _contains("pkg/mod.py", "pkg/mod.py::ok"),
+        ),
+    )
+
+
+def _direct_request(node_id: str = "mod.py::f") -> SummaryRequest:
+    return SummaryRequest(
+        node_id=node_id,
+        level="function",
+        facts={"id": node_id, "file": "mod.py"},
+        source_text="def f():\n    return 1\n",
+    )
+
+
+def test_checkpoint_after_each_slice(tmp_path: Path) -> None:
+    """Checkpoint fires once per slice with a cumulative, bottom-up prefix."""
+    graph = _functions_graph(module_count=1, functions_per_module=5)
+    snapshots: list[list[str]] = []
+
+    results = run_hierarchy(
+        graph,
+        StubSummarizer(),
+        tmp_path,
+        existing_cache={},
+        checkpoint=lambda partial: snapshots.append(
+            [r.node_id for r in partial]
+        ),
+        checkpoint_every=2,
+    )
+
+    assert [len(s) for s in snapshots] == [2, 4, 5, 6]
+    assert snapshots[-1] == [r.node_id for r in results[:-1]]
+
+
+def test_crash_mid_run_keeps_completed_slices(tmp_path: Path) -> None:
+    """A fatal error leaves the completed slices on disk and they seed a resume."""
+    graph = _functions_graph(module_count=1, functions_per_module=5)
+    snapshots: list[list[SummaryResult]] = []
+
+    summarizer = _FatalOnNode("pkg/mod0.py::f2")
+    with pytest.raises(Exception) as excinfo:
+        run_hierarchy(
+            graph,
+            summarizer,
+            tmp_path,
+            existing_cache={},
+            checkpoint=snapshots.append,
+            checkpoint_every=2,
+        )
+    assert excinfo.value.node_id == "pkg/mod0.py::f2"
+
+    assert [r.node_id for r in snapshots[-1]] == [
+        "pkg/mod0.py::f0",
+        "pkg/mod0.py::f1",
+    ]
+
+    cache = {r.node_id: r for r in snapshots[-1]}
+    resumed = CountingSummarizer()
+    run_hierarchy(
+        graph, resumed, tmp_path, existing_cache=cache, repair_passes=0
+    )
+
+    # f2, f3, f4, the module, and the system node.
+    assert resumed.call_count == 5
+
+
+def test_repair_pass_recovers_failed_leaf(tmp_path: Path) -> None:
+    """A repaired leaf rebuilds its module, package and system in the same run."""
+    summarizer = ChildEchoSummarizer(fail_node="pkg/mod.py::bad")
+
+    results = run_hierarchy(
+        _repair_graph(),
+        summarizer,
+        tmp_path,
+        existing_cache={},
+        retry=RetryPolicy(max_attempts=1),
+        sleep=lambda _: None,
+    )
+
+    by_id = {r.node_id: r for r in results}
+    assert by_id["pkg/mod.py::bad"].backend == "stub"
+    assert "[needs_human_review]" not in by_id["pkg/mod.py"].text
+    assert "[needs_human_review]" not in by_id["pkg"].text
+    assert "[needs_human_review]" not in by_id["system"].text
+
+    assert summarizer.calls.count("pkg/mod.py::bad") == 2
+    assert summarizer.calls.count("pkg/mod.py::ok") == 1
+    assert summarizer.calls.count("pkg/mod.py") == 2
+    assert summarizer.calls.count("pkg") == 2
+    assert summarizer.calls.count("system") == 2
+
+
+def test_repair_passes_are_bounded(tmp_path: Path) -> None:
+    """A permanently failing leaf is attempted 1 + repair_passes times, then stops."""
+    summarizer = _AlwaysFailingNode("pkg/mod.py::bad")
+
+    results = run_hierarchy(
+        _repair_graph(),
+        summarizer,
+        tmp_path,
+        existing_cache={},
+        retry=RetryPolicy(max_attempts=1),
+        sleep=lambda _: None,
+        repair_passes=2,
+    )
+
+    assert summarizer.calls.count("pkg/mod.py::bad") == 3
+    # Nothing changed, so the ancestors are not re-called in the repair passes.
+    assert summarizer.calls.count("pkg/mod.py") == 1
+    assert {
+        r.node_id for r in results if r.backend == NEEDS_HUMAN_REVIEW_BACKEND
+    } == {"pkg/mod.py::bad"}
+
+
+def test_no_repair_pass_when_nothing_failed(tmp_path: Path) -> None:
+    """A clean run makes exactly the same calls with repair on or off."""
+    with_repair = ChildEchoSummarizer()
+    run_hierarchy(
+        _repair_graph(),
+        with_repair,
+        tmp_path,
+        existing_cache={},
+        retry=RetryPolicy(max_attempts=1),
+        sleep=lambda _: None,
+        repair_passes=1,
+    )
+
+    without_repair = ChildEchoSummarizer()
+    run_hierarchy(
+        _repair_graph(),
+        without_repair,
+        tmp_path,
+        existing_cache={},
+        retry=RetryPolicy(max_attempts=1),
+        sleep=lambda _: None,
+        repair_passes=0,
+    )
+
+    assert with_repair.calls == without_repair.calls
+
+
+def test_repair_preserves_determinism(tmp_path: Path) -> None:
+    """Workers 1 and 4 produce identical order and texts after a repair."""
+    sequential = run_hierarchy(
+        _repair_graph(),
+        ChildEchoSummarizer(fail_node="pkg/mod.py::bad"),
+        tmp_path,
+        existing_cache={},
+        max_workers=1,
+        retry=RetryPolicy(max_attempts=1),
+        sleep=lambda _: None,
+    )
+    parallel = run_hierarchy(
+        _repair_graph(),
+        ChildEchoSummarizer(fail_node="pkg/mod.py::bad"),
+        tmp_path,
+        existing_cache={},
+        max_workers=4,
+        retry=RetryPolicy(max_attempts=1),
+        sleep=lambda _: None,
+    )
+
+    assert parallel == sequential
+
+
+def test_retry_gate_shared_cooldown() -> None:
+    """defer() parks the whole group; a second wait only sleeps the remainder."""
+    now = [100.0]
+    sleeps: list[float] = []
+    gate = RetryGate(clock=lambda: now[0])
+
+    gate.defer(10)
+    assert gate.wait(sleeps.append) == 10
+
+    now[0] += 4
+    assert gate.wait(sleeps.append) == 6
+
+    now[0] += 6
+    assert gate.wait(sleeps.append) == 0.0
+    assert sleeps == [10, 6]
+
+
+def test_node_sleep_budget_stops_retries() -> None:
+    """A 60 s header cannot be slept when the node's budget is 5 s."""
+
+    class Busy:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def summarize(self, req: SummaryRequest) -> SummaryResult:
+            self.calls += 1
+            raise BackendError("busy", retry_after=60.0)
+
+    sleeps: list[float] = []
+    summarizer = Busy()
+
+    result, retryable = _call_summarizer(
+        summarizer,
+        _direct_request(),
+        "key",
+        RetryPolicy(max_attempts=4, max_node_sleep=5.0, jitter=0),
+        sleeps.append,
+    )
+
+    assert summarizer.calls == 1
+    assert sleeps == []
+    assert result.backend == NEEDS_HUMAN_REVIEW_BACKEND
+    assert retryable is True
+
+
+def test_context_overflow_is_not_fatal(tmp_path: Path) -> None:
+    """A non-transient node failure returns normally and is not repaired."""
+
+    class Overflow:
+        name = "stub"
+
+        def __init__(self) -> None:
+            self.calls: list[str] = []
+
+        def summarize(self, req: SummaryRequest) -> SummaryResult:
+            self.calls.append(req.node_id)
+            if req.node_id == "mod.py::f":
+                raise BackendError(
+                    "context overflow", transient=False, fatal=False
+                )
+            return StubSummarizer().summarize(req)
+
+    summarizer = Overflow()
+    results = run_hierarchy(
+        _make_graph(_node("mod.py::f")),
+        summarizer,
+        tmp_path,
+        existing_cache={},
+        retry=RetryPolicy(max_attempts=4),
+        sleep=lambda _: None,
+        repair_passes=1,
+    )
+
+    assert summarizer.calls.count("mod.py::f") == 1
+    assert [
+        r.node_id for r in results if r.backend == NEEDS_HUMAN_REVIEW_BACKEND
+    ] == ["mod.py::f"]
+
+
+def test_checkpoint_is_sliced(tmp_path: Path) -> None:
+    """Seven leaves at checkpoint_every=2 → 2, 4, 6, 7; a replay writes nothing."""
+    functions = [
+        _node(f"mod.py::f{i}", NodeType.FUNCTION, file="mod.py") for i in range(7)
+    ]
+    graph = _make_graph(*functions)
+    snapshots: list[int] = []
+
+    results = run_hierarchy(
+        graph,
+        StubSummarizer(),
+        tmp_path,
+        existing_cache={},
+        checkpoint=lambda partial: snapshots.append(len(partial)),
+        checkpoint_every=2,
+    )
+
+    assert snapshots == [2, 4, 6, 7]
+    assert len(results) == 8
+
+    cache = {r.node_id: r for r in results}
+    replay: list[int] = []
+    run_hierarchy(
+        graph,
+        StubSummarizer(),
+        tmp_path,
+        existing_cache=cache,
+        checkpoint=lambda partial: replay.append(len(partial)),
+        checkpoint_every=2,
+    )
+
+    assert replay == []
+
+
+def test_unknown_exception_names_its_class(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A bug in the prompt builder must not look like provider flakiness."""
+
+    class Broken:
+        def summarize(self, req: SummaryRequest) -> SummaryResult:
+            raise KeyError("x")
+
+    result, retryable = _call_summarizer(
+        Broken(),
+        _direct_request(),
+        "key",
+        RetryPolicy(max_attempts=1),
+        lambda _: None,
+    )
+
+    err = capsys.readouterr().err
+    assert "KeyError" in err
+    assert result.hash_input == ""
+    assert retryable is True
 
